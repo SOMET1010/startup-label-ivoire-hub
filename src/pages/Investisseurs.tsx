@@ -1,4 +1,3 @@
-
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,73 +5,73 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import CTA from "@/components/CTA";
 
-// Mock data for investors
+// Mock data for investors with Ivorian context
 const investors = [
   {
     id: 1,
-    name: "Orange Ventures Africa",
-    logo: "https://randomuser.me/api/portraits/lego/1.jpg",
-    description: "Fonds d'investissement corporate dédié aux startups africaines innovantes dans les domaines des technologies et des services numériques.",
+    name: "Orange Digital Ventures Afrique",
+    logo: "/placeholder.svg",
+    description: "Fonds d'investissement de Orange dédié aux startups africaines innovantes dans les secteurs de la fintech, e-santé, énergie et éducation.",
     investmentStages: ["Seed", "Series A"],
-    ticketSize: "€50K - €500K",
+    ticketSize: "50M-500M FCFA",
     sectors: ["FinTech", "E-commerce", "HealthTech", "EdTech"],
-    portfolio: ["Demo Company 1", "Demo Company 2", "Demo Company 3"],
-    website: "https://orangeventures.com"
+    portfolio: ["MobilPay", "SanteYako", "Koulé Éducation"],
+    website: "https://digitalventures.orange.com"
   },
   {
     id: 2,
-    name: "Côte d'Ivoire Angels",
-    logo: "https://randomuser.me/api/portraits/lego/2.jpg",
-    description: "Réseau d'investisseurs providentiels ivoiriens finançant les startups locales à fort potentiel de croissance.",
+    name: "Réseau des Business Angels de Côte d'Ivoire",
+    logo: "/placeholder.svg",
+    description: "Réseau d'investisseurs providentiels ivoiriens finançant les startups locales à fort potentiel de croissance et d'impact social.",
     investmentStages: ["Pre-seed", "Seed"],
-    ticketSize: "€10K - €100K",
+    ticketSize: "5M-50M FCFA",
     sectors: ["AgriTech", "FinTech", "Retail", "Logistics"],
-    portfolio: ["Demo Company 4", "Demo Company 5"],
-    website: "https://cotedivoireangels.org"
+    portfolio: ["Wôrô Logistics", "Cocoa Connect"],
+    website: "https://businessangels.ci"
   },
   {
     id: 3,
-    name: "Startup Invest CI",
-    logo: "https://randomuser.me/api/portraits/lego/3.jpg",
-    description: "Fonds d'investissement public-privé dédié au financement et à l'accompagnement des startups innovantes ivoiriennes.",
+    name: "Fonds CI Innovations",
+    logo: "/placeholder.svg",
+    description: "Fonds d'investissement public-privé soutenu par l'État ivoirien pour financer les startups innovantes contribuant au développement numérique du pays.",
     investmentStages: ["Seed", "Series A"],
-    ticketSize: "€50K - €300K",
+    ticketSize: "25M-150M FCFA",
     sectors: ["FinTech", "AgriTech", "CleanTech", "EdTech"],
-    portfolio: ["Demo Company 6", "Demo Company 7"],
-    website: "https://startupinvestci.ci"
+    portfolio: ["Gnamakoudji Energy", "Ivoiro-Tech"],
+    website: "https://ciinnovations.ci"
   },
   {
     id: 4,
-    name: "Afric Invest Partners",
-    logo: "https://randomuser.me/api/portraits/lego/4.jpg",
-    description: "Société de capital-investissement panafricaine avec une attention particulière pour les entreprises innovantes à fort impact.",
+    name: "Comoe Capital",
+    logo: "/placeholder.svg",
+    description: "Société de capital-investissement spécialisée dans le financement des PME et startups en Côte d'Ivoire et dans la sous-région ouest-africaine.",
     investmentStages: ["Series A", "Series B"],
-    ticketSize: "€200K - €2M",
+    ticketSize: "100M-1B FCFA",
     sectors: ["FinTech", "HealthTech", "Energy", "Infrastructure"],
-    portfolio: ["Demo Company 8", "Demo Company 9", "Demo Company 10"],
-    website: "https://africinvest.com"
+    portfolio: ["Akwaba Tour", "MobilPay", "Gnamakoudji Energy"],
+    website: "https://comoecapital.com"
   },
   {
     id: 5,
-    name: "Digital Africa Seed Fund",
-    logo: "https://randomuser.me/api/portraits/lego/5.jpg",
-    description: "Fonds d'amorçage pour les startups du secteur numérique à fort impact social et économique en Afrique.",
+    name: "Impact Hub Abidjan Ventures",
+    logo: "/placeholder.svg",
+    description: "Fonds d'amorçage de l'incubateur Impact Hub Abidjan, soutenant les entrepreneurs à fort impact social et environnemental.",
     investmentStages: ["Pre-seed", "Seed"],
-    ticketSize: "€20K - €100K",
-    sectors: ["EdTech", "HealthTech", "FinTech", "GreenTech"],
-    portfolio: ["Demo Company 11", "Demo Company 12"],
-    website: "https://digital-africa.co"
+    ticketSize: "10M-50M FCFA",
+    sectors: ["EdTech", "HealthTech", "CleanTech", "AgriTech"],
+    portfolio: ["SanteYako", "Cocoa Connect"],
+    website: "https://abidjan.impacthub.net"
   },
   {
     id: 6,
-    name: "Savannah Fund",
-    logo: "https://randomuser.me/api/portraits/lego/6.jpg",
-    description: "Fonds de capital-risque spécialisé dans les investissements early-stage dans les startups technologiques en Afrique.",
+    name: "Afrique Innovation Fund",
+    logo: "/placeholder.svg",
+    description: "Fonds de capital-risque panafricain avec un bureau à Abidjan, spécialisé dans les investissements dans les startups technologiques africaines.",
     investmentStages: ["Seed", "Series A"],
-    ticketSize: "€25K - €500K",
+    ticketSize: "25M-250M FCFA",
     sectors: ["FinTech", "AgriTech", "E-commerce", "Mobile"],
-    portfolio: ["Demo Company 13", "Demo Company 14", "Demo Company 15"],
-    website: "https://savannah.vc"
+    portfolio: ["Adjamé Market", "Cocoa Connect", "Ivoiro-Tech"],
+    website: "https://afriqueinnovation.fund"
   }
 ];
 

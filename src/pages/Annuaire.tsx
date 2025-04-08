@@ -8,74 +8,107 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Search } from "lucide-react";
 
-// Mock data for startups
+// Mock data for startups with Ivorian names and context
 const startups = [
   {
     id: 1,
-    name: "FinPay CI",
-    logo: "https://randomuser.me/api/portraits/men/32.jpg",
-    description: "Solution de paiement mobile pour les PME ivoiriennes avec des options de crédit intégrées.",
-    sector: "FinTech",
-    founded: 2020,
+    name: "Cocoa Connect",
+    logo: "/placeholder.svg",
+    description: "Plateforme de mise en relation des producteurs de cacao avec les acheteurs internationaux, utilisant la blockchain pour garantir la traçabilité.",
+    sector: "AgriTech",
+    founded: 2021,
     location: "Abidjan",
-    website: "https://finpay.ci",
+    website: "https://coaconnect.ci",
     isLabeled: true
   },
   {
     id: 2,
-    name: "AgroConnect",
-    logo: "https://randomuser.me/api/portraits/women/44.jpg",
-    description: "Plateforme connectant les agriculteurs aux acheteurs et proposant des conseils agricoles via IA.",
-    sector: "AgriTech",
-    founded: 2021,
-    location: "Yamoussoukro",
-    website: "https://agroconnect.ci",
+    name: "MobilPay",
+    logo: "/placeholder.svg",
+    description: "Solution de paiement mobile adaptée spécifiquement aux besoins des PME et commerçants des marchés ivoiriens.",
+    sector: "FinTech",
+    founded: 2020,
+    location: "Abidjan",
+    website: "https://mobilpay.ci",
     isLabeled: true
   },
   {
     id: 3,
-    name: "EduPlus",
-    logo: "https://randomuser.me/api/portraits/men/67.jpg",
-    description: "Application mobile d'apprentissage adaptée au curriculum ivoirien avec contenu hors ligne.",
-    sector: "EdTech",
-    founded: 2019,
-    location: "Abidjan",
-    website: "https://eduplus.ci",
+    name: "SanteYako",
+    logo: "/placeholder.svg",
+    description: "Application de télémédecine permettant de mettre en relation patients et médecins, avec un système de livraison de médicaments intégré.",
+    sector: "HealthTech",
+    founded: 2022,
+    location: "Yamoussoukro",
+    website: "https://santeyako.ci",
     isLabeled: true
   },
   {
     id: 4,
-    name: "MedConnect",
-    logo: "https://randomuser.me/api/portraits/women/22.jpg",
-    description: "Service de télémédecine connectant patients et médecins pour consultations à distance.",
-    sector: "HealthTech",
-    founded: 2022,
+    name: "Koulé Éducation",
+    logo: "/placeholder.svg",
+    description: "Plateforme éducative proposant des contenus adaptés au programme scolaire ivoirien, accessibles même sans connexion internet.",
+    sector: "EdTech",
+    founded: 2019,
     location: "Bouaké",
-    website: "https://medconnect.ci",
+    website: "https://koule-edu.ci",
     isLabeled: true
   },
   {
     id: 5,
-    name: "LogiTrans",
-    logo: "https://randomuser.me/api/portraits/men/54.jpg",
-    description: "Solution logistique optimisant le transport de marchandises dans toute l'Afrique de l'Ouest.",
+    name: "Wôrô Logistics",
+    logo: "/placeholder.svg",
+    description: "Solution de gestion logistique optimisant le transport de marchandises entre zones rurales et centres urbains en Côte d'Ivoire.",
     sector: "LogisTech",
     founded: 2020,
-    location: "Abidjan",
-    website: "https://logitrans.ci",
+    location: "San-Pédro",
+    website: "https://woro-logistics.ci",
     isLabeled: false
   },
   {
     id: 6,
-    name: "TourismeCI",
-    logo: "https://randomuser.me/api/portraits/women/28.jpg",
-    description: "Plateforme de découverte d'expériences touristiques locales en Côte d'Ivoire.",
+    name: "Akwaba Tour",
+    logo: "/placeholder.svg",
+    description: "Application de découverte touristique mettant en valeur le patrimoine culturel et naturel ivoirien à travers des expériences immersives.",
     sector: "TravelTech",
     founded: 2021,
-    location: "San-Pédro",
-    website: "https://tourismeci.com",
+    location: "Grand-Bassam",
+    website: "https://akwabatour.ci",
     isLabeled: false
   },
+  {
+    id: 7,
+    name: "Adjamé Market",
+    logo: "/placeholder.svg",
+    description: "Marketplace en ligne connectant les artisans ivoiriens aux marchés internationaux, avec un focus sur l'artisanat traditionnel.",
+    sector: "E-commerce",
+    founded: 2022,
+    location: "Abidjan",
+    website: "https://adjamemarket.ci",
+    isLabeled: false
+  },
+  {
+    id: 8,
+    name: "Gnamakoudji Energy",
+    logo: "/placeholder.svg",
+    description: "Startup spécialisée dans le développement de solutions d'énergie solaire adaptées aux besoins des zones rurales ivoiriennes.",
+    sector: "CleanTech",
+    founded: 2021,
+    location: "Korhogo",
+    website: "https://gnamakoudji-energy.ci",
+    isLabeled: true
+  },
+  {
+    id: 9,
+    name: "Ivoiro-Tech",
+    logo: "/placeholder.svg",
+    description: "Studio de développement spécialisé dans la création d'applications mobiles et de solutions digitales adaptées au marché africain.",
+    sector: "Software",
+    founded: 2019,
+    location: "Abidjan",
+    website: "https://ivoirotech.ci",
+    isLabeled: true
+  }
 ];
 
 const Annuaire = () => {
