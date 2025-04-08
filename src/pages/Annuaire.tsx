@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -81,20 +80,20 @@ const startups = [
 
 const Annuaire = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [sectorFilter, setSectorFilter] = useState("");
-  const [locationFilter, setLocationFilter] = useState("");
-  const [labelFilter, setLabelFilter] = useState("");
+  const [sectorFilter, setSectorFilter] = useState("all");
+  const [locationFilter, setLocationFilter] = useState("all");
+  const [labelFilter, setLabelFilter] = useState("all");
   
   // Filter startups based on search and filters
   const filteredStartups = startups.filter((startup) => {
     const matchesSearch = startup.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           startup.description.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesSector = sectorFilter === "" || startup.sector === sectorFilter;
+    const matchesSector = sectorFilter === "all" || startup.sector === sectorFilter;
     
-    const matchesLocation = locationFilter === "" || startup.location === locationFilter;
+    const matchesLocation = locationFilter === "all" || startup.location === locationFilter;
     
-    const matchesLabel = labelFilter === "" || 
+    const matchesLabel = labelFilter === "all" || 
                          (labelFilter === "labeled" && startup.isLabeled) || 
                          (labelFilter === "unlabeled" && !startup.isLabeled);
     
@@ -136,7 +135,7 @@ const Annuaire = () => {
                     <SelectValue placeholder="Secteur d'activité" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Tous les secteurs</SelectItem>
+                    <SelectItem value="all">Tous les secteurs</SelectItem>
                     {sectors.map((sector) => (
                       <SelectItem key={sector} value={sector}>{sector}</SelectItem>
                     ))}
@@ -148,7 +147,7 @@ const Annuaire = () => {
                     <SelectValue placeholder="Localisation" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Toutes les localisations</SelectItem>
+                    <SelectItem value="all">Toutes les localisations</SelectItem>
                     {locations.map((location) => (
                       <SelectItem key={location} value={location}>{location}</SelectItem>
                     ))}
@@ -160,7 +159,7 @@ const Annuaire = () => {
                     <SelectValue placeholder="Statut de labellisation" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Tous les statuts</SelectItem>
+                    <SelectItem value="all">Tous les statuts</SelectItem>
                     <SelectItem value="labeled">Startups labellisées</SelectItem>
                     <SelectItem value="unlabeled">Startups non labellisées</SelectItem>
                   </SelectContent>
@@ -175,9 +174,9 @@ const Annuaire = () => {
               
               <Button variant="outline" size="sm" onClick={() => {
                 setSearchTerm("");
-                setSectorFilter("");
-                setLocationFilter("");
-                setLabelFilter("");
+                setSectorFilter("all");
+                setLocationFilter("all");
+                setLabelFilter("all");
               }}>
                 Réinitialiser les filtres
               </Button>
