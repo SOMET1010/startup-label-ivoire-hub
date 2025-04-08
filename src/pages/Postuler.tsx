@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -10,18 +11,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { ClipboardCheck } from "lucide-react";
 
 const Postuler = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [trackingId, setTrackingId] = useState("");
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate API call
+    // Simuler API call
     setTimeout(() => {
       setIsLoading(false);
+      setTrackingId("LSN-2025-0012");
+      setShowConfirmation(true);
       toast({
         title: "Candidature soumise avec succès",
         description: "Votre dossier a été transmis au Comité de Labellisation pour examen.",
@@ -394,6 +401,46 @@ const Postuler = () => {
           </div>
         </div>
       </main>
+      
+      <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center">Candidature envoyée!</DialogTitle>
+            <DialogDescription className="text-center">
+              Votre dossier a été soumis avec succès
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center py-4">
+            <div className="bg-green-50 p-3 rounded-full mb-4">
+              <ClipboardCheck className="h-10 w-10 text-green-600" />
+            </div>
+            <p className="text-center mb-2">
+              Votre numéro de suivi est:
+            </p>
+            <p className="font-bold text-xl mb-4 text-center">
+              {trackingId}
+            </p>
+            <p className="text-sm text-gray-500 text-center mb-4">
+              Conservez ce numéro pour suivre l'avancement de votre dossier. Nous avons également envoyé un email de confirmation à l'adresse spécifiée.
+            </p>
+          </div>
+          <DialogFooter className="flex flex-col sm:flex-row gap-2">
+            <Button 
+              variant="outline" 
+              className="sm:flex-1"
+              onClick={() => setShowConfirmation(false)}
+            >
+              Fermer
+            </Button>
+            <Link to="/suivi-candidature" className="sm:flex-1">
+              <Button className="w-full">
+                Suivre mon dossier
+              </Button>
+            </Link>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
       <Footer />
     </div>
   );
