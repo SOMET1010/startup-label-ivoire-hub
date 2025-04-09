@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -18,7 +17,7 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMediaQuery } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const formSchema = z.object({
   trackingId: z.string().min(8, "L'identifiant doit contenir au moins 8 caractères"),
@@ -27,7 +26,6 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-// Données de démo
 const mockCandidature = {
   id: "LSN-2025-0012",
   companyName: "EcoTech Côte d'Ivoire",
@@ -109,7 +107,7 @@ const SuiviCandidature = () => {
   const [open, setOpen] = useState(false);
   const [selectedDoc, setSelectedDoc] = useState<string | null>(null);
   
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
