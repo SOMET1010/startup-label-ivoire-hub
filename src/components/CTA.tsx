@@ -21,11 +21,11 @@ const CTA = () => {
               Questions fréquentes
             </Button>
           </Link>
-          <Link to="/contact">
+          <a href="#contact">
             <Button size="lg" variant="outline" className="w-full sm:w-auto border-white text-white hover:bg-white/10">
               Nous contacter
             </Button>
-          </Link>
+          </a>
         </div>
       </div>
     </section>
