@@ -1,44 +1,10 @@
-
 import { CalendarDays, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
+import { allNews } from "@/data/mockNews";
 
-interface NewsItem {
-  id: string;
-  title: string;
-  excerpt: string;
-  date: string;
-  category: string;
-  imageUrl?: string;
-}
-
-const recentNews: NewsItem[] = [
-  {
-    id: "1",
-    title: "Lancement de la 3ème cohorte du Label Startup",
-    excerpt: "Le Ministère du Numérique annonce le lancement de la troisième cohorte du Label Startup, offrant de nouvelles opportunités aux startups innovantes de Côte d'Ivoire.",
-    date: "2025-04-15",
-    category: "Annonces",
-    imageUrl: "https://images.unsplash.com/photo-1556761175-b413da4baf72?q=80&w=1374&auto=format&fit=crop"
-  },
-  {
-    id: "2",
-    title: "Atelier sur le financement des startups à Abidjan",
-    excerpt: "Un atelier dédié aux stratégies de financement pour les startups labellisées se tiendra le mois prochain à Abidjan, avec la participation de plusieurs investisseurs internationaux.",
-    date: "2025-04-10",
-    category: "Événements",
-    imageUrl: "https://images.unsplash.com/photo-1560523160-754a9e25c68f?q=80&w=1470&auto=format&fit=crop"
-  },
-  {
-    id: "3",
-    title: "Succès de la startup ivoirienne TechIvoire",
-    excerpt: "TechIvoire, une startup labellisée en 2024, vient de lever 2 millions d'euros pour développer sa solution de paiement mobile innovante.",
-    date: "2025-04-02",
-    category: "Succès",
-    imageUrl: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1471&auto=format&fit=crop"
-  }
-];
+const recentNews = allNews.slice(0, 3);
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('fr-FR', {
