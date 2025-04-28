@@ -7,6 +7,8 @@ import Testimonials from "@/components/Testimonials";
 import Contact from "@/components/Contact";
 import CTA from "@/components/CTA";
 import Footer from "@/components/Footer";
+import NewsFeed from "@/components/NewsFeed";
+import FaqCard from "@/components/FaqCard";
 
 const Index = () => {
   return (
@@ -16,7 +18,15 @@ const Index = () => {
         <Hero />
         <Features />
         <Stats />
+        <NewsFeed />
         <Testimonials />
+        <div className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="max-w-md mx-auto">
+              <FaqCard />
+            </div>
+          </div>
+        </div>
         <Contact />
         <CTA />
       </main>
