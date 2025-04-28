@@ -9,6 +9,7 @@ import CTA from "@/components/CTA";
 import Footer from "@/components/Footer";
 import NewsFeed from "@/components/NewsFeed";
 import FaqCard from "@/components/FaqCard";
+import Benefits from "@/components/Benefits";
 
 const Index = () => {
   return (
@@ -17,6 +18,7 @@ const Index = () => {
       <main className="flex-grow">
         <Hero />
         <Features />
+        <Benefits />
         <Stats />
         <NewsFeed />
         <Testimonials />
@@ -36,3 +38,4 @@ const Index = () => {
 };
 
 export default Index;
+
