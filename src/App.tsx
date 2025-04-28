@@ -15,6 +15,7 @@ import Inscription from "./pages/Inscription";
 import Connexion from "./pages/Connexion";
 import NotFound from "./pages/NotFound";
 import SuiviCandidature from "./pages/SuiviCandidature";
+import FAQ from "./pages/FAQ";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/investisseurs" element={<Investisseurs />} />
           <Route path="/inscription" element={<Inscription />} />
           <Route path="/connexion" element={<Connexion />} />
+          <Route path="/faq" element={<FAQ />} />
           <Route path="/suivi-candidature" element={<SuiviCandidature />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

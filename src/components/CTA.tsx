@@ -16,6 +16,11 @@ const CTA = () => {
               Postuler maintenant
             </Button>
           </Link>
+          <Link to="/faq">
+            <Button size="lg" variant="outline" className="w-full sm:w-auto border-white text-white hover:bg-white/10">
+              Questions fréquentes
+            </Button>
+          </Link>
           <Link to="/contact">
             <Button size="lg" variant="outline" className="w-full sm:w-auto border-white text-white hover:bg-white/10">
               Nous contacter
