@@ -7,6 +7,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { RoleGate } from "./components/auth/RoleGate";
 
+// Components
+import CloudStatusBanner from "./components/CloudStatusBanner";
+
 // Public pages
 import Index from "./pages/Index";
 import Criteres from "./pages/Criteres";
@@ -38,6 +41,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <CloudStatusBanner />
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Index />} />
