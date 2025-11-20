@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Input } from "@/components/ui/input";
@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, Building2, MapPin, Users, Cpu, Brain } from "lucide-react";
+import { Search, Building2, MapPin, Users, Cpu, Brain, Key, AlertCircle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import MapView from "@/components/ai-companies/MapView";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // Mock data for AI companies
 const aiCompanies = [
@@ -138,6 +140,24 @@ const EntreprisesIA = () => {
   const [sectorFilter, setSectorFilter] = useState("all");
   const [specializationFilter, setSpecializationFilter] = useState("all");
   const [labelFilter, setLabelFilter] = useState("all");
+  const [mapboxApiKey, setMapboxApiKey] = useState("");
+  const [tempApiKey, setTempApiKey] = useState("");
+  
+  // Load API key from localStorage on mount
+  useEffect(() => {
+    const savedKey = localStorage.getItem('mapboxApiKey');
+    if (savedKey) {
+      setMapboxApiKey(savedKey);
+    }
+  }, []);
+  
+  // Save API key to localStorage
+  const handleSaveApiKey = () => {
+    if (tempApiKey.trim()) {
+      localStorage.setItem('mapboxApiKey', tempApiKey.trim());
+      setMapboxApiKey(tempApiKey.trim());
+    }
+  };
   
   // Filter companies based on search and filters
   const filteredCompanies = aiCompanies.filter((company) => {
@@ -377,51 +397,81 @@ const EntreprisesIA = () => {
             
             {/* Map View */}
             <TabsContent value="map">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {Object.entries(companiesByLocation).map(([location, companies]) => (
-                  <Card key={location} className="overflow-hidden">
-                    <CardContent className="p-0">
-                      <div className="bg-primary/5 p-4 border-b">
-                        <div className="flex items-center">
-                          <MapPin className="h-5 w-5 text-primary mr-2" />
-                          <h3 className="font-bold text-lg">{location}</h3>
-                          <Badge variant="secondary" className="ml-auto">
-                            {companies.length} entreprise{companies.length !== 1 ? "s" : ""}
-                          </Badge>
+              {!mapboxApiKey ? (
+                <Card>
+                  <CardContent className="p-8">
+                    <div className="max-w-2xl mx-auto">
+                      <div className="flex items-start gap-4 mb-6">
+                        <div className="p-3 bg-primary/10 rounded-full">
+                          <Key className="h-6 w-6 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold mb-2">Configuration de la carte interactive</h3>
+                          <p className="text-muted-foreground mb-4">
+                            Pour afficher la cartographie interactive des entreprises IA, vous devez fournir une clé publique Mapbox.
+                          </p>
                         </div>
                       </div>
-                      <div className="p-4 space-y-3">
-                        {companies.map((company) => (
-                          <div key={company.id} className="flex items-start p-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors">
-                            <div className="w-10 h-10 rounded overflow-hidden bg-background mr-3 flex-shrink-0">
-                              <img 
-                                src={company.logo} 
-                                alt={company.name} 
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <div className="flex-grow">
-                              <div className="font-semibold text-sm mb-1">{company.name}</div>
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline" className="text-xs">
-                                  {company.specialization}
-                                </Badge>
-                                <span className="text-xs text-muted-foreground">{company.employees}</span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
+                      
+                      <Alert className="mb-6">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>
+                          <strong>Comment obtenir votre clé Mapbox :</strong>
+                          <ol className="list-decimal ml-4 mt-2 space-y-1">
+                            <li>Créez un compte gratuit sur <a href="https://mapbox.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">mapbox.com</a></li>
+                            <li>Accédez à la section "Tokens" dans votre dashboard</li>
+                            <li>Copiez votre clé publique (elle commence par "pk.")</li>
+                            <li>Collez-la dans le champ ci-dessous</li>
+                          </ol>
+                        </AlertDescription>
+                      </Alert>
+                      
+                      <div className="flex gap-2">
+                        <Input 
+                          type="text"
+                          placeholder="pk.eyJ1Ijoi..." 
+                          value={tempApiKey}
+                          onChange={(e) => setTempApiKey(e.target.value)}
+                          className="flex-grow"
+                        />
+                        <Button onClick={handleSaveApiKey} disabled={!tempApiKey.trim()}>
+                          Enregistrer
+                        </Button>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-              
-              {Object.keys(companiesByLocation).length === 0 && (
-                <div className="text-center py-12">
-                  <MapPin className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
-                  <div className="text-2xl font-bold text-muted-foreground mb-2">Aucune localisation trouvée</div>
-                  <p className="text-muted-foreground">Essayez de modifier vos critères de recherche</p>
+                      
+                      <p className="text-xs text-muted-foreground mt-4">
+                        Votre clé sera stockée localement dans votre navigateur. Les clés publiques Mapbox (commençant par "pk.") sont sécuritaires à utiliser côté client.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex justify-end">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        setMapboxApiKey("");
+                        setTempApiKey("");
+                        localStorage.removeItem('mapboxApiKey');
+                      }}
+                    >
+                      Modifier la clé API
+                    </Button>
+                  </div>
+                  
+                  {filteredCompanies.length > 0 ? (
+                    <MapView companies={filteredCompanies} apiKey={mapboxApiKey} />
+                  ) : (
+                    <Card>
+                      <CardContent className="p-12 text-center">
+                        <MapPin className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
+                        <div className="text-2xl font-bold text-muted-foreground mb-2">Aucune entreprise à afficher</div>
+                        <p className="text-muted-foreground">Essayez de modifier vos critères de recherche</p>
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
               )}
             </TabsContent>
