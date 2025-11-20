@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Input } from "@/components/ui/input";
@@ -10,132 +11,10 @@ import { Search, Building2, MapPin, Users, Cpu, Brain, Key, AlertCircle } from "
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MapView from "@/components/ai-companies/MapView";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
-// Mock data for AI companies
-const aiCompanies = [
-  {
-    id: 1,
-    name: "Ivoire AI Labs",
-    logo: "/placeholder.svg",
-    description: "Centre de recherche et développement en intelligence artificielle, spécialisé dans le traitement du langage naturel pour les langues africaines.",
-    sector: "Recherche & Développement",
-    specialization: "NLP",
-    founded: 2020,
-    location: "Abidjan",
-    coordinates: { lat: 5.3600, lng: -4.0083 },
-    employees: "15-50",
-    website: "https://ivoireailabs.ci",
-    isLabeled: true,
-    services: ["Traduction automatique", "Analyse de sentiments", "Chatbots"]
-  },
-  {
-    id: 2,
-    name: "AgriSmart CI",
-    logo: "/placeholder.svg",
-    description: "Solutions d'IA pour l'agriculture intelligente : prédiction des récoltes, détection des maladies des cultures et optimisation des ressources.",
-    sector: "AgriTech",
-    specialization: "Computer Vision",
-    founded: 2021,
-    location: "Yamoussoukro",
-    coordinates: { lat: 6.8276, lng: -5.2893 },
-    employees: "10-25",
-    website: "https://agrismart.ci",
-    isLabeled: true,
-    services: ["Analyse d'images satellitaires", "Prédiction météo", "Conseil personnalisé"]
-  },
-  {
-    id: 3,
-    name: "MedTech AI",
-    logo: "/placeholder.svg",
-    description: "Intelligence artificielle appliquée à la santé : diagnostic assisté par IA, analyse d'imagerie médicale et prédiction de maladies.",
-    sector: "HealthTech",
-    specialization: "Medical AI",
-    founded: 2022,
-    location: "Abidjan",
-    coordinates: { lat: 5.3600, lng: -4.0083 },
-    employees: "25-50",
-    website: "https://medtechai.ci",
-    isLabeled: true,
-    services: ["Diagnostic par imagerie", "Prédiction de risques", "Télémédecine"]
-  },
-  {
-    id: 4,
-    name: "FinPredict",
-    logo: "/placeholder.svg",
-    description: "Solutions d'IA pour la finance : scoring de crédit, détection de fraude et prédiction de risques financiers adaptés au marché africain.",
-    sector: "FinTech",
-    specialization: "Machine Learning",
-    founded: 2021,
-    location: "Abidjan",
-    coordinates: { lat: 5.3600, lng: -4.0083 },
-    employees: "20-40",
-    website: "https://finpredict.ci",
-    isLabeled: false,
-    services: ["Scoring crédit", "Anti-fraude", "Analyse prédictive"]
-  },
-  {
-    id: 5,
-    name: "EduBot CI",
-    logo: "/placeholder.svg",
-    description: "Plateforme éducative utilisant l'IA pour personnaliser l'apprentissage et fournir du tutorat intelligent aux étudiants.",
-    sector: "EdTech",
-    specialization: "NLP & Adaptive Learning",
-    founded: 2020,
-    location: "Bouaké",
-    coordinates: { lat: 7.6944, lng: -5.0319 },
-    employees: "15-30",
-    website: "https://edubot.ci",
-    isLabeled: true,
-    services: ["Tutorat intelligent", "Évaluation adaptative", "Recommandations personnalisées"]
-  },
-  {
-    id: 6,
-    name: "VisionTech Africa",
-    logo: "/placeholder.svg",
-    description: "Spécialiste de la vision par ordinateur pour la surveillance, la sécurité et l'analyse vidéo en temps réel.",
-    sector: "Security & Surveillance",
-    specialization: "Computer Vision",
-    founded: 2019,
-    location: "Abidjan",
-    coordinates: { lat: 5.3600, lng: -4.0083 },
-    employees: "30-60",
-    website: "https://visiontech.ci",
-    isLabeled: false,
-    services: ["Reconnaissance faciale", "Détection d'objets", "Analyse comportementale"]
-  },
-  {
-    id: 7,
-    name: "DataMind CI",
-    logo: "/placeholder.svg",
-    description: "Cabinet de conseil en data science et IA, accompagnant les entreprises dans leur transformation numérique.",
-    sector: "Conseil & Services",
-    specialization: "Data Science",
-    founded: 2021,
-    location: "Abidjan",
-    coordinates: { lat: 5.3600, lng: -4.0083 },
-    employees: "10-20",
-    website: "https://datamind.ci",
-    isLabeled: true,
-    services: ["Audit data", "Formation IA", "Développement sur mesure"]
-  },
-  {
-    id: 8,
-    name: "SmartCity Ivoire",
-    logo: "/placeholder.svg",
-    description: "Solutions IoT et IA pour la gestion intelligente des villes : trafic, énergie, déchets et services urbains.",
-    sector: "Smart City",
-    specialization: "IoT & AI",
-    founded: 2020,
-    location: "Yamoussoukro",
-    coordinates: { lat: 6.8276, lng: -5.2893 },
-    employees: "20-35",
-    website: "https://smartcity.ci",
-    isLabeled: false,
-    services: ["Gestion du trafic", "Smart lighting", "Gestion des déchets"]
-  }
-];
+import { aiCompanies } from "@/data/aiCompanies";
 
 const EntreprisesIA = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [sectorFilter, setSectorFilter] = useState("all");
   const [specializationFilter, setSpecializationFilter] = useState("all");
@@ -378,7 +257,13 @@ const EntreprisesIA = () => {
                             Visiter le site
                           </a>
                           
-                          <Button size="sm" variant="ghost">Détails</Button>
+                          <Button 
+                            size="sm" 
+                            variant="ghost"
+                            onClick={() => navigate(`/entreprises-ia/${company.id}`)}
+                          >
+                            Détails
+                          </Button>
                         </div>
                       </div>
                     </CardContent>

@@ -12,6 +12,7 @@ import Annuaire from "./pages/Annuaire";
 import Accompagnement from "./pages/Accompagnement";
 import Investisseurs from "./pages/Investisseurs";
 import EntreprisesIA from "./pages/EntreprisesIA";
+import EntrepriseIADetail from "./pages/EntrepriseIADetail";
 import Inscription from "./pages/Inscription";
 import Connexion from "./pages/Connexion";
 import NotFound from "./pages/NotFound";
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/accompagnement" element={<Accompagnement />} />
           <Route path="/investisseurs" element={<Investisseurs />} />
           <Route path="/entreprises-ia" element={<EntreprisesIA />} />
+          <Route path="/entreprises-ia/:id" element={<EntrepriseIADetail />} />
           <Route path="/inscription" element={<Inscription />} />
           <Route path="/connexion" element={<Connexion />} />
           <Route path="/faq" element={<FAQ />} />
