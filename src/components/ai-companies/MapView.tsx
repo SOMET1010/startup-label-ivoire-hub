@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Building2 } from 'lucide-react';
@@ -24,6 +25,7 @@ interface MapViewProps {
 }
 
 const MapView = ({ companies, apiKey }: MapViewProps) => {
+  const navigate = useNavigate();
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<mapboxgl.Marker[]>([]);
@@ -101,9 +103,13 @@ const MapView = ({ companies, apiKey }: MapViewProps) => {
         el.style.transform = 'scale(1)';
       });
 
-      // Create popup content
-      const popupContent = `
-        <div style="min-width: 250px; max-width: 300px;">
+      // Create popup content as DOM element for better interactivity
+      const popupContent = document.createElement('div');
+      popupContent.style.minWidth = '250px';
+      popupContent.style.maxWidth = '300px';
+      
+      popupContent.innerHTML = `
+        <div>
           <div style="display: flex; align-items: start; margin-bottom: 12px;">
             <div style="width: 40px; height: 40px; border-radius: 8px; background: hsl(var(--muted)); margin-right: 12px; overflow: hidden;">
               <img src="${company.logo}" alt="${company.name}" style="width: 100%; height: 100%; object-fit: cover;" />
@@ -127,13 +133,23 @@ const MapView = ({ companies, apiKey }: MapViewProps) => {
               <strong>Employés:</strong> ${company.employees}
             </div>
           </div>
-          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid hsl(var(--border));">
+          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid hsl(var(--border)); display: flex; gap: 8px;">
             <a href="${company.website}" target="_blank" rel="noopener noreferrer" style="color: hsl(var(--primary)); text-decoration: none; font-size: 13px; font-weight: 500;">
               Visiter le site →
             </a>
           </div>
         </div>
       `;
+      
+      // Add details button
+      const detailsButton = document.createElement('button');
+      detailsButton.textContent = 'Voir tous les détails';
+      detailsButton.style.cssText = 'width: 100%; margin-top: 12px; padding: 8px 12px; background: hsl(var(--primary)); color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity 0.2s;';
+      detailsButton.onmouseover = () => detailsButton.style.opacity = '0.9';
+      detailsButton.onmouseout = () => detailsButton.style.opacity = '1';
+      detailsButton.onclick = () => navigate(`/entreprises-ia/${company.id}`);
+      
+      popupContent.appendChild(detailsButton);
 
       // Create popup
       const popup = new mapboxgl.Popup({
@@ -141,7 +157,7 @@ const MapView = ({ companies, apiKey }: MapViewProps) => {
         closeButton: true,
         closeOnClick: false,
         maxWidth: '320px'
-      }).setHTML(popupContent);
+      }).setDOMContent(popupContent);
 
       // Create and add marker
       const marker = new mapboxgl.Marker(el)
