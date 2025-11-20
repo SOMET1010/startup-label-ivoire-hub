@@ -78,6 +78,17 @@ const CompanyContact = ({ company }: CompanyContactProps) => {
 
   const onSubmit = async (data: ContactFormData) => {
     if (!company.contact) return;
+
+    if (!supabase) {
+      toast({
+        variant: "destructive",
+        title: "Service indisponible",
+        description:
+          "L'envoi de messages n'est pas encore configuré (backend désactivé).",
+        duration: 5000,
+      });
+      return;
+    }
     
     setIsSubmitting(true);
     setIsSuccess(false);
