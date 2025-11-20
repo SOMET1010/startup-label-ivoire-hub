@@ -4,6 +4,10 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { RoleGate } from "./components/auth/RoleGate";
+
+// Public pages
 import Index from "./pages/Index";
 import Criteres from "./pages/Criteres";
 import Avantages from "./pages/Avantages";
@@ -20,6 +24,12 @@ import SuiviCandidature from "./pages/SuiviCandidature";
 import FAQ from "./pages/FAQ";
 import Actualites from "./pages/Actualites";
 
+// Startup pages
+import StartupDashboard from "./pages/startup/Dashboard";
+
+// Admin pages
+import AdminDashboard from "./pages/admin/Dashboard";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -29,6 +39,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Public routes */}
           <Route path="/" element={<Index />} />
           <Route path="/criteres" element={<Criteres />} />
           <Route path="/avantages" element={<Avantages />} />
@@ -38,12 +49,39 @@ const App = () => (
           <Route path="/investisseurs" element={<Investisseurs />} />
           <Route path="/entreprises-ia" element={<EntreprisesIA />} />
           <Route path="/entreprises-ia/:id" element={<EntrepriseIADetail />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/actualites" element={<Actualites />} />
+          
+          {/* Auth routes */}
           <Route path="/inscription" element={<Inscription />} />
           <Route path="/connexion" element={<Connexion />} />
-          <Route path="/faq" element={<FAQ />} />
+          
+          {/* Startup routes (protected) */}
+          <Route 
+            path="/startup" 
+            element={
+              <ProtectedRoute>
+                <RoleGate allowedRoles={['startup']}>
+                  <StartupDashboard />
+                </RoleGate>
+              </ProtectedRoute>
+            } 
+          />
           <Route path="/suivi-candidature" element={<SuiviCandidature />} />
-          <Route path="/actualites" element={<Actualites />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          
+          {/* Admin routes (protected) */}
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedRoute>
+                <RoleGate allowedRoles={['admin', 'evaluator']}>
+                  <AdminDashboard />
+                </RoleGate>
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Catch-all route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

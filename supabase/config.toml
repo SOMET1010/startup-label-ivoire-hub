@@ -1,2 +1,5 @@
 [functions.send-contact-email]
 verify_jwt = false
+
+[functions.check-user-role]
+verify_jwt = false
