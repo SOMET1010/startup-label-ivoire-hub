@@ -39,6 +39,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
 
   useEffect(() => {
+    if (!supabase) {
+      // Backend not configured: disable auth features but allow app to render
+      setLoading(false);
+      return;
+    }
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -67,6 +73,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const loadUserData = async (userId: string) => {
+    if (!supabase) return;
+
     try {
       // Load profile
       const { data: profileData } = await supabase
@@ -93,6 +101,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
+    if (!supabase) {
+      const error = new Error(
+        'Les fonctionnalités de connexion ne sont pas encore configurées (Cloud désactivé).'
+      );
+      toast({
+        title: 'Erreur de connexion',
+        description: error.message,
+        variant: 'destructive',
+      });
+      throw error;
+    }
+
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -114,6 +134,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, data: any) => {
+    if (!supabase) {
+      const error = new Error(
+        "Les fonctionnalités d'inscription ne sont pas encore configurées (Cloud désactivé)."
+      );
+      toast({
+        title: "Erreur d'inscription",
+        description: error.message,
+        variant: 'destructive',
+      });
+      throw error;
+    }
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -127,7 +159,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (error) {
       toast({
-        title: 'Erreur d\'inscription',
+        title: "Erreur d'inscription",
         description: error.message,
         variant: 'destructive',
       });
@@ -141,6 +173,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
+    if (!supabase) {
+      const error = new Error(
+        'Les fonctionnalités de déconnexion ne sont pas encore configurées (Cloud désactivé).'
+      );
+      toast({
+        title: 'Erreur de déconnexion',
+        description: error.message,
+        variant: 'destructive',
+      });
+      throw error;
+    }
+
     const { error } = await supabase.auth.signOut();
 
     if (error) {
