@@ -53,6 +53,9 @@ const Navbar = () => {
             <Link to="/investisseurs" className="text-gray-700 hover:text-primary transition-colors font-medium">
               Investisseurs
             </Link>
+            <Link to="/entreprises-ia" className="text-gray-700 hover:text-primary transition-colors font-medium">
+              Entreprises IA
+            </Link>
           </div>
 
           {/* Auth Buttons */}
@@ -134,6 +137,13 @@ const Navbar = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Investisseurs
+              </Link>
+              <Link
+                to="/entreprises-ia"
+                className="text-gray-700 hover:text-primary transition-colors font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Entreprises IA
               </Link>
 
               <div className="pt-2 flex flex-col space-y-2">
