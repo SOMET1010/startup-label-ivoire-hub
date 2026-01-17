@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 import { 
   Download, 
   X, 
@@ -17,7 +18,9 @@ import {
   ImageIcon,
   ZoomIn,
   ZoomOut,
-  RotateCcw
+  RotateCcw,
+  Maximize2,
+  Minimize2
 } from "lucide-react";
 
 // Zoom constants
@@ -49,6 +52,8 @@ const DocumentPreviewModal = ({
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(100);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -57,6 +62,33 @@ const DocumentPreviewModal = ({
       setZoomLevel(100);
     }
   }, [isOpen, documentUrl]);
+
+  // Handle fullscreen state changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, []);
+
+  const toggleFullscreen = useCallback(async () => {
+    if (!document.fullscreenElement) {
+      await contentRef.current?.requestFullscreen();
+    } else {
+      await document.exitFullscreen();
+    }
+  }, []);
+
+  const handleClose = useCallback(() => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    }
+    onClose();
+  }, [onClose]);
 
   const handleLoad = () => {
     setIsLoading(false);
@@ -91,11 +123,14 @@ const DocumentPreviewModal = ({
       if (!isOpen) return;
       
       if (e.key === "Escape") {
-        onClose();
+        handleClose();
       } else if (e.key === "d" || e.key === "D") {
         if (!isDownloading) {
           onDownload();
         }
+      } else if (e.key === "F11") {
+        e.preventDefault();
+        toggleFullscreen();
       }
       
       // Zoom shortcuts for images only
@@ -115,7 +150,7 @@ const DocumentPreviewModal = ({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose, onDownload, isDownloading, documentType, handleZoomIn, handleZoomOut, handleResetZoom]);
+  }, [isOpen, handleClose, onDownload, isDownloading, documentType, handleZoomIn, handleZoomOut, handleResetZoom, toggleFullscreen]);
 
   // Handle mouse wheel zoom for images
   useEffect(() => {
@@ -257,8 +292,16 @@ const DocumentPreviewModal = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] p-0 gap-0">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent 
+        ref={contentRef}
+        className={cn(
+          "p-0 gap-0",
+          isFullscreen 
+            ? "w-screen h-screen max-w-none max-h-none rounded-none" 
+            : "max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh]"
+        )}
+      >
         <DialogHeader className="px-4 py-3 border-b flex-row items-center justify-between space-y-0">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             {getHeaderIcon()}
@@ -279,6 +322,21 @@ const DocumentPreviewModal = ({
             <Button
               variant="outline"
               size="sm"
+              onClick={toggleFullscreen}
+              title={isFullscreen ? "Quitter le plein écran (F11)" : "Plein écran (F11)"}
+            >
+              {isFullscreen ? (
+                <Minimize2 className="h-4 w-4 sm:mr-2" />
+              ) : (
+                <Maximize2 className="h-4 w-4 sm:mr-2" />
+              )}
+              <span className="hidden sm:inline">
+                {isFullscreen ? "Réduire" : "Plein écran"}
+              </span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={onDownload}
               disabled={isDownloading}
             >
@@ -291,13 +349,16 @@ const DocumentPreviewModal = ({
                 </>
               )}
             </Button>
-            <Button variant="ghost" size="sm" onClick={onClose}>
+            <Button variant="ghost" size="sm" onClick={handleClose}>
               <X className="h-4 w-4" />
             </Button>
           </div>
         </DialogHeader>
 
-        <div className="flex-1 relative bg-muted/30 overflow-hidden" style={{ height: "calc(90vh - 60px)" }}>
+        <div 
+          className="flex-1 relative bg-muted/30 overflow-hidden" 
+          style={{ height: isFullscreen ? "calc(100vh - 60px)" : "calc(90vh - 60px)" }}
+        >
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
               <div className="flex flex-col items-center gap-3">
