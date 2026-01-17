@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -46,10 +46,11 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { format } from "date-fns";
+import { format, subDays, startOfYear, isAfter } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useAuth } from "@/contexts/AuthContext";
 import EvaluationList from "@/components/evaluation/EvaluationList";
+import ApplicationFilters from "@/components/admin/ApplicationFilters";
 
 interface ApplicationWithStartup {
   id: string;
@@ -57,6 +58,7 @@ interface ApplicationWithStartup {
   submitted_at: string | null;
   notes: string | null;
   created_at: string;
+  averageScore: number | null;
   startup: {
     id: string;
     name: string;
@@ -136,6 +138,13 @@ export default function AdminDashboard() {
   const [showRoleDialog, setShowRoleDialog] = useState(false);
   const [newRole, setNewRole] = useState("");
 
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [sectorFilter, setSectorFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("all");
+  const [minScoreFilter, setMinScoreFilter] = useState("all");
+
   const fetchData = async () => {
     if (!supabase) return;
     
@@ -171,16 +180,40 @@ export default function AdminDashboard() {
         .select("user_id, email, full_name")
         .in("user_id", userIds);
 
+      // Fetch evaluations for average scores
+      const appIds = appsData?.map(a => a.id) || [];
+      const { data: evaluationsData } = await supabase
+        .from("evaluations")
+        .select("application_id, total_score, is_submitted")
+        .in("application_id", appIds)
+        .eq("is_submitted", true);
+
+      // Calculate average scores per application
+      const scoresByApp: Record<string, number[]> = {};
+      evaluationsData?.forEach((ev) => {
+        if (ev.total_score != null) {
+          if (!scoresByApp[ev.application_id]) {
+            scoresByApp[ev.application_id] = [];
+          }
+          scoresByApp[ev.application_id].push(Number(ev.total_score));
+        }
+      });
+
       // Combine data
       const applicationsWithDetails: ApplicationWithStartup[] = (appsData || []).map(app => {
         const startup = startupsData?.find(s => s.id === app.startup_id);
         const profile = profilesData?.find(p => p.user_id === app.user_id);
+        const scores = scoresByApp[app.id] || [];
+        const averageScore = scores.length > 0 
+          ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) 
+          : null;
         return {
           id: app.id,
           status: app.status || "pending",
           submitted_at: app.submitted_at,
           notes: app.notes,
           created_at: app.created_at,
+          averageScore,
           startup: startup || { id: "", name: "Startup inconnue", sector: null, stage: null, description: null, website: null, team_size: null },
           user: { email: profile?.email || null, full_name: profile?.full_name || null },
         };
@@ -240,6 +273,81 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Filtered applications logic
+  const filteredApplications = useMemo(() => {
+    return applications.filter((app) => {
+      // Search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchesName = app.startup.name.toLowerCase().includes(query);
+        const matchesEmail = app.user.email?.toLowerCase().includes(query);
+        const matchesFullName = app.user.full_name?.toLowerCase().includes(query);
+        if (!matchesName && !matchesEmail && !matchesFullName) return false;
+      }
+
+      // Status filter
+      if (statusFilter !== "all" && app.status !== statusFilter) return false;
+
+      // Sector filter
+      if (sectorFilter !== "all" && app.startup.sector !== sectorFilter) return false;
+
+      // Date filter
+      if (dateFilter !== "all" && app.submitted_at) {
+        const submittedDate = new Date(app.submitted_at);
+        const now = new Date();
+        let cutoffDate: Date;
+
+        switch (dateFilter) {
+          case "7days":
+            cutoffDate = subDays(now, 7);
+            break;
+          case "30days":
+            cutoffDate = subDays(now, 30);
+            break;
+          case "90days":
+            cutoffDate = subDays(now, 90);
+            break;
+          case "year":
+            cutoffDate = startOfYear(now);
+            break;
+          default:
+            cutoffDate = new Date(0);
+        }
+
+        if (!isAfter(submittedDate, cutoffDate)) return false;
+      }
+
+      // Score filter
+      if (minScoreFilter !== "all") {
+        const minScore = parseInt(minScoreFilter);
+        if (app.averageScore === null || app.averageScore < minScore) return false;
+      }
+
+      return true;
+    });
+  }, [applications, searchQuery, statusFilter, sectorFilter, dateFilter, minScoreFilter]);
+
+  const resetFilters = () => {
+    setSearchQuery("");
+    setStatusFilter("all");
+    setSectorFilter("all");
+    setDateFilter("all");
+    setMinScoreFilter("all");
+  };
+
+  const getScoreBadge = (score: number | null) => {
+    if (score === null) {
+      return <Badge variant="outline" className="text-muted-foreground">-</Badge>;
+    }
+    if (score >= 80) {
+      return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">{score}</Badge>;
+    }
+    if (score >= 60) {
+      return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">{score}</Badge>;
+    }
+    return <Badge className="bg-red-100 text-red-800 hover:bg-red-100">{score}</Badge>;
+  };
 
   const handleStatusChange = async () => {
     if (!selectedApplication || !actionType || !supabase) return;
@@ -486,13 +594,32 @@ export default function AdminDashboard() {
                   <CardTitle>Gestion des candidatures</CardTitle>
                 </CardHeader>
                 <CardContent>
+                  {/* Filters */}
+                  <ApplicationFilters
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    statusFilter={statusFilter}
+                    onStatusChange={setStatusFilter}
+                    sectorFilter={sectorFilter}
+                    onSectorChange={setSectorFilter}
+                    dateFilter={dateFilter}
+                    onDateChange={setDateFilter}
+                    minScoreFilter={minScoreFilter}
+                    onMinScoreChange={setMinScoreFilter}
+                    onReset={resetFilters}
+                    filteredCount={filteredApplications.length}
+                    totalCount={applications.length}
+                  />
+
                   {loading ? (
                     <div className="flex items-center justify-center py-8">
                       <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                     </div>
-                  ) : applications.length === 0 ? (
+                  ) : filteredApplications.length === 0 ? (
                     <p className="text-center text-muted-foreground py-8">
-                      Aucune candidature pour le moment.
+                      {applications.length === 0 
+                        ? "Aucune candidature pour le moment."
+                        : "Aucune candidature ne correspond aux filtres."}
                     </p>
                   ) : (
                     <Table>
@@ -504,11 +631,12 @@ export default function AdminDashboard() {
                           <TableHead>Candidat</TableHead>
                           <TableHead>Date</TableHead>
                           <TableHead>Statut</TableHead>
+                          <TableHead>Score</TableHead>
                           <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {applications.map((app) => (
+                        {filteredApplications.map((app) => (
                           <TableRow key={app.id}>
                             <TableCell className="font-medium">{app.startup.name}</TableCell>
                             <TableCell>{SECTOR_LABELS[app.startup.sector || ""] || app.startup.sector || "-"}</TableCell>
@@ -528,6 +656,9 @@ export default function AdminDashboard() {
                               <Badge variant={STATUS_LABELS[app.status]?.variant || "secondary"}>
                                 {STATUS_LABELS[app.status]?.label || app.status}
                               </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {getScoreBadge(app.averageScore)}
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex items-center justify-end gap-2">
