@@ -13,9 +13,10 @@ import {
   Loader2,
   CheckCircle,
   XCircle,
-  Eye
+  Eye,
+  ImageIcon
 } from "lucide-react";
-import PDFPreviewModal from "./PDFPreviewModal";
+import DocumentPreviewModal, { type DocumentType } from "./DocumentPreviewModal";
 
 interface DocumentViewerProps {
   documents: {
@@ -43,6 +44,7 @@ interface PreviewModalState {
   documentName: string;
   documentPath: string;
   documentKey: string;
+  documentType: DocumentType;
 }
 
 const DocumentViewer = ({ documents, startupName }: DocumentViewerProps) => {
@@ -53,6 +55,7 @@ const DocumentViewer = ({ documents, startupName }: DocumentViewerProps) => {
     documentName: "",
     documentPath: "",
     documentKey: "",
+    documentType: "other",
   });
 
   const requiredDocs: DocumentItem[] = [
@@ -81,14 +84,36 @@ const DocumentViewer = ({ documents, startupName }: DocumentViewerProps) => {
     return getFileExtension(path) === "pdf";
   };
 
+  const isImage = (path: string): boolean => {
+    const ext = getFileExtension(path);
+    return ["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(ext);
+  };
+
+  const isPreviewable = (path: string): boolean => {
+    return isPDF(path) || isImage(path);
+  };
+
+  const getDocumentType = (path: string): DocumentType => {
+    if (isPDF(path)) return "pdf";
+    if (isImage(path)) return "image";
+    return "other";
+  };
+
   const getFileIcon = (path: string) => {
     const ext = getFileExtension(path);
     switch (ext) {
       case "pdf":
         return <FileText className="h-5 w-5 text-red-500" />;
+      case "jpg":
+      case "jpeg":
+      case "png":
+      case "gif":
+      case "webp":
+      case "svg":
+        return <ImageIcon className="h-5 w-5 text-blue-500" />;
       case "doc":
       case "docx":
-        return <FileText className="h-5 w-5 text-blue-500" />;
+        return <FileText className="h-5 w-5 text-blue-600" />;
       case "ppt":
       case "pptx":
         return <FileText className="h-5 w-5 text-orange-500" />;
@@ -106,10 +131,10 @@ const DocumentViewer = ({ documents, startupName }: DocumentViewerProps) => {
       return;
     }
 
-    const ext = getFileExtension(path);
+    const docType = getDocumentType(path);
 
-    // Only PDF files can be previewed in the modal
-    if (ext !== "pdf") {
+    // Only PDF and images can be previewed in the modal
+    if (docType === "other") {
       // For other formats, open in a new tab
       handleOpenInNewTab(path, docKey);
       return;
@@ -129,6 +154,7 @@ const DocumentViewer = ({ documents, startupName }: DocumentViewerProps) => {
         documentName: `${label} - ${getFileName(path)}`,
         documentPath: path,
         documentKey: docKey,
+        documentType: docType,
       });
     } catch (error: any) {
       console.error("Error getting signed URL:", error);
@@ -210,6 +236,7 @@ const DocumentViewer = ({ documents, startupName }: DocumentViewerProps) => {
       documentName: "",
       documentPath: "",
       documentKey: "",
+      documentType: "other",
     });
   };
 
@@ -255,7 +282,7 @@ const DocumentViewer = ({ documents, startupName }: DocumentViewerProps) => {
                   >
                     {isLoading ? (
                       <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : isPDF(doc.path!) ? (
+                    ) : isPreviewable(doc.path!) ? (
                       <>
                         <Eye className="h-3 w-3 mr-1" />
                         Aperçu
@@ -330,7 +357,7 @@ const DocumentViewer = ({ documents, startupName }: DocumentViewerProps) => {
                         >
                           {isLoading ? (
                             <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : isPDF(path) ? (
+                          ) : isPreviewable(path) ? (
                             <>
                               <Eye className="h-3 w-3 mr-1" />
                               Aperçu
@@ -415,11 +442,12 @@ const DocumentViewer = ({ documents, startupName }: DocumentViewerProps) => {
         </>
       )}
 
-      <PDFPreviewModal
+      <DocumentPreviewModal
         isOpen={previewModal.isOpen}
         onClose={closePreviewModal}
-        pdfUrl={previewModal.url}
+        documentUrl={previewModal.url}
         documentName={previewModal.documentName}
+        documentType={previewModal.documentType}
         onDownload={handleModalDownload}
         isDownloading={loadingDoc === previewModal.documentKey}
       />
