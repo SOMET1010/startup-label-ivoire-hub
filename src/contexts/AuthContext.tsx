@@ -7,13 +7,12 @@ type UserRole = 'admin' | 'startup' | 'evaluator' | 'public';
 
 interface Profile {
   id: string;
-  email: string;
-  first_name?: string;
-  last_name?: string;
-  phone?: string;
-  avatar_url?: string;
-  company_name?: string;
-  user_type?: string;
+  user_id: string;
+  email: string | null;
+  full_name: string | null;
+  avatar_url: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface AuthContextType {
@@ -83,8 +82,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data: profileData } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', userId)
-        .single();
+        .eq('user_id', userId)
+        .maybeSingle();
 
       setProfile(profileData);
 
@@ -157,8 +156,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       options: {
         emailRedirectTo: redirectUrl,
         data: {
-          first_name: data.firstName,
-          last_name: data.lastName,
+          full_name: `${data.firstName || ''} ${data.lastName || ''}`.trim(),
         },
       },
     });

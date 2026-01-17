@@ -11,7 +11,7 @@ export default function StartupDashboard() {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">
-          Bienvenue, {profile?.first_name || 'Startup'} !
+          Bienvenue, {profile?.full_name || 'Startup'} !
         </h1>
         <p className="text-muted-foreground">
           Gérez votre candidature au label et suivez votre progression.
