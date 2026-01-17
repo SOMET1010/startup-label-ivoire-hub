@@ -40,6 +40,7 @@ import {
   Loader2,
   RefreshCw,
   Shield,
+  Star,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -47,6 +48,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { useAuth } from "@/contexts/AuthContext";
+import EvaluationList from "@/components/evaluation/EvaluationList";
 
 interface ApplicationWithStartup {
   id: string;
@@ -114,6 +117,7 @@ const STAGE_LABELS: Record<string, string> = {
 };
 
 export default function AdminDashboard() {
+  const { user, profile } = useAuth();
   const [applications, setApplications] = useState<ApplicationWithStartup[]>([]);
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [stats, setStats] = useState<Stats>({ total: 0, pending: 0, approved: 0, rejected: 0, users: 0 });
@@ -468,6 +472,10 @@ export default function AdminDashboard() {
           <Tabs defaultValue="applications" className="space-y-4">
             <TabsList>
               <TabsTrigger value="applications">Candidatures</TabsTrigger>
+              <TabsTrigger value="evaluations" className="flex items-center gap-1">
+                <Star className="h-4 w-4" />
+                Évaluations
+              </TabsTrigger>
               <TabsTrigger value="users">Utilisateurs & Rôles</TabsTrigger>
             </TabsList>
 
@@ -572,6 +580,16 @@ export default function AdminDashboard() {
                   )}
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            {/* Evaluations Tab */}
+            <TabsContent value="evaluations">
+              {user && (
+                <EvaluationList 
+                  currentUserId={user.id} 
+                  currentUserName={profile?.full_name || profile?.email || undefined}
+                />
+              )}
             </TabsContent>
 
             {/* Users Tab */}
