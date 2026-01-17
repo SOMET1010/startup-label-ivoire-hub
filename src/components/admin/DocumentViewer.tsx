@@ -12,8 +12,10 @@ import {
   File, 
   Loader2,
   CheckCircle,
-  XCircle
+  XCircle,
+  Eye
 } from "lucide-react";
+import PDFPreviewModal from "./PDFPreviewModal";
 
 interface DocumentViewerProps {
   documents: {
@@ -35,8 +37,23 @@ interface DocumentItem {
   required: boolean;
 }
 
+interface PreviewModalState {
+  isOpen: boolean;
+  url: string | null;
+  documentName: string;
+  documentPath: string;
+  documentKey: string;
+}
+
 const DocumentViewer = ({ documents, startupName }: DocumentViewerProps) => {
   const [loadingDoc, setLoadingDoc] = useState<string | null>(null);
+  const [previewModal, setPreviewModal] = useState<PreviewModalState>({
+    isOpen: false,
+    url: null,
+    documentName: "",
+    documentPath: "",
+    documentKey: "",
+  });
 
   const requiredDocs: DocumentItem[] = [
     { key: "doc_rccm", label: "Registre du Commerce (RCCM)", path: documents.doc_rccm, required: true },
@@ -60,6 +77,10 @@ const DocumentViewer = ({ documents, startupName }: DocumentViewerProps) => {
     return parts[parts.length - 1]?.toLowerCase() || "";
   };
 
+  const isPDF = (path: string): boolean => {
+    return getFileExtension(path) === "pdf";
+  };
+
   const getFileIcon = (path: string) => {
     const ext = getFileExtension(path);
     switch (ext) {
@@ -79,7 +100,45 @@ const DocumentViewer = ({ documents, startupName }: DocumentViewerProps) => {
     }
   };
 
-  const handleView = async (path: string, docKey: string) => {
+  const handlePreview = async (path: string, docKey: string, label: string) => {
+    if (!supabase) {
+      toast.error("Connexion au stockage non disponible");
+      return;
+    }
+
+    const ext = getFileExtension(path);
+
+    // Only PDF files can be previewed in the modal
+    if (ext !== "pdf") {
+      // For other formats, open in a new tab
+      handleOpenInNewTab(path, docKey);
+      return;
+    }
+
+    setLoadingDoc(docKey);
+    try {
+      const { data, error } = await supabase.storage
+        .from("application-documents")
+        .createSignedUrl(path, 3600);
+
+      if (error) throw error;
+
+      setPreviewModal({
+        isOpen: true,
+        url: data?.signedUrl || null,
+        documentName: `${label} - ${getFileName(path)}`,
+        documentPath: path,
+        documentKey: docKey,
+      });
+    } catch (error: any) {
+      console.error("Error getting signed URL:", error);
+      toast.error("Erreur lors du chargement de l'aperçu");
+    } finally {
+      setLoadingDoc(null);
+    }
+  };
+
+  const handleOpenInNewTab = async (path: string, docKey: string) => {
     if (!supabase) {
       toast.error("Connexion au stockage non disponible");
       return;
@@ -89,7 +148,7 @@ const DocumentViewer = ({ documents, startupName }: DocumentViewerProps) => {
     try {
       const { data, error } = await supabase.storage
         .from("application-documents")
-        .createSignedUrl(path, 3600); // URL valide 1 heure
+        .createSignedUrl(path, 3600);
 
       if (error) throw error;
 
@@ -138,6 +197,22 @@ const DocumentViewer = ({ documents, startupName }: DocumentViewerProps) => {
     }
   };
 
+  const handleModalDownload = () => {
+    if (previewModal.documentPath) {
+      handleDownload(previewModal.documentPath, previewModal.documentKey);
+    }
+  };
+
+  const closePreviewModal = () => {
+    setPreviewModal({
+      isOpen: false,
+      url: null,
+      documentName: "",
+      documentPath: "",
+      documentKey: "",
+    });
+  };
+
   const renderDocumentCard = (doc: DocumentItem) => {
     const isLoading = loadingDoc === doc.key;
     const hasDocument = !!doc.path;
@@ -174,16 +249,21 @@ const DocumentViewer = ({ documents, startupName }: DocumentViewerProps) => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleView(doc.path!, doc.key)}
+                    onClick={() => handlePreview(doc.path!, doc.key, doc.label)}
                     disabled={isLoading}
                     className="h-7 text-xs"
                   >
                     {isLoading ? (
                       <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : isPDF(doc.path!) ? (
+                      <>
+                        <Eye className="h-3 w-3 mr-1" />
+                        Aperçu
+                      </>
                     ) : (
                       <>
                         <ExternalLink className="h-3 w-3 mr-1" />
-                        Voir
+                        Ouvrir
                       </>
                     )}
                   </Button>
@@ -244,16 +324,21 @@ const DocumentViewer = ({ documents, startupName }: DocumentViewerProps) => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleView(path, docKey)}
+                          onClick={() => handlePreview(path, docKey, `Document ${index + 1}`)}
                           disabled={isLoading}
                           className="h-7 text-xs"
                         >
                           {isLoading ? (
                             <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : isPDF(path) ? (
+                            <>
+                              <Eye className="h-3 w-3 mr-1" />
+                              Aperçu
+                            </>
                           ) : (
                             <>
                               <ExternalLink className="h-3 w-3 mr-1" />
-                              Voir
+                              Ouvrir
                             </>
                           )}
                         </Button>
@@ -329,6 +414,15 @@ const DocumentViewer = ({ documents, startupName }: DocumentViewerProps) => {
           {renderOtherDocuments()}
         </>
       )}
+
+      <PDFPreviewModal
+        isOpen={previewModal.isOpen}
+        onClose={closePreviewModal}
+        pdfUrl={previewModal.url}
+        documentName={previewModal.documentName}
+        onDownload={handleModalDownload}
+        isDownloading={loadingDoc === previewModal.documentKey}
+      />
     </div>
   );
 };
