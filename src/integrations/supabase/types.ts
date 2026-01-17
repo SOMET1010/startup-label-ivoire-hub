@@ -203,45 +203,90 @@ export type Database = {
       }
       startups: {
         Row: {
+          address: string | null
+          business_model: string | null
           created_at: string
           description: string | null
+          doc_business_plan: string | null
+          doc_cv: string | null
+          doc_other: string[] | null
+          doc_pitch: string | null
+          doc_rccm: string | null
+          doc_statutes: string | null
+          doc_tax: string | null
           founded_date: string | null
+          founder_info: string | null
+          growth_potential: string | null
           id: string
+          innovation: string | null
+          legal_status: string | null
           logo_url: string | null
           name: string
+          rccm: string | null
           sector: string | null
           stage: string | null
           status: string | null
+          tax_id: string | null
           team_size: number | null
           updated_at: string
           user_id: string
           website: string | null
         }
         Insert: {
+          address?: string | null
+          business_model?: string | null
           created_at?: string
           description?: string | null
+          doc_business_plan?: string | null
+          doc_cv?: string | null
+          doc_other?: string[] | null
+          doc_pitch?: string | null
+          doc_rccm?: string | null
+          doc_statutes?: string | null
+          doc_tax?: string | null
           founded_date?: string | null
+          founder_info?: string | null
+          growth_potential?: string | null
           id?: string
+          innovation?: string | null
+          legal_status?: string | null
           logo_url?: string | null
           name: string
+          rccm?: string | null
           sector?: string | null
           stage?: string | null
           status?: string | null
+          tax_id?: string | null
           team_size?: number | null
           updated_at?: string
           user_id: string
           website?: string | null
         }
         Update: {
+          address?: string | null
+          business_model?: string | null
           created_at?: string
           description?: string | null
+          doc_business_plan?: string | null
+          doc_cv?: string | null
+          doc_other?: string[] | null
+          doc_pitch?: string | null
+          doc_rccm?: string | null
+          doc_statutes?: string | null
+          doc_tax?: string | null
           founded_date?: string | null
+          founder_info?: string | null
+          growth_potential?: string | null
           id?: string
+          innovation?: string | null
+          legal_status?: string | null
           logo_url?: string | null
           name?: string
+          rccm?: string | null
           sector?: string | null
           stage?: string | null
           status?: string | null
+          tax_id?: string | null
           team_size?: number | null
           updated_at?: string
           user_id?: string
