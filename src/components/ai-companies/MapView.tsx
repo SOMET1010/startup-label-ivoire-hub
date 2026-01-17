@@ -103,43 +103,80 @@ const MapView = ({ companies, apiKey }: MapViewProps) => {
         el.style.transform = 'scale(1)';
       });
 
-      // Create popup content as DOM element for better interactivity
+      // Create popup content as DOM element for better interactivity (XSS-safe)
       const popupContent = document.createElement('div');
       popupContent.style.minWidth = '250px';
       popupContent.style.maxWidth = '300px';
       
-      popupContent.innerHTML = `
-        <div>
-          <div style="display: flex; align-items: start; margin-bottom: 12px;">
-            <div style="width: 40px; height: 40px; border-radius: 8px; background: hsl(var(--muted)); margin-right: 12px; overflow: hidden;">
-              <img src="${company.logo}" alt="${company.name}" style="width: 100%; height: 100%; object-fit: cover;" />
-            </div>
-            <div style="flex-grow: 1;">
-              <h3 style="font-weight: bold; font-size: 16px; margin-bottom: 4px; color: hsl(var(--foreground));">${company.name}</h3>
-              <span style="display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 500; ${company.isLabeled ? 'background: hsl(var(--primary)); color: hsl(var(--primary-foreground));' : 'border: 1px solid hsl(var(--border)); color: hsl(var(--foreground));'}">
-                ${company.isLabeled ? 'Labellisée' : 'Non labellisée'}
-              </span>
-            </div>
-          </div>
-          <p style="font-size: 13px; color: hsl(var(--muted-foreground)); margin-bottom: 12px; line-height: 1.4;">${company.description.substring(0, 120)}${company.description.length > 120 ? '...' : ''}</p>
-          <div style="margin-bottom: 8px;">
-            <div style="font-size: 12px; color: hsl(var(--muted-foreground)); margin-bottom: 4px;">
-              <strong>Spécialisation:</strong> ${company.specialization}
-            </div>
-            <div style="font-size: 12px; color: hsl(var(--muted-foreground)); margin-bottom: 4px;">
-              <strong>Secteur:</strong> ${company.sector}
-            </div>
-            <div style="font-size: 12px; color: hsl(var(--muted-foreground)); margin-bottom: 4px;">
-              <strong>Employés:</strong> ${company.employees}
-            </div>
-          </div>
-          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid hsl(var(--border)); display: flex; gap: 8px;">
-            <a href="${company.website}" target="_blank" rel="noopener noreferrer" style="color: hsl(var(--primary)); text-decoration: none; font-size: 13px; font-weight: 500;">
-              Visiter le site →
-            </a>
-          </div>
-        </div>
-      `;
+      // Build popup using safe DOM methods instead of innerHTML
+      const container = document.createElement('div');
+      
+      // Header with logo and name
+      const header = document.createElement('div');
+      header.style.cssText = 'display: flex; align-items: start; margin-bottom: 12px;';
+      
+      const logoContainer = document.createElement('div');
+      logoContainer.style.cssText = 'width: 40px; height: 40px; border-radius: 8px; background: hsl(var(--muted)); margin-right: 12px; overflow: hidden;';
+      const logo = document.createElement('img');
+      logo.src = company.logo;
+      logo.alt = company.name;
+      logo.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
+      logoContainer.appendChild(logo);
+      
+      const headerInfo = document.createElement('div');
+      headerInfo.style.flexGrow = '1';
+      const nameEl = document.createElement('h3');
+      nameEl.style.cssText = 'font-weight: bold; font-size: 16px; margin-bottom: 4px; color: hsl(var(--foreground));';
+      nameEl.textContent = company.name;
+      const labelBadge = document.createElement('span');
+      labelBadge.style.cssText = `display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 500; ${company.isLabeled ? 'background: hsl(var(--primary)); color: hsl(var(--primary-foreground));' : 'border: 1px solid hsl(var(--border)); color: hsl(var(--foreground));'}`;
+      labelBadge.textContent = company.isLabeled ? 'Labellisée' : 'Non labellisée';
+      headerInfo.appendChild(nameEl);
+      headerInfo.appendChild(labelBadge);
+      
+      header.appendChild(logoContainer);
+      header.appendChild(headerInfo);
+      container.appendChild(header);
+      
+      // Description
+      const description = document.createElement('p');
+      description.style.cssText = 'font-size: 13px; color: hsl(var(--muted-foreground)); margin-bottom: 12px; line-height: 1.4;';
+      const descText = company.description.substring(0, 120) + (company.description.length > 120 ? '...' : '');
+      description.textContent = descText;
+      container.appendChild(description);
+      
+      // Details
+      const details = document.createElement('div');
+      details.style.marginBottom = '8px';
+      
+      const createDetailRow = (label: string, value: string) => {
+        const row = document.createElement('div');
+        row.style.cssText = 'font-size: 12px; color: hsl(var(--muted-foreground)); margin-bottom: 4px;';
+        const strong = document.createElement('strong');
+        strong.textContent = label;
+        row.appendChild(strong);
+        row.appendChild(document.createTextNode(' ' + value));
+        return row;
+      };
+      
+      details.appendChild(createDetailRow('Spécialisation:', company.specialization));
+      details.appendChild(createDetailRow('Secteur:', company.sector));
+      details.appendChild(createDetailRow('Employés:', company.employees));
+      container.appendChild(details);
+      
+      // Website link
+      const linkContainer = document.createElement('div');
+      linkContainer.style.cssText = 'margin-top: 12px; padding-top: 12px; border-top: 1px solid hsl(var(--border)); display: flex; gap: 8px;';
+      const websiteLink = document.createElement('a');
+      websiteLink.href = company.website;
+      websiteLink.target = '_blank';
+      websiteLink.rel = 'noopener noreferrer';
+      websiteLink.style.cssText = 'color: hsl(var(--primary)); text-decoration: none; font-size: 13px; font-weight: 500;';
+      websiteLink.textContent = 'Visiter le site →';
+      linkContainer.appendChild(websiteLink);
+      container.appendChild(linkContainer);
+      
+      popupContent.appendChild(container);
       
       // Add details button
       const detailsButton = document.createElement('button');
