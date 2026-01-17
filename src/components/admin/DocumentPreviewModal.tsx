@@ -12,26 +12,31 @@ import {
   ExternalLink, 
   FileText,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  ImageIcon
 } from "lucide-react";
 
-interface PDFPreviewModalProps {
+export type DocumentType = "pdf" | "image" | "other";
+
+interface DocumentPreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  pdfUrl: string | null;
+  documentUrl: string | null;
   documentName: string;
+  documentType: DocumentType;
   onDownload: () => void;
   isDownloading?: boolean;
 }
 
-const PDFPreviewModal = ({
+const DocumentPreviewModal = ({
   isOpen,
   onClose,
-  pdfUrl,
+  documentUrl,
   documentName,
+  documentType,
   onDownload,
   isDownloading = false,
-}: PDFPreviewModalProps) => {
+}: DocumentPreviewModalProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
@@ -40,20 +45,20 @@ const PDFPreviewModal = ({
       setIsLoading(true);
       setHasError(false);
     }
-  }, [isOpen, pdfUrl]);
+  }, [isOpen, documentUrl]);
 
-  const handleIframeLoad = () => {
+  const handleLoad = () => {
     setIsLoading(false);
   };
 
-  const handleIframeError = () => {
+  const handleError = () => {
     setIsLoading(false);
     setHasError(true);
   };
 
   const handleOpenInNewTab = () => {
-    if (pdfUrl) {
-      window.open(pdfUrl, "_blank");
+    if (documentUrl) {
+      window.open(documentUrl, "_blank");
     }
   };
 
@@ -75,12 +80,83 @@ const PDFPreviewModal = ({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose, onDownload, isDownloading]);
 
+  const getHeaderIcon = () => {
+    switch (documentType) {
+      case "pdf":
+        return <FileText className="h-5 w-5 text-red-500 flex-shrink-0" />;
+      case "image":
+        return <ImageIcon className="h-5 w-5 text-blue-500 flex-shrink-0" />;
+      default:
+        return <FileText className="h-5 w-5 text-muted-foreground flex-shrink-0" />;
+    }
+  };
+
+  const renderContent = () => {
+    if (hasError) {
+      return (
+        <div className="absolute inset-0 flex items-center justify-center bg-background z-10">
+          <div className="flex flex-col items-center gap-4 text-center p-6">
+            <AlertCircle className="h-12 w-12 text-destructive" />
+            <div>
+              <p className="font-medium mb-1">Impossible de charger l'aperçu</p>
+              <p className="text-sm text-muted-foreground mb-4">
+                Le document ne peut pas être affiché dans le navigateur.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={handleOpenInNewTab}>
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Ouvrir dans un nouvel onglet
+              </Button>
+              <Button onClick={onDownload} disabled={isDownloading}>
+                {isDownloading ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Download className="h-4 w-4 mr-2" />
+                )}
+                Télécharger
+              </Button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (documentType === "pdf" && documentUrl) {
+      return (
+        <iframe
+          src={documentUrl}
+          className="w-full h-full border-0"
+          title={documentName}
+          onLoad={handleLoad}
+          onError={handleError}
+        />
+      );
+    }
+
+    if (documentType === "image" && documentUrl) {
+      return (
+        <div className="flex items-center justify-center h-full p-4 overflow-auto bg-muted/30">
+          <img
+            src={documentUrl}
+            alt={documentName}
+            className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+            onLoad={handleLoad}
+            onError={handleError}
+          />
+        </div>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-[95vw] w-[95vw] h-[90vh] max-h-[90vh] p-0 gap-0">
         <DialogHeader className="px-4 py-3 border-b flex-row items-center justify-between space-y-0">
           <div className="flex items-center gap-3 min-w-0 flex-1">
-            <FileText className="h-5 w-5 text-red-500 flex-shrink-0" />
+            {getHeaderIcon()}
             <DialogTitle className="text-base font-medium truncate">
               {documentName}
             </DialogTitle>
@@ -126,47 +202,11 @@ const PDFPreviewModal = ({
             </div>
           )}
 
-          {hasError && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background z-10">
-              <div className="flex flex-col items-center gap-4 text-center p-6">
-                <AlertCircle className="h-12 w-12 text-destructive" />
-                <div>
-                  <p className="font-medium mb-1">Impossible de charger l'aperçu</p>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Le document ne peut pas être affiché dans le navigateur.
-                  </p>
-                </div>
-                <div className="flex gap-3">
-                  <Button variant="outline" onClick={handleOpenInNewTab}>
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Ouvrir dans un nouvel onglet
-                  </Button>
-                  <Button onClick={onDownload} disabled={isDownloading}>
-                    {isDownloading ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    ) : (
-                      <Download className="h-4 w-4 mr-2" />
-                    )}
-                    Télécharger
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {pdfUrl && (
-            <iframe
-              src={pdfUrl}
-              className="w-full h-full border-0"
-              title={documentName}
-              onLoad={handleIframeLoad}
-              onError={handleIframeError}
-            />
-          )}
+          {renderContent()}
         </div>
       </DialogContent>
     </Dialog>
   );
 };
 
-export default PDFPreviewModal;
+export default DocumentPreviewModal;
