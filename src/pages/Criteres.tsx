@@ -1,9 +1,9 @@
-
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CTA from "@/components/CTA";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { ClipboardCheck, ArrowRight } from "lucide-react";
 
 const Criteres = () => {
   return (
@@ -18,6 +18,31 @@ const Criteres = () => {
               <p className="text-xl text-gray-600">
                 Découvrez les conditions requises pour obtenir le Label Startup numérique conformément à la Loi n°2023-901 du 23 novembre 2023.
               </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Quiz CTA */}
+        <section className="py-8 bg-primary/5 border-y border-primary/10">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <ClipboardCheck className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-lg">Vérifiez votre éligibilité en 3 minutes</h2>
+                  <p className="text-muted-foreground text-sm">
+                    Répondez à quelques questions pour savoir si votre startup peut obtenir le Label
+                  </p>
+                </div>
+              </div>
+              <Link to="/eligibilite">
+                <Button size="lg" className="gap-2 whitespace-nowrap">
+                  Tester mon éligibilité
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
             </div>
           </div>
         </section>
@@ -73,9 +98,15 @@ const Criteres = () => {
                 </ul>
               </div>
               
-              <div className="mt-8 flex justify-center">
+              <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+                <Link to="/eligibilite">
+                  <Button variant="outline" size="lg" className="gap-2 w-full sm:w-auto">
+                    <ClipboardCheck className="w-4 h-4" />
+                    Vérifier mon éligibilité
+                  </Button>
+                </Link>
                 <Link to="/postuler">
-                  <Button size="lg">
+                  <Button size="lg" className="w-full sm:w-auto">
                     Postuler au label
                   </Button>
                 </Link>

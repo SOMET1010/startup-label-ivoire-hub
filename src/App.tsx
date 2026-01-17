@@ -13,6 +13,7 @@ import CloudStatusBanner from "./components/CloudStatusBanner";
 // Public pages
 import Index from "./pages/Index";
 import Criteres from "./pages/Criteres";
+import EligibiliteQuiz from "./pages/EligibiliteQuiz";
 import Avantages from "./pages/Avantages";
 import Postuler from "./pages/Postuler";
 import Annuaire from "./pages/Annuaire";
@@ -45,6 +46,7 @@ const App = () => (
           {/* Public routes */}
           <Route path="/" element={<Index />} />
           <Route path="/criteres" element={<Criteres />} />
+          <Route path="/eligibilite" element={<EligibiliteQuiz />} />
           <Route path="/avantages" element={<Avantages />} />
           <Route path="/postuler" element={<Postuler />} />
           <Route path="/annuaire" element={<Annuaire />} />
