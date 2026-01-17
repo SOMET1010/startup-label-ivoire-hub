@@ -61,7 +61,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        loadUserData(session.user.id);
+        // Avoid calling other Supabase APIs inside the auth callback
+        setTimeout(() => {
+          loadUserData(session.user.id);
+        }, 0);
       } else {
         setProfile(null);
         setUserRole(null);
@@ -146,10 +149,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw error;
     }
 
+    const redirectUrl = `${window.location.origin}/`;
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        emailRedirectTo: redirectUrl,
         data: {
           first_name: data.firstName,
           last_name: data.lastName,
