@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,6 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import { 
   Download, 
   X, 
@@ -13,8 +14,16 @@ import {
   FileText,
   Loader2,
   AlertCircle,
-  ImageIcon
+  ImageIcon,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw
 } from "lucide-react";
+
+// Zoom constants
+const ZOOM_MIN = 25;
+const ZOOM_MAX = 300;
+const ZOOM_STEP = 25;
 
 export type DocumentType = "pdf" | "image" | "other";
 
@@ -39,11 +48,13 @@ const DocumentPreviewModal = ({
 }: DocumentPreviewModalProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(100);
 
   useEffect(() => {
     if (isOpen) {
       setIsLoading(true);
       setHasError(false);
+      setZoomLevel(100);
     }
   }, [isOpen, documentUrl]);
 
@@ -55,6 +66,18 @@ const DocumentPreviewModal = ({
     setIsLoading(false);
     setHasError(true);
   };
+
+  const handleZoomIn = useCallback(() => {
+    setZoomLevel((prev) => Math.min(prev + ZOOM_STEP, ZOOM_MAX));
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    setZoomLevel((prev) => Math.max(prev - ZOOM_STEP, ZOOM_MIN));
+  }, []);
+
+  const handleResetZoom = useCallback(() => {
+    setZoomLevel(100);
+  }, []);
 
   const handleOpenInNewTab = () => {
     if (documentUrl) {
@@ -74,11 +97,44 @@ const DocumentPreviewModal = ({
           onDownload();
         }
       }
+      
+      // Zoom shortcuts for images only
+      if (documentType === "image") {
+        if (e.key === "+" || e.key === "=") {
+          e.preventDefault();
+          handleZoomIn();
+        } else if (e.key === "-") {
+          e.preventDefault();
+          handleZoomOut();
+        } else if (e.key === "0") {
+          e.preventDefault();
+          handleResetZoom();
+        }
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose, onDownload, isDownloading]);
+  }, [isOpen, onClose, onDownload, isDownloading, documentType, handleZoomIn, handleZoomOut, handleResetZoom]);
+
+  // Handle mouse wheel zoom for images
+  useEffect(() => {
+    if (!isOpen || documentType !== "image") return;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        if (e.deltaY < 0) {
+          handleZoomIn();
+        } else {
+          handleZoomOut();
+        }
+      }
+    };
+
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    return () => window.removeEventListener("wheel", handleWheel);
+  }, [isOpen, documentType, handleZoomIn, handleZoomOut]);
 
   const getHeaderIcon = () => {
     switch (documentType) {
@@ -136,14 +192,63 @@ const DocumentPreviewModal = ({
 
     if (documentType === "image" && documentUrl) {
       return (
-        <div className="flex items-center justify-center h-full p-4 overflow-auto bg-muted/30">
-          <img
-            src={documentUrl}
-            alt={documentName}
-            className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
-            onLoad={handleLoad}
-            onError={handleError}
-          />
+        <div className="relative flex items-center justify-center h-full overflow-auto bg-muted/30">
+          <div className="flex items-center justify-center min-h-full p-4">
+            <img
+              src={documentUrl}
+              alt={documentName}
+              className="object-contain rounded-lg shadow-lg transition-transform duration-200"
+              style={{ 
+                transform: `scale(${zoomLevel / 100})`,
+                transformOrigin: 'center center'
+              }}
+              onLoad={handleLoad}
+              onError={handleError}
+            />
+          </div>
+          
+          {/* Zoom controls */}
+          {!isLoading && !hasError && (
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20">
+              <div className="flex items-center gap-2 bg-background/90 backdrop-blur-sm border rounded-lg shadow-lg px-3 py-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleZoomOut}
+                  disabled={zoomLevel <= ZOOM_MIN}
+                  title="Zoom arrière (-)"
+                >
+                  <ZoomOut className="h-4 w-4" />
+                </Button>
+                
+                <span className="text-sm font-medium w-12 text-center tabular-nums">
+                  {zoomLevel}%
+                </span>
+                
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleZoomIn}
+                  disabled={zoomLevel >= ZOOM_MAX}
+                  title="Zoom avant (+)"
+                >
+                  <ZoomIn className="h-4 w-4" />
+                </Button>
+                
+                <Separator orientation="vertical" className="h-5" />
+                
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleResetZoom}
+                  disabled={zoomLevel === 100}
+                  title="Réinitialiser le zoom (0)"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       );
     }
