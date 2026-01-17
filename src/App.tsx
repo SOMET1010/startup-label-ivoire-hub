@@ -20,8 +20,7 @@ import Accompagnement from "./pages/Accompagnement";
 import Investisseurs from "./pages/Investisseurs";
 import EntreprisesIA from "./pages/EntreprisesIA";
 import EntrepriseIADetail from "./pages/EntrepriseIADetail";
-import Inscription from "./pages/Inscription";
-import Connexion from "./pages/Connexion";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import SuiviCandidature from "./pages/SuiviCandidature";
 import FAQ from "./pages/FAQ";
@@ -56,9 +55,10 @@ const App = () => (
           <Route path="/faq" element={<FAQ />} />
           <Route path="/actualites" element={<Actualites />} />
           
-          {/* Auth routes */}
-          <Route path="/inscription" element={<Inscription />} />
-          <Route path="/connexion" element={<Connexion />} />
+          {/* Auth route */}
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/connexion" element={<Auth />} />
+          <Route path="/inscription" element={<Auth />} />
           
           {/* Startup routes (protected) */}
           <Route 
