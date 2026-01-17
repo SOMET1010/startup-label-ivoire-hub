@@ -126,6 +126,69 @@ export type Database = {
         }
         Relationships: []
       }
+      evaluations: {
+        Row: {
+          application_id: string
+          business_model_comment: string | null
+          business_model_score: number | null
+          created_at: string
+          evaluator_id: string
+          general_comment: string | null
+          id: string
+          impact_comment: string | null
+          impact_score: number | null
+          innovation_comment: string | null
+          innovation_score: number | null
+          is_submitted: boolean | null
+          recommendation: string | null
+          submitted_at: string | null
+          team_comment: string | null
+          team_score: number | null
+          total_score: number | null
+          updated_at: string
+        }
+        Insert: {
+          application_id: string
+          business_model_comment?: string | null
+          business_model_score?: number | null
+          created_at?: string
+          evaluator_id: string
+          general_comment?: string | null
+          id?: string
+          impact_comment?: string | null
+          impact_score?: number | null
+          innovation_comment?: string | null
+          innovation_score?: number | null
+          is_submitted?: boolean | null
+          recommendation?: string | null
+          submitted_at?: string | null
+          team_comment?: string | null
+          team_score?: number | null
+          total_score?: number | null
+          updated_at?: string
+        }
+        Update: {
+          application_id?: string
+          business_model_comment?: string | null
+          business_model_score?: number | null
+          created_at?: string
+          evaluator_id?: string
+          general_comment?: string | null
+          id?: string
+          impact_comment?: string | null
+          impact_score?: number | null
+          innovation_comment?: string | null
+          innovation_score?: number | null
+          is_submitted?: boolean | null
+          recommendation?: string | null
+          submitted_at?: string | null
+          team_comment?: string | null
+          team_score?: number | null
+          total_score?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       news: {
         Row: {
           author_id: string | null
