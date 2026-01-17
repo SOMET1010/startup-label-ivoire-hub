@@ -1,446 +1,565 @@
-
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { ClipboardCheck } from "lucide-react";
+import { ClipboardCheck, Loader2 } from "lucide-react";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+
+const startupFormSchema = z.object({
+  name: z.string().min(2, "Le nom doit contenir au moins 2 caractères").max(100, "Le nom ne peut pas dépasser 100 caractères"),
+  description: z.string().min(50, "La description doit contenir au moins 50 caractères").max(2000, "La description ne peut pas dépasser 2000 caractères"),
+  sector: z.string().min(1, "Veuillez sélectionner un secteur"),
+  website: z.string().url("URL invalide").or(z.literal("")).optional(),
+  stage: z.string().min(1, "Veuillez sélectionner un stade"),
+  team_size: z.coerce.number().min(1, "Minimum 1 employé").max(10000, "Maximum 10000 employés"),
+  founded_date: z.string().optional(),
+  terms_accepted: z.boolean().refine(val => val === true, "Vous devez accepter les conditions"),
+});
+
+type StartupFormData = z.infer<typeof startupFormSchema>;
+
+const SECTORS = [
+  { value: "fintech", label: "FinTech" },
+  { value: "edtech", label: "EdTech" },
+  { value: "healthtech", label: "HealthTech" },
+  { value: "agritech", label: "AgriTech" },
+  { value: "ecommerce", label: "E-commerce" },
+  { value: "mobility", label: "Mobilité" },
+  { value: "cleantech", label: "CleanTech" },
+  { value: "proptech", label: "PropTech" },
+  { value: "other", label: "Autre" },
+];
+
+const STAGES = [
+  { value: "idea", label: "Idéation" },
+  { value: "mvp", label: "MVP" },
+  { value: "early", label: "Early Stage" },
+  { value: "growth", label: "Growth" },
+  { value: "scale", label: "Scale-up" },
+];
 
 const Postuler = () => {
+  const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [trackingId, setTrackingId] = useState("");
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+
+  const form = useForm<StartupFormData>({
+    resolver: zodResolver(startupFormSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      sector: "",
+      website: "",
+      stage: "",
+      team_size: 1,
+      founded_date: "",
+      terms_accepted: false,
+    },
+  });
+
+  const handleSubmit = async (data: StartupFormData) => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Connexion requise",
+        description: "Vous devez être connecté pour soumettre une candidature.",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    if (!supabase) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Service non disponible. Veuillez réessayer plus tard.",
+      });
+      return;
+    }
+
     setIsLoading(true);
-    
-    // Simuler API call
-    setTimeout(() => {
-      setIsLoading(false);
-      setTrackingId("LSN-2025-0012");
+
+    try {
+      // Create startup record
+      const { data: startupData, error: startupError } = await supabase
+        .from("startups")
+        .insert({
+          user_id: user.id,
+          name: data.name.trim(),
+          description: data.description.trim(),
+          sector: data.sector,
+          website: data.website?.trim() || null,
+          stage: data.stage,
+          team_size: data.team_size,
+          founded_date: data.founded_date || null,
+          status: "submitted",
+        })
+        .select()
+        .single();
+
+      if (startupError) throw startupError;
+
+      // Create application record
+      const { data: applicationData, error: applicationError } = await supabase
+        .from("applications")
+        .insert({
+          user_id: user.id,
+          startup_id: startupData.id,
+          status: "pending",
+          submitted_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (applicationError) throw applicationError;
+
+      // Generate tracking ID from application ID
+      const shortId = applicationData.id.slice(0, 8).toUpperCase();
+      setTrackingId(`LSN-${new Date().getFullYear()}-${shortId}`);
       setShowConfirmation(true);
+
       toast({
         title: "Candidature soumise avec succès",
         description: "Votre dossier a été transmis au Comité de Labellisation pour examen.",
       });
-    }, 2000);
+    } catch (error: any) {
+      console.error("Submission error:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur de soumission",
+        description: error.message || "Une erreur est survenue lors de la soumission.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
-  
-  const nextStep = () => {
-    setCurrentStep(currentStep + 1);
-    window.scrollTo(0, 0);
+
+  const nextStep = async () => {
+    let fieldsToValidate: (keyof StartupFormData)[] = [];
+    
+    if (currentStep === 1) {
+      fieldsToValidate = ["name", "sector", "website", "team_size", "founded_date"];
+    } else if (currentStep === 2) {
+      fieldsToValidate = ["description", "stage"];
+    }
+
+    const isValid = await form.trigger(fieldsToValidate);
+    if (isValid) {
+      setCurrentStep(currentStep + 1);
+      window.scrollTo(0, 0);
+    }
   };
-  
+
   const prevStep = () => {
     setCurrentStep(currentStep - 1);
     window.scrollTo(0, 0);
   };
-  
+
+  // Show loading state while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow py-12 bg-muted/30 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Redirect to auth if not logged in
+  if (!user) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow py-12 bg-muted/30">
+          <div className="container mx-auto px-4">
+            <div className="max-w-md mx-auto text-center bg-card rounded-xl shadow-sm p-8">
+              <h1 className="text-2xl font-bold mb-4">Connexion requise</h1>
+              <p className="text-muted-foreground mb-6">
+                Vous devez être connecté pour soumettre une candidature au Label Startup Numérique.
+              </p>
+              <Button asChild>
+                <Link to="/auth">Se connecter</Link>
+              </Button>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  const formValues = form.watch();
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-grow py-12 bg-gray-50">
+      <main className="flex-grow py-12 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold mb-2">Demande de labellisation</h1>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 Complétez ce formulaire pour soumettre votre candidature au Label Startup numérique
               </p>
             </div>
-            
+
             {/* Progress bar */}
             <div className="mb-8">
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div 
-                  className="bg-gradient-to-r from-ivoire-orange to-ivoire-green h-2.5 rounded-full" 
-                  style={{ width: `${(currentStep / 4) * 100}%` }}
+              <div className="w-full bg-muted rounded-full h-2.5">
+                <div
+                  className="bg-gradient-to-r from-primary to-accent h-2.5 rounded-full transition-all duration-300"
+                  style={{ width: `${(currentStep / 3) * 100}%` }}
                 ></div>
               </div>
               <div className="flex justify-between mt-2 text-sm">
-                <span className={currentStep >= 1 ? "text-ivoire-orange font-medium" : "text-gray-500"}>Informations générales</span>
-                <span className={currentStep >= 2 ? "text-ivoire-orange font-medium" : "text-gray-500"}>Équipe & Innovation</span>
-                <span className={currentStep >= 3 ? "text-ivoire-orange font-medium" : "text-gray-500"}>Documents</span>
-                <span className={currentStep >= 4 ? "text-ivoire-orange font-medium" : "text-gray-500"}>Validation</span>
+                <span className={currentStep >= 1 ? "text-primary font-medium" : "text-muted-foreground"}>
+                  Informations générales
+                </span>
+                <span className={currentStep >= 2 ? "text-primary font-medium" : "text-muted-foreground"}>
+                  Description & Stade
+                </span>
+                <span className={currentStep >= 3 ? "text-primary font-medium" : "text-muted-foreground"}>
+                  Validation
+                </span>
               </div>
             </div>
-            
-            <div className="bg-white rounded-xl shadow-sm p-8">
-              {currentStep === 1 && (
-                <div>
-                  <h2 className="text-xl font-bold mb-6">Informations générales de la startup</h2>
-                  
-                  <div className="space-y-4">
+
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleSubmit)}>
+                <div className="bg-card rounded-xl shadow-sm p-8">
+                  {currentStep === 1 && (
                     <div>
-                      <Label htmlFor="companyName">Nom de la startup</Label>
-                      <Input id="companyName" type="text" required />
+                      <h2 className="text-xl font-bold mb-6">Informations générales de la startup</h2>
+
+                      <div className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Nom de la startup *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Ex: TechInnovate CI" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="sector"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Secteur d'activité *</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Sélectionner" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {SECTORS.map((sector) => (
+                                      <SelectItem key={sector.value} value={sector.value}>
+                                        {sector.label}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="founded_date"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Date de création</FormLabel>
+                                <FormControl>
+                                  <Input type="date" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="website"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Site web</FormLabel>
+                                <FormControl>
+                                  <Input type="url" placeholder="https://example.com" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="team_size"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Nombre d'employés *</FormLabel>
+                                <FormControl>
+                                  <Input type="number" min="1" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="mt-8 flex justify-end">
+                        <Button type="button" onClick={nextStep}>
+                          Étape suivante
+                        </Button>
+                      </div>
                     </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="legalStatus">Forme juridique</Label>
-                        <Select>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Sélectionner" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="sarl">SARL</SelectItem>
-                            <SelectItem value="sa">SA</SelectItem>
-                            <SelectItem value="sas">SAS</SelectItem>
-                            <SelectItem value="ei">Entreprise Individuelle</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="creationDate">Date de création</Label>
-                        <Input id="creationDate" type="date" required />
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="rccm">Numéro de RCCM</Label>
-                        <Input id="rccm" type="text" required />
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="taxId">Numéro de compte contribuable</Label>
-                        <Input id="taxId" type="text" required />
-                      </div>
-                    </div>
-                    
+                  )}
+
+                  {currentStep === 2 && (
                     <div>
-                      <Label htmlFor="sector">Secteur d'activité</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="fintech">FinTech</SelectItem>
-                          <SelectItem value="edtech">EdTech</SelectItem>
-                          <SelectItem value="healthtech">HealthTech</SelectItem>
-                          <SelectItem value="agritech">AgriTech</SelectItem>
-                          <SelectItem value="ecommerce">E-commerce</SelectItem>
-                          <SelectItem value="mobility">Mobilité</SelectItem>
-                          <SelectItem value="other">Autre</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <h2 className="text-xl font-bold mb-6">Description & Stade de développement</h2>
+
+                      <div className="space-y-6">
+                        <FormField
+                          control={form.control}
+                          name="description"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Description du projet *</FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  rows={6}
+                                  placeholder="Décrivez votre projet, votre proposition de valeur, votre marché cible et ce qui vous différencie de la concurrence..."
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                              <p className="text-xs text-muted-foreground">
+                                {field.value.length}/2000 caractères (minimum 50)
+                              </p>
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="stage"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Stade de développement *</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Sélectionner le stade" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {STAGES.map((stage) => (
+                                    <SelectItem key={stage.value} value={stage.value}>
+                                      {stage.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <div className="mt-8 flex justify-between">
+                        <Button type="button" variant="outline" onClick={prevStep}>
+                          Étape précédente
+                        </Button>
+
+                        <Button type="button" onClick={nextStep}>
+                          Étape suivante
+                        </Button>
+                      </div>
                     </div>
-                    
+                  )}
+
+                  {currentStep === 3 && (
                     <div>
-                      <Label htmlFor="address">Adresse du siège social</Label>
-                      <Textarea id="address" rows={3} required />
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="website">Site web</Label>
-                        <Input id="website" type="url" placeholder="https://" />
+                      <h2 className="text-xl font-bold mb-6">Révision et soumission</h2>
+
+                      <div className="space-y-6">
+                        <div className="bg-muted/50 p-4 rounded-lg">
+                          <h3 className="font-bold mb-2">Récapitulatif de votre candidature</h3>
+                          <p className="text-muted-foreground mb-4">
+                            Veuillez vérifier attentivement les informations renseignées avant de soumettre votre candidature.
+                          </p>
+
+                          <Tabs defaultValue="general">
+                            <TabsList className="mb-4">
+                              <TabsTrigger value="general">Informations générales</TabsTrigger>
+                              <TabsTrigger value="description">Description</TabsTrigger>
+                            </TabsList>
+
+                            <TabsContent value="general">
+                              <div className="text-sm space-y-2">
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div className="font-medium">Nom de la startup :</div>
+                                  <div>{formValues.name || "-"}</div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div className="font-medium">Secteur d'activité :</div>
+                                  <div>{SECTORS.find(s => s.value === formValues.sector)?.label || "-"}</div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div className="font-medium">Date de création :</div>
+                                  <div>{formValues.founded_date || "-"}</div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div className="font-medium">Site web :</div>
+                                  <div>{formValues.website || "-"}</div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div className="font-medium">Nombre d'employés :</div>
+                                  <div>{formValues.team_size}</div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div className="font-medium">Stade de développement :</div>
+                                  <div>{STAGES.find(s => s.value === formValues.stage)?.label || "-"}</div>
+                                </div>
+                              </div>
+                            </TabsContent>
+
+                            <TabsContent value="description">
+                              <div className="text-sm">
+                                <div className="font-medium mb-2">Description du projet :</div>
+                                <div className="text-muted-foreground whitespace-pre-wrap">
+                                  {formValues.description || "-"}
+                                </div>
+                              </div>
+                            </TabsContent>
+                          </Tabs>
+                        </div>
+
+                        <FormField
+                          control={form.control}
+                          name="terms_accepted"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                              <div className="space-y-1 leading-none">
+                                <FormLabel>
+                                  J'atteste que les informations fournies sont exactes et j'accepte les{" "}
+                                  <Link to="/criteres" className="text-primary hover:underline">
+                                    critères d'éligibilité
+                                  </Link>{" "}
+                                  du Label Startup Numérique. *
+                                </FormLabel>
+                                <FormMessage />
+                              </div>
+                            </FormItem>
+                          )}
+                        />
                       </div>
-                      
-                      <div>
-                        <Label htmlFor="employees">Nombre d'employés</Label>
-                        <Input id="employees" type="number" min="1" required />
+
+                      <div className="mt-8 flex justify-between">
+                        <Button type="button" variant="outline" onClick={prevStep}>
+                          Étape précédente
+                        </Button>
+
+                        <Button type="submit" disabled={isLoading}>
+                          {isLoading ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Soumission en cours...
+                            </>
+                          ) : (
+                            "Soumettre ma candidature"
+                          )}
+                        </Button>
                       </div>
                     </div>
-                  </div>
-                  
-                  <div className="mt-8 flex justify-end">
-                    <Button onClick={nextStep}>
-                      Étape suivante
-                    </Button>
-                  </div>
+                  )}
                 </div>
-              )}
-              
-              {currentStep === 2 && (
-                <div>
-                  <h2 className="text-xl font-bold mb-6">Équipe & Innovation</h2>
-                  
-                  <div className="space-y-6">
-                    <div>
-                      <Label htmlFor="founderInfo" className="mb-2 block">Informations sur les fondateurs</Label>
-                      <Textarea 
-                        id="founderInfo" 
-                        rows={4} 
-                        placeholder="Présentez brièvement les fondateurs, leurs parcours et compétences."
-                        required 
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="projectDesc" className="mb-2 block">Description du projet</Label>
-                      <Textarea 
-                        id="projectDesc" 
-                        rows={4} 
-                        placeholder="Décrivez votre projet ou produit en détail."
-                        required 
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="innovation" className="mb-2 block">Caractère innovant</Label>
-                      <Textarea 
-                        id="innovation" 
-                        rows={4} 
-                        placeholder="En quoi votre solution est-elle innovante ? Quelle est votre proposition de valeur ?"
-                        required 
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="businessModel" className="mb-2 block">Modèle économique</Label>
-                      <Textarea 
-                        id="businessModel" 
-                        rows={4} 
-                        placeholder="Décrivez votre modèle économique et comment vous générez ou prévoyez de générer des revenus."
-                        required 
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="growth" className="mb-2 block">Potentiel de croissance</Label>
-                      <Textarea 
-                        id="growth" 
-                        rows={4} 
-                        placeholder="Décrivez le potentiel de croissance de votre startup et votre stratégie de développement."
-                        required 
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="mt-8 flex justify-between">
-                    <Button variant="outline" onClick={prevStep}>
-                      Étape précédente
-                    </Button>
-                    
-                    <Button onClick={nextStep}>
-                      Étape suivante
-                    </Button>
-                  </div>
-                </div>
-              )}
-              
-              {currentStep === 3 && (
-                <div>
-                  <h2 className="text-xl font-bold mb-6">Documents à fournir</h2>
-                  
-                  <div className="space-y-6">
-                    <div>
-                      <Label htmlFor="rccmDoc" className="mb-2 block">Registre de Commerce (RCCM)</Label>
-                      <Input id="rccmDoc" type="file" className="cursor-pointer" required />
-                      <p className="text-xs text-gray-500 mt-1">Format PDF, max 5MB</p>
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="taxDoc" className="mb-2 block">Déclaration fiscale d'existence</Label>
-                      <Input id="taxDoc" type="file" className="cursor-pointer" required />
-                      <p className="text-xs text-gray-500 mt-1">Format PDF, max 5MB</p>
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="statutesDoc" className="mb-2 block">Statuts de l'entreprise</Label>
-                      <Input id="statutesDoc" type="file" className="cursor-pointer" required />
-                      <p className="text-xs text-gray-500 mt-1">Format PDF, max 5MB</p>
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="businessPlanDoc" className="mb-2 block">Business plan</Label>
-                      <Input id="businessPlanDoc" type="file" className="cursor-pointer" required />
-                      <p className="text-xs text-gray-500 mt-1">Format PDF, max 10MB</p>
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="cvDoc" className="mb-2 block">CV des fondateurs</Label>
-                      <Input id="cvDoc" type="file" className="cursor-pointer" required />
-                      <p className="text-xs text-gray-500 mt-1">Format PDF, max 10MB</p>
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="pitchDoc" className="mb-2 block">Présentation (pitch deck)</Label>
-                      <Input id="pitchDoc" type="file" className="cursor-pointer" required />
-                      <p className="text-xs text-gray-500 mt-1">Format PDF ou PPT, max 15MB</p>
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="otherDocs" className="mb-2 block">Autres documents (facultatif)</Label>
-                      <Input id="otherDocs" type="file" className="cursor-pointer" multiple />
-                      <p className="text-xs text-gray-500 mt-1">Format PDF, max 20MB au total</p>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-8 flex justify-between">
-                    <Button variant="outline" onClick={prevStep}>
-                      Étape précédente
-                    </Button>
-                    
-                    <Button onClick={nextStep}>
-                      Étape suivante
-                    </Button>
-                  </div>
-                </div>
-              )}
-              
-              {currentStep === 4 && (
-                <div>
-                  <h2 className="text-xl font-bold mb-6">Révision et soumission</h2>
-                  
-                  <div className="space-y-6">
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <h3 className="font-bold mb-2">Récapitulatif de votre candidature</h3>
-                      <p className="text-gray-600 mb-4">
-                        Veuillez vérifier attentivement les informations renseignées avant de soumettre votre candidature.
-                      </p>
-                      
-                      <Tabs defaultValue="general">
-                        <TabsList className="mb-4">
-                          <TabsTrigger value="general">Informations générales</TabsTrigger>
-                          <TabsTrigger value="team">Équipe & Innovation</TabsTrigger>
-                          <TabsTrigger value="docs">Documents</TabsTrigger>
-                        </TabsList>
-                        
-                        <TabsContent value="general">
-                          <div className="text-sm">
-                            <div className="grid grid-cols-2 gap-2 mb-2">
-                              <div className="font-medium">Nom de la startup :</div>
-                              <div>Demo Startup</div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2 mb-2">
-                              <div className="font-medium">Forme juridique :</div>
-                              <div>SARL</div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2 mb-2">
-                              <div className="font-medium">Date de création :</div>
-                              <div>01/01/2023</div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2 mb-2">
-                              <div className="font-medium">Secteur d'activité :</div>
-                              <div>FinTech</div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2 mb-2">
-                              <div className="font-medium">Nombre d'employés :</div>
-                              <div>12</div>
-                            </div>
-                          </div>
-                        </TabsContent>
-                        
-                        <TabsContent value="team">
-                          <div className="text-sm">
-                            <div className="mb-2">
-                              <div className="font-medium mb-1">Informations sur les fondateurs :</div>
-                              <div className="text-gray-600">John Doe - CEO, expertise en finance...</div>
-                            </div>
-                            <div className="mb-2">
-                              <div className="font-medium mb-1">Description du projet :</div>
-                              <div className="text-gray-600">Solution mobile de paiement pour les PME...</div>
-                            </div>
-                            <div className="mb-2">
-                              <div className="font-medium mb-1">Caractère innovant :</div>
-                              <div className="text-gray-600">Utilisation de l'IA pour l'analyse prédictive...</div>
-                            </div>
-                          </div>
-                        </TabsContent>
-                        
-                        <TabsContent value="docs">
-                          <div className="text-sm">
-                            <ul className="space-y-1 list-disc list-inside text-gray-600">
-                              <li>Registre de Commerce (RCCM) - rccm.pdf</li>
-                              <li>Déclaration fiscale d'existence - dfe.pdf</li>
-                              <li>Statuts de l'entreprise - statuts.pdf</li>
-                              <li>Business plan - bp.pdf</li>
-                              <li>CV des fondateurs - cv.pdf</li>
-                              <li>Présentation (pitch deck) - pitch.pdf</li>
-                            </ul>
-                          </div>
-                        </TabsContent>
-                      </Tabs>
-                    </div>
-                    
-                    <div className="flex items-start space-x-2">
-                      <Checkbox id="terms" required />
-                      <div className="grid gap-1.5 leading-none">
-                        <Label htmlFor="terms" className="text-sm font-normal">
-                          Je certifie que les informations fournies sont exactes et complètes.
-                        </Label>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-start space-x-2">
-                      <Checkbox id="privacy" required />
-                      <div className="grid gap-1.5 leading-none">
-                        <Label htmlFor="privacy" className="text-sm font-normal">
-                          J'accepte que mes données soient traitées conformément à la politique de confidentialité.
-                        </Label>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-8 flex justify-between">
-                    <Button variant="outline" onClick={prevStep}>
-                      Étape précédente
-                    </Button>
-                    
-                    <Button onClick={handleSubmit} disabled={isLoading}>
-                      {isLoading ? "Soumission en cours..." : "Soumettre ma candidature"}
-                    </Button>
-                  </div>
-                </div>
-              )}
+              </form>
+            </Form>
+
+            <div className="mt-8 p-4 bg-accent/10 border border-accent/20 rounded-lg">
+              <h3 className="font-bold mb-2">Besoin d'aide ?</h3>
+              <p className="text-sm text-muted-foreground mb-2">
+                Notre équipe est disponible pour vous accompagner dans votre démarche de labellisation.
+              </p>
+              <Link to="/contact" className="text-sm text-primary hover:underline">
+                Contactez-nous →
+              </Link>
             </div>
           </div>
         </div>
       </main>
-      
+
+      {/* Confirmation Dialog */}
       <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-center">Candidature envoyée!</DialogTitle>
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <ClipboardCheck className="h-6 w-6 text-primary" />
+            </div>
+            <DialogTitle className="text-center">Candidature soumise !</DialogTitle>
             <DialogDescription className="text-center">
-              Votre dossier a été soumis avec succès
+              Votre dossier a été transmis avec succès au Comité de Labellisation.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex flex-col items-center py-4">
-            <div className="bg-green-50 p-3 rounded-full mb-4">
-              <ClipboardCheck className="h-10 w-10 text-green-600" />
-            </div>
-            <p className="text-center mb-2">
-              Votre numéro de suivi est:
-            </p>
-            <p className="font-bold text-xl mb-4 text-center">
-              {trackingId}
-            </p>
-            <p className="text-sm text-gray-500 text-center mb-4">
-              Conservez ce numéro pour suivre l'avancement de votre dossier. Nous avons également envoyé un email de confirmation à l'adresse spécifiée.
-            </p>
+
+          <div className="bg-muted p-4 rounded-lg text-center">
+            <p className="text-sm text-muted-foreground mb-1">Numéro de suivi</p>
+            <p className="text-lg font-bold font-mono">{trackingId}</p>
           </div>
-          <DialogFooter className="flex flex-col sm:flex-row gap-2">
-            <Button 
-              variant="outline" 
-              className="sm:flex-1"
-              onClick={() => setShowConfirmation(false)}
-            >
-              Fermer
+
+          <p className="text-sm text-muted-foreground text-center">
+            Conservez ce numéro pour suivre l'avancement de votre candidature. Vous recevrez un email de confirmation.
+          </p>
+
+          <DialogFooter className="flex-col gap-2 sm:flex-row">
+            <Button variant="outline" asChild className="w-full">
+              <Link to="/suivi-candidature">Suivre ma candidature</Link>
             </Button>
-            <Link to="/suivi-candidature" className="sm:flex-1">
-              <Button className="w-full">
-                Suivre mon dossier
-              </Button>
-            </Link>
+            <Button asChild className="w-full">
+              <Link to="/startup/dashboard">Accéder à mon espace</Link>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
+
       <Footer />
     </div>
   );
