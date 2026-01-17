@@ -28,6 +28,8 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   FileCheck,
   Users,
@@ -51,6 +53,17 @@ import { fr } from "date-fns/locale";
 import { useAuth } from "@/contexts/AuthContext";
 import EvaluationList from "@/components/evaluation/EvaluationList";
 import ApplicationFilters from "@/components/admin/ApplicationFilters";
+import DocumentViewer from "@/components/admin/DocumentViewer";
+
+interface StartupDocuments {
+  doc_rccm: string | null;
+  doc_tax: string | null;
+  doc_statutes: string | null;
+  doc_business_plan: string | null;
+  doc_cv: string | null;
+  doc_pitch: string | null;
+  doc_other: string[] | null;
+}
 
 interface ApplicationWithStartup {
   id: string;
@@ -67,7 +80,7 @@ interface ApplicationWithStartup {
     description: string | null;
     website: string | null;
     team_size: number | null;
-  };
+  } & StartupDocuments;
   user: {
     email: string | null;
     full_name: string | null;
@@ -166,11 +179,11 @@ export default function AdminDashboard() {
 
       if (appsError) throw appsError;
 
-      // Fetch startups
+      // Fetch startups with documents
       const startupIds = appsData?.map(a => a.startup_id).filter(Boolean) || [];
       const { data: startupsData } = await supabase
         .from("startups")
-        .select("id, name, sector, stage, description, website, team_size")
+        .select("id, name, sector, stage, description, website, team_size, doc_rccm, doc_tax, doc_statutes, doc_business_plan, doc_cv, doc_pitch, doc_other")
         .in("id", startupIds);
 
       // Fetch profiles
@@ -214,7 +227,22 @@ export default function AdminDashboard() {
           notes: app.notes,
           created_at: app.created_at,
           averageScore,
-          startup: startup || { id: "", name: "Startup inconnue", sector: null, stage: null, description: null, website: null, team_size: null },
+          startup: startup || { 
+            id: "", 
+            name: "Startup inconnue", 
+            sector: null, 
+            stage: null, 
+            description: null, 
+            website: null, 
+            team_size: null,
+            doc_rccm: null,
+            doc_tax: null,
+            doc_statutes: null,
+            doc_business_plan: null,
+            doc_cv: null,
+            doc_pitch: null,
+            doc_other: null,
+          },
           user: { email: profile?.email || null, full_name: profile?.full_name || null },
         };
       });
@@ -794,84 +822,117 @@ export default function AdminDashboard() {
 
       {/* Details Dialog */}
       <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-4xl max-h-[90vh]">
           <DialogHeader>
             <DialogTitle>Détails de la candidature</DialogTitle>
           </DialogHeader>
-          {selectedApplication && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-muted-foreground">Startup</Label>
-                  <p className="font-medium">{selectedApplication.startup.name}</p>
+          <ScrollArea className="max-h-[calc(90vh-140px)]">
+            {selectedApplication && (
+              <div className="space-y-6 pr-4">
+                {/* Startup Info Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Informations de la startup</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label className="text-muted-foreground">Startup</Label>
+                      <p className="font-medium">{selectedApplication.startup.name}</p>
+                    </div>
+                    <div>
+                      <Label className="text-muted-foreground">Statut</Label>
+                      <p>
+                        <Badge variant={STATUS_LABELS[selectedApplication.status]?.variant || "secondary"}>
+                          {STATUS_LABELS[selectedApplication.status]?.label || selectedApplication.status}
+                        </Badge>
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-muted-foreground">Score moyen</Label>
+                      <p>{selectedApplication.averageScore !== null ? `${selectedApplication.averageScore}/100` : "-"}</p>
+                    </div>
+                    <div>
+                      <Label className="text-muted-foreground">Secteur</Label>
+                      <p>{SECTOR_LABELS[selectedApplication.startup.sector || ""] || selectedApplication.startup.sector || "-"}</p>
+                    </div>
+                    <div>
+                      <Label className="text-muted-foreground">Stade</Label>
+                      <p>{STAGE_LABELS[selectedApplication.startup.stage || ""] || selectedApplication.startup.stage || "-"}</p>
+                    </div>
+                    <div>
+                      <Label className="text-muted-foreground">Équipe</Label>
+                      <p>{selectedApplication.startup.team_size || "-"} employés</p>
+                    </div>
+                    <div className="col-span-2 md:col-span-3">
+                      <Label className="text-muted-foreground">Site web</Label>
+                      <p>
+                        {selectedApplication.startup.website ? (
+                          <a
+                            href={selectedApplication.startup.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline"
+                          >
+                            {selectedApplication.startup.website}
+                          </a>
+                        ) : (
+                          "-"
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Description</Label>
+                    <p className="text-sm mt-1 whitespace-pre-wrap">
+                      {selectedApplication.startup.description || "Aucune description fournie."}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <Label className="text-muted-foreground">Statut</Label>
-                  <p>
-                    <Badge variant={STATUS_LABELS[selectedApplication.status]?.variant || "secondary"}>
-                      {STATUS_LABELS[selectedApplication.status]?.label || selectedApplication.status}
-                    </Badge>
-                  </p>
+
+                <Separator />
+
+                {/* Candidate Info Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Informations du candidat</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-muted-foreground">Candidat</Label>
+                      <p>{selectedApplication.user.full_name || "-"}</p>
+                      <p className="text-sm text-muted-foreground">{selectedApplication.user.email}</p>
+                    </div>
+                    <div>
+                      <Label className="text-muted-foreground">Date de soumission</Label>
+                      <p>
+                        {selectedApplication.submitted_at
+                          ? format(new Date(selectedApplication.submitted_at), "dd MMMM yyyy 'à' HH:mm", { locale: fr })
+                          : "-"}
+                      </p>
+                    </div>
+                  </div>
+                  {selectedApplication.notes && (
+                    <div>
+                      <Label className="text-muted-foreground">Notes de l'évaluateur</Label>
+                      <p className="text-sm mt-1">{selectedApplication.notes}</p>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <Label className="text-muted-foreground">Secteur</Label>
-                  <p>{SECTOR_LABELS[selectedApplication.startup.sector || ""] || selectedApplication.startup.sector || "-"}</p>
-                </div>
-                <div>
-                  <Label className="text-muted-foreground">Stade</Label>
-                  <p>{STAGE_LABELS[selectedApplication.startup.stage || ""] || selectedApplication.startup.stage || "-"}</p>
-                </div>
-                <div>
-                  <Label className="text-muted-foreground">Équipe</Label>
-                  <p>{selectedApplication.startup.team_size || "-"} employés</p>
-                </div>
-                <div>
-                  <Label className="text-muted-foreground">Site web</Label>
-                  <p>
-                    {selectedApplication.startup.website ? (
-                      <a
-                        href={selectedApplication.startup.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        {selectedApplication.startup.website}
-                      </a>
-                    ) : (
-                      "-"
-                    )}
-                  </p>
-                </div>
+
+                <Separator />
+
+                {/* Documents Section */}
+                <DocumentViewer
+                  documents={{
+                    doc_rccm: selectedApplication.startup.doc_rccm,
+                    doc_tax: selectedApplication.startup.doc_tax,
+                    doc_statutes: selectedApplication.startup.doc_statutes,
+                    doc_business_plan: selectedApplication.startup.doc_business_plan,
+                    doc_cv: selectedApplication.startup.doc_cv,
+                    doc_pitch: selectedApplication.startup.doc_pitch,
+                    doc_other: selectedApplication.startup.doc_other,
+                  }}
+                  startupName={selectedApplication.startup.name}
+                />
               </div>
-              <div>
-                <Label className="text-muted-foreground">Description</Label>
-                <p className="text-sm mt-1 whitespace-pre-wrap">
-                  {selectedApplication.startup.description || "Aucune description fournie."}
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-muted-foreground">Candidat</Label>
-                  <p>{selectedApplication.user.full_name || "-"}</p>
-                  <p className="text-sm text-muted-foreground">{selectedApplication.user.email}</p>
-                </div>
-                <div>
-                  <Label className="text-muted-foreground">Date de soumission</Label>
-                  <p>
-                    {selectedApplication.submitted_at
-                      ? format(new Date(selectedApplication.submitted_at), "dd MMMM yyyy 'à' HH:mm", { locale: fr })
-                      : "-"}
-                  </p>
-                </div>
-              </div>
-              {selectedApplication.notes && (
-                <div>
-                  <Label className="text-muted-foreground">Notes de l'évaluateur</Label>
-                  <p className="text-sm mt-1">{selectedApplication.notes}</p>
-                </div>
-              )}
-            </div>
-          )}
+            )}
+          </ScrollArea>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDetailsDialog(false)}>
               Fermer
