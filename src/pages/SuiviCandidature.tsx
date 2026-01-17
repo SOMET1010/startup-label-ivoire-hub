@@ -1,417 +1,613 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter } from "@/components/ui/drawer";
 import { Progress } from "@/components/ui/progress";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { ClipboardCheck, FileCheck, Clock, AlertTriangle, CheckCircle, FileText, Search } from "lucide-react";
+import { 
+  Clock, 
+  CheckCircle, 
+  XCircle, 
+  FileText, 
+  Loader2, 
+  RefreshCw,
+  Building,
+  Calendar,
+  Users,
+  Globe,
+  MessageSquare,
+  AlertCircle
+} from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
-const formSchema = z.object({
-  trackingId: z.string().min(8, "L'identifiant doit contenir au moins 8 caractères"),
-  email: z.string().email("Veuillez saisir une adresse email valide")
-});
+interface Application {
+  id: string;
+  status: string;
+  submitted_at: string | null;
+  notes: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+}
 
-type FormValues = z.infer<typeof formSchema>;
+interface Startup {
+  id: string;
+  name: string;
+  description: string | null;
+  sector: string | null;
+  stage: string | null;
+  website: string | null;
+  team_size: number | null;
+  founded_date: string | null;
+  status: string | null;
+}
 
-const mockCandidature = {
-  id: "LSN-2025-0012",
-  companyName: "EcoTech Côte d'Ivoire",
-  submissionDate: "2025-03-15",
-  status: "Évaluation technique",
-  currentStep: 2,
-  steps: [
-    {
-      id: 1,
-      name: "Soumission du dossier",
-      status: "completed",
-      date: "15/03/2025",
-      description: "Dossier soumis et reçu par le comité de labellisation"
-    },
-    {
-      id: 2, 
-      name: "Évaluation technique", 
-      status: "in-progress",
-      date: "20/03/2025",
-      description: "Examen technique et évaluation par les experts du comité"
-    },
-    {
-      id: 3,
-      name: "Entretien", 
-      status: "pending",
-      date: "Prévu le 05/04/2025",
-      description: "Présentation du projet devant le comité"
-    },
-    {
-      id: 4,
-      name: "Décision finale", 
-      status: "pending",
-      date: "Prévue pour le 15/04/2025",
-      description: "Délibération et notification de la décision"
-    }
-  ],
-  comments: [
-    {
-      date: "18/03/2025",
-      author: "Service d'analyse",
-      content: "Documents reçus et validés. Le dossier est complet et passe à l'étape d'évaluation technique."
-    },
-    {
-      date: "22/03/2025",
-      author: "Comité technique",
-      content: "Analyse en cours du business plan et des aspects d'innovation. Un complément d'information pourrait être demandé."
-    }
-  ],
-  documents: [
-    {
-      name: "RCCM",
-      status: "validé",
-      date: "16/03/2025"
-    },
-    {
-      name: "Déclaration fiscale",
-      status: "validé",
-      date: "16/03/2025"
-    },
-    {
-      name: "Business plan",
-      status: "en cours d'analyse",
-      date: "20/03/2025"
-    },
-    {
-      name: "CV des fondateurs",
-      status: "validé",
-      date: "17/03/2025"
-    }
-  ],
-  nextSteps: "L'entretien avec le comité est prévu pour le 05/04/2025. Vous recevrez un email de confirmation avec les détails pratiques 3 jours avant la date."
+interface Comment {
+  id: string;
+  content: string;
+  created_at: string;
+  user_id: string;
+}
+
+interface ApplicationWithDetails {
+  application: Application;
+  startup: Startup;
+  comments: Comment[];
+}
+
+const STATUS_CONFIG: Record<string, { 
+  label: string; 
+  variant: "default" | "secondary" | "destructive" | "outline";
+  step: number;
+  icon: React.ReactNode;
+}> = {
+  pending: { 
+    label: "En attente", 
+    variant: "secondary", 
+    step: 1,
+    icon: <Clock className="h-5 w-5 text-yellow-500" />
+  },
+  under_review: { 
+    label: "En cours d'examen", 
+    variant: "outline", 
+    step: 2,
+    icon: <FileText className="h-5 w-5 text-blue-500" />
+  },
+  approved: { 
+    label: "Approuvée", 
+    variant: "default", 
+    step: 4,
+    icon: <CheckCircle className="h-5 w-5 text-green-500" />
+  },
+  rejected: { 
+    label: "Rejetée", 
+    variant: "destructive", 
+    step: 4,
+    icon: <XCircle className="h-5 w-5 text-red-500" />
+  },
 };
+
+const SECTOR_LABELS: Record<string, string> = {
+  fintech: "FinTech",
+  edtech: "EdTech",
+  healthtech: "HealthTech",
+  agritech: "AgriTech",
+  ecommerce: "E-commerce",
+  mobility: "Mobilité",
+  cleantech: "CleanTech",
+  proptech: "PropTech",
+  other: "Autre",
+};
+
+const STAGE_LABELS: Record<string, string> = {
+  idea: "Idéation",
+  mvp: "MVP",
+  early: "Early Stage",
+  growth: "Growth",
+  scale: "Scale-up",
+};
+
+const PROCESS_STEPS = [
+  { id: 1, name: "Soumission", description: "Dossier soumis au comité" },
+  { id: 2, name: "Examen", description: "Évaluation par les experts" },
+  { id: 3, name: "Décision", description: "Délibération du comité" },
+  { id: 4, name: "Résultat", description: "Notification de la décision" },
+];
 
 const SuiviCandidature = () => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
-  const [candidature, setCandidature] = useState<typeof mockCandidature | null>(null);
-  const [showResults, setShowResults] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [selectedDoc, setSelectedDoc] = useState<string | null>(null);
-  
-  const isMobile = useIsMobile();
-  
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      trackingId: "",
-      email: ""
-    }
-  });
+  const { user, loading: authLoading } = useAuth();
+  const [applications, setApplications] = useState<ApplicationWithDetails[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedApp, setSelectedApp] = useState<ApplicationWithDetails | null>(null);
 
-  const trackCandidature = (values: FormValues) => {
-    setIsLoading(true);
-    
-    // Simuler une requête API
-    setTimeout(() => {
-      setIsLoading(false);
-      if (values.trackingId === "LSN-2025-0012" || values.trackingId === "LSN20250012") {
-        setCandidature(mockCandidature);
-        setShowResults(true);
-        form.reset();
-      } else {
-        toast({
-          title: "Dossier non trouvé",
-          description: "Vérifiez les informations saisies et réessayez.",
-          variant: "destructive"
-        });
+  const fetchApplications = async () => {
+    if (!user || !supabase) return;
+
+    setLoading(true);
+    try {
+      // Fetch user's applications
+      const { data: appsData, error: appsError } = await supabase
+        .from("applications")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (appsError) throw appsError;
+
+      if (!appsData || appsData.length === 0) {
+        setApplications([]);
+        setLoading(false);
+        return;
       }
-    }, 1500);
-  };
-  
-  const getStatusIcon = (status: string) => {
-    switch(status) {
-      case "completed":
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case "in-progress":
-        return <Clock className="h-5 w-5 text-blue-500" />;
-      case "pending":
-        return <Clock className="h-5 w-5 text-gray-400" />;
-      default:
-        return <AlertTriangle className="h-5 w-5 text-yellow-500" />;
+
+      // Fetch startups
+      const startupIds = appsData.map(a => a.startup_id).filter(Boolean);
+      const { data: startupsData } = await supabase
+        .from("startups")
+        .select("*")
+        .in("id", startupIds);
+
+      // Fetch comments for these applications
+      const appIds = appsData.map(a => a.id);
+      const { data: commentsData } = await supabase
+        .from("application_comments")
+        .select("*")
+        .in("application_id", appIds)
+        .order("created_at", { ascending: false });
+
+      // Combine data
+      const applicationsWithDetails: ApplicationWithDetails[] = appsData.map(app => {
+        const startup = startupsData?.find(s => s.id === app.startup_id);
+        const comments = commentsData?.filter(c => c.application_id === app.id) || [];
+        
+        return {
+          application: {
+            id: app.id,
+            status: app.status || "pending",
+            submitted_at: app.submitted_at,
+            notes: app.notes,
+            reviewed_at: app.reviewed_at,
+            created_at: app.created_at,
+          },
+          startup: startup || {
+            id: "",
+            name: "Startup inconnue",
+            description: null,
+            sector: null,
+            stage: null,
+            website: null,
+            team_size: null,
+            founded_date: null,
+            status: null,
+          },
+          comments,
+        };
+      });
+
+      setApplications(applicationsWithDetails);
+      
+      // Auto-select first application if none selected
+      if (!selectedApp && applicationsWithDetails.length > 0) {
+        setSelectedApp(applicationsWithDetails[0]);
+      }
+    } catch (error: any) {
+      console.error("Error fetching applications:", error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de charger vos candidatures.",
+      });
+    } finally {
+      setLoading(false);
     }
   };
-  
-  const getStatusColor = (status: string) => {
-    switch(status) {
-      case "validé":
-        return "bg-green-100 text-green-800";
-      case "en cours d'analyse":
-        return "bg-blue-100 text-blue-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+
+  // Initial fetch
+  useEffect(() => {
+    if (user) {
+      fetchApplications();
     }
+  }, [user]);
+
+  // Real-time subscription
+  useEffect(() => {
+    if (!user || !supabase) return;
+
+    const channel = supabase
+      .channel("application-updates")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "applications",
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          console.log("Application update received:", payload);
+          fetchApplications();
+          
+          if (payload.eventType === "UPDATE") {
+            const newStatus = (payload.new as Application).status;
+            const statusLabel = STATUS_CONFIG[newStatus]?.label || newStatus;
+            toast({
+              title: "Mise à jour de votre candidature",
+              description: `Le statut est passé à : ${statusLabel}`,
+            });
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "application_comments",
+        },
+        (payload) => {
+          console.log("New comment received:", payload);
+          fetchApplications();
+          toast({
+            title: "Nouveau commentaire",
+            description: "Un évaluateur a ajouté un commentaire à votre candidature.",
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
+  const getProgressPercentage = (status: string) => {
+    const step = STATUS_CONFIG[status]?.step || 1;
+    return Math.round((step / 4) * 100);
   };
-  
-  const getProgressPercentage = () => {
-    if (!candidature) return 0;
-    
-    const totalSteps = candidature.steps.length;
-    const completedSteps = candidature.steps.filter(step => step.status === "completed").length;
-    const inProgressStep = candidature.steps.some(step => step.status === "in-progress") ? 0.5 : 0;
-    
-    return Math.round(((completedSteps + inProgressStep) / totalSteps) * 100);
+
+  const getStepStatus = (stepId: number, currentStep: number, isFinal: boolean, isApproved: boolean) => {
+    if (stepId < currentStep) return "completed";
+    if (stepId === currentStep && !isFinal) return "in-progress";
+    if (isFinal && stepId === 4) {
+      return isApproved ? "completed" : "rejected";
+    }
+    return "pending";
   };
-  
-  const viewDocumentDetails = (docName: string) => {
-    setSelectedDoc(docName);
-    setOpen(true);
+
+  const generateTrackingId = (appId: string, createdAt: string) => {
+    const year = new Date(createdAt).getFullYear();
+    const shortId = appId.slice(0, 8).toUpperCase();
+    return `LSN-${year}-${shortId}`;
   };
-  
-  const openDocument = isMobile 
-    ? (docName: string) => {
-        viewDocumentDetails(docName);
-      }
-    : (docName: string) => {
-        viewDocumentDetails(docName);
-      };
+
+  // Show loading state while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow py-12 bg-muted/30 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Redirect to auth if not logged in
+  if (!user) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow py-12 bg-muted/30">
+          <div className="container mx-auto px-4">
+            <div className="max-w-md mx-auto text-center bg-card rounded-xl shadow-sm p-8">
+              <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h1 className="text-2xl font-bold mb-4">Connexion requise</h1>
+              <p className="text-muted-foreground mb-6">
+                Connectez-vous pour suivre vos candidatures au Label Startup Numérique.
+              </p>
+              <Button asChild>
+                <Link to="/auth">Se connecter</Link>
+              </Button>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-grow py-12 bg-gray-50">
+      <main className="flex-grow py-12 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold mb-2">Suivi de votre candidature</h1>
-              <p className="text-gray-600">
-                Suivez l'état d'avancement de votre demande de labellisation
-              </p>
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h1 className="text-3xl font-bold mb-2">Suivi de vos candidatures</h1>
+                <p className="text-muted-foreground">
+                  Suivez l'état d'avancement de vos demandes de labellisation en temps réel
+                </p>
+              </div>
+              <Button variant="outline" onClick={fetchApplications} disabled={loading}>
+                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+                Actualiser
+              </Button>
             </div>
-            
-            {!showResults ? (
-              <Card className="mb-8">
-                <CardHeader>
-                  <CardTitle>Rechercher votre dossier</CardTitle>
-                  <CardDescription>
-                    Entrez l'identifiant de suivi et l'email utilisés lors de votre candidature
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Form {...form}>
-                    <form onSubmit={form.handleSubmit(trackCandidature)} className="space-y-4">
-                      <FormField
-                        control={form.control}
-                        name="trackingId"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Identifiant de suivi</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Ex: LSN-2025-0012" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email du responsable</FormLabel>
-                            <FormControl>
-                              <Input type="email" placeholder="votre@email.com" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <Button type="submit" className="w-full" disabled={isLoading}>
-                        {isLoading ? "Recherche en cours..." : "Rechercher mon dossier"}
-                        <Search className="ml-2 h-4 w-4" />
-                      </Button>
-                    </form>
-                  </Form>
+
+            {loading ? (
+              <div className="flex items-center justify-center py-16">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : applications.length === 0 ? (
+              <Card>
+                <CardContent className="py-16 text-center">
+                  <Building className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h2 className="text-xl font-semibold mb-2">Aucune candidature</h2>
+                  <p className="text-muted-foreground mb-6">
+                    Vous n'avez pas encore soumis de candidature au Label Startup Numérique.
+                  </p>
+                  <Button asChild>
+                    <Link to="/postuler">Soumettre une candidature</Link>
+                  </Button>
                 </CardContent>
-                <CardFooter className="flex justify-center text-sm text-gray-500">
-                  <p>Pour toute assistance, contactez-nous à support@labelstartup.ci</p>
-                </CardFooter>
               </Card>
-            ) : candidature ? (
-              <div className="space-y-6">
-                <Card>
-                  <CardHeader className="pb-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-xl">{candidature.companyName}</CardTitle>
-                        <CardDescription>
-                          Dossier N° {candidature.id} • Soumis le {candidature.submissionDate}
-                        </CardDescription>
-                      </div>
-                      <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200">{candidature.status}</Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="mb-4">
-                      <div className="flex justify-between mb-2">
-                        <span className="text-sm font-medium">Progression du dossier</span>
-                        <span className="text-sm font-medium">{getProgressPercentage()}%</span>
-                      </div>
-                      <Progress value={getProgressPercentage()} className="h-2" />
-                    </div>
-                    
-                    <div className="space-y-6 mt-6">
-                      <h3 className="font-medium text-gray-900">Étapes du processus</h3>
-                      <div className="space-y-4">
-                        {candidature.steps.map((step) => (
-                          <div key={step.id} className="flex gap-4">
-                            <div className="flex-shrink-0 mt-1">
-                              {getStatusIcon(step.status)}
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Applications List */}
+                <div className="lg:col-span-1 space-y-3">
+                  <h2 className="text-lg font-semibold mb-3">Mes candidatures</h2>
+                  {applications.map((app) => (
+                    <Card
+                      key={app.application.id}
+                      className={`cursor-pointer transition-all hover:shadow-md ${
+                        selectedApp?.application.id === app.application.id
+                          ? "ring-2 ring-primary"
+                          : ""
+                      }`}
+                      onClick={() => setSelectedApp(app)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="font-medium truncate">{app.startup.name}</h3>
+                          <Badge variant={STATUS_CONFIG[app.application.status]?.variant || "secondary"}>
+                            {STATUS_CONFIG[app.application.status]?.label || app.application.status}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {generateTrackingId(app.application.id, app.application.created_at)}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Soumis le{" "}
+                          {app.application.submitted_at
+                            ? format(new Date(app.application.submitted_at), "dd MMM yyyy", { locale: fr })
+                            : format(new Date(app.application.created_at), "dd MMM yyyy", { locale: fr })}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                {/* Selected Application Details */}
+                <div className="lg:col-span-2 space-y-6">
+                  {selectedApp ? (
+                    <>
+                      {/* Header Card */}
+                      <Card>
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <CardTitle className="text-xl">{selectedApp.startup.name}</CardTitle>
+                              <CardDescription>
+                                Dossier N° {generateTrackingId(selectedApp.application.id, selectedApp.application.created_at)}
+                              </CardDescription>
                             </div>
-                            <div className="flex-grow">
-                              <div className="flex justify-between">
-                                <p className="font-medium text-gray-900">{step.name}</p>
-                                <p className="text-sm text-gray-500">{step.date}</p>
-                              </div>
-                              <p className="text-sm text-gray-600 mt-0.5">{step.description}</p>
+                            <div className="flex items-center gap-2">
+                              {STATUS_CONFIG[selectedApp.application.status]?.icon}
+                              <Badge variant={STATUS_CONFIG[selectedApp.application.status]?.variant || "secondary"}>
+                                {STATUS_CONFIG[selectedApp.application.status]?.label || selectedApp.application.status}
+                              </Badge>
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Tabs defaultValue="documents">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="documents">Documents</TabsTrigger>
-                    <TabsTrigger value="comments">Commentaires</TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="documents" className="mt-4">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">Documents soumis</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          {candidature.documents.map((doc, index) => (
-                            <div 
-                              key={index} 
-                              className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
-                              onClick={() => openDocument(doc.name)}
-                            >
-                              <div className="flex items-center gap-3">
-                                <FileText className="h-5 w-5 text-gray-500" />
-                                <span className="font-medium">{doc.name}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Badge className={getStatusColor(doc.status)}>{doc.status}</Badge>
-                              </div>
+                        </CardHeader>
+                        <CardContent>
+                          {/* Progress Bar */}
+                          <div className="mb-6">
+                            <div className="flex justify-between mb-2">
+                              <span className="text-sm font-medium">Progression du dossier</span>
+                              <span className="text-sm font-medium">
+                                {getProgressPercentage(selectedApp.application.status)}%
+                              </span>
                             </div>
-                          ))}
-                        </div>
+                            <Progress 
+                              value={getProgressPercentage(selectedApp.application.status)} 
+                              className="h-2" 
+                            />
+                          </div>
+
+                          {/* Process Steps */}
+                          <div className="space-y-4">
+                            <h3 className="font-medium">Étapes du processus</h3>
+                            <div className="space-y-3">
+                              {PROCESS_STEPS.map((step) => {
+                                const currentStep = STATUS_CONFIG[selectedApp.application.status]?.step || 1;
+                                const isFinal = selectedApp.application.status === "approved" || selectedApp.application.status === "rejected";
+                                const isApproved = selectedApp.application.status === "approved";
+                                const stepStatus = getStepStatus(step.id, currentStep, isFinal, isApproved);
+
+                                return (
+                                  <div key={step.id} className="flex gap-4">
+                                    <div className="flex-shrink-0 mt-1">
+                                      {stepStatus === "completed" ? (
+                                        <CheckCircle className="h-5 w-5 text-green-500" />
+                                      ) : stepStatus === "rejected" ? (
+                                        <XCircle className="h-5 w-5 text-red-500" />
+                                      ) : stepStatus === "in-progress" ? (
+                                        <Clock className="h-5 w-5 text-blue-500" />
+                                      ) : (
+                                        <Clock className="h-5 w-5 text-muted-foreground/40" />
+                                      )}
+                                    </div>
+                                    <div className="flex-grow">
+                                      <p className={`font-medium ${stepStatus === "pending" ? "text-muted-foreground" : ""}`}>
+                                        {step.name}
+                                      </p>
+                                      <p className="text-sm text-muted-foreground">{step.description}</p>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Tabs for Details */}
+                      <Tabs defaultValue="details">
+                        <TabsList className="grid w-full grid-cols-2">
+                          <TabsTrigger value="details">Informations</TabsTrigger>
+                          <TabsTrigger value="comments">
+                            Commentaires ({selectedApp.comments.length})
+                          </TabsTrigger>
+                        </TabsList>
+
+                        <TabsContent value="details" className="mt-4">
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-lg">Informations de la startup</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="flex items-center gap-2">
+                                  <Building className="h-4 w-4 text-muted-foreground" />
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Secteur</p>
+                                    <p className="font-medium">
+                                      {SECTOR_LABELS[selectedApp.startup.sector || ""] || selectedApp.startup.sector || "-"}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <FileText className="h-4 w-4 text-muted-foreground" />
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Stade</p>
+                                    <p className="font-medium">
+                                      {STAGE_LABELS[selectedApp.startup.stage || ""] || selectedApp.startup.stage || "-"}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Users className="h-4 w-4 text-muted-foreground" />
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Équipe</p>
+                                    <p className="font-medium">
+                                      {selectedApp.startup.team_size || "-"} employés
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Création</p>
+                                    <p className="font-medium">
+                                      {selectedApp.startup.founded_date
+                                        ? format(new Date(selectedApp.startup.founded_date), "MMMM yyyy", { locale: fr })
+                                        : "-"}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {selectedApp.startup.website && (
+                                <div className="flex items-center gap-2">
+                                  <Globe className="h-4 w-4 text-muted-foreground" />
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">Site web</p>
+                                    <a
+                                      href={selectedApp.startup.website}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="font-medium text-primary hover:underline"
+                                    >
+                                      {selectedApp.startup.website}
+                                    </a>
+                                  </div>
+                                </div>
+                              )}
+
+                              {selectedApp.startup.description && (
+                                <div>
+                                  <p className="text-sm text-muted-foreground mb-1">Description</p>
+                                  <p className="text-sm whitespace-pre-wrap">{selectedApp.startup.description}</p>
+                                </div>
+                              )}
+
+                              {selectedApp.application.notes && (
+                                <div className="pt-4 border-t">
+                                  <p className="text-sm text-muted-foreground mb-1">Notes de l'évaluateur</p>
+                                  <p className="text-sm bg-muted p-3 rounded-lg">
+                                    {selectedApp.application.notes}
+                                  </p>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        </TabsContent>
+
+                        <TabsContent value="comments" className="mt-4">
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-lg">Historique des commentaires</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              {selectedApp.comments.length === 0 ? (
+                                <div className="text-center py-8">
+                                  <MessageSquare className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                                  <p className="text-muted-foreground">Aucun commentaire pour le moment.</p>
+                                </div>
+                              ) : (
+                                <div className="space-y-4">
+                                  {selectedApp.comments.map((comment) => (
+                                    <div key={comment.id} className="border-l-2 border-primary/30 pl-4 py-1">
+                                      <div className="flex justify-between">
+                                        <p className="font-medium">Évaluateur</p>
+                                        <p className="text-sm text-muted-foreground">
+                                          {format(new Date(comment.created_at), "dd MMM yyyy 'à' HH:mm", { locale: fr })}
+                                        </p>
+                                      </div>
+                                      <p className="text-muted-foreground mt-1">{comment.content}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        </TabsContent>
+                      </Tabs>
+                    </>
+                  ) : (
+                    <Card>
+                      <CardContent className="py-16 text-center">
+                        <p className="text-muted-foreground">
+                          Sélectionnez une candidature pour voir les détails.
+                        </p>
                       </CardContent>
                     </Card>
-                  </TabsContent>
-                  
-                  <TabsContent value="comments" className="mt-4">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg">Historique des commentaires</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          {candidature.comments.map((comment, index) => (
-                            <div key={index} className="border-l-2 border-gray-200 pl-4 py-1">
-                              <div className="flex justify-between">
-                                <p className="font-medium">{comment.author}</p>
-                                <p className="text-sm text-gray-500">{comment.date}</p>
-                              </div>
-                              <p className="text-gray-600 mt-1">{comment.content}</p>
-                            </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-                </Tabs>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Prochaines étapes</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-700">{candidature.nextSteps}</p>
-                  </CardContent>
-                </Card>
-                
-                <div className="flex justify-center gap-4 pt-2">
-                  <Button variant="outline" onClick={() => setShowResults(false)}>
-                    Nouvelle recherche
-                  </Button>
-                  <Button onClick={() => navigate("/")}>
-                    Retour à l'accueil
-                  </Button>
+                  )}
                 </div>
               </div>
-            ) : null}
+            )}
           </div>
         </div>
       </main>
-      
-      {isMobile ? (
-        <Drawer open={open} onOpenChange={setOpen}>
-          <DrawerContent>
-            <DrawerHeader>
-              <DrawerTitle>Document: {selectedDoc}</DrawerTitle>
-              <DrawerDescription>Détails du document soumis</DrawerDescription>
-            </DrawerHeader>
-            <div className="p-4">
-              <div className="p-6 border rounded-lg bg-gray-50 text-center">
-                <FileCheck className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-sm text-gray-600 mb-2">Le document a été enregistré et est en cours d'analyse par notre équipe.</p>
-                <p className="text-xs text-gray-500">Téléchargé le 15/03/2025</p>
-              </div>
-            </div>
-            <DrawerFooter>
-              <Button variant="outline" onClick={() => setOpen(false)}>
-                Fermer
-              </Button>
-            </DrawerFooter>
-          </DrawerContent>
-        </Drawer>
-      ) : (
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Document: {selectedDoc}</DialogTitle>
-              <DialogDescription>Détails du document soumis</DialogDescription>
-            </DialogHeader>
-            <div className="p-6 border rounded-lg bg-gray-50 text-center">
-              <FileCheck className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-sm text-gray-600 mb-2">Le document a été enregistré et est en cours d'analyse par notre équipe.</p>
-              <p className="text-xs text-gray-500">Téléchargé le 15/03/2025</p>
-            </div>
-            <div className="flex justify-end">
-              <Button variant="outline" onClick={() => setOpen(false)}>
-                Fermer
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
-      
       <Footer />
     </div>
   );
