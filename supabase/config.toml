@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.check-user-role]
 verify_jwt = false
+
+[functions.notify-application-status]
+verify_jwt = false
