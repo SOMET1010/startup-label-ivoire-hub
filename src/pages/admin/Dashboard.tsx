@@ -242,6 +242,7 @@ export default function AdminDashboard() {
 
     setActionLoading(true);
     try {
+      const oldStatus = selectedApplication.status;
       const newStatus = actionType === "approve" ? "approved" : "rejected";
       
       const { error } = await supabase
@@ -263,10 +264,38 @@ export default function AdminDashboard() {
           .eq("id", selectedApplication.startup.id);
       }
 
-      toast({
-        title: actionType === "approve" ? "Candidature approuvée" : "Candidature rejetée",
-        description: `La candidature de ${selectedApplication.startup.name} a été ${actionType === "approve" ? "approuvée" : "rejetée"}.`,
-      });
+      // Send email notification via edge function
+      try {
+        const { error: notifyError } = await supabase.functions.invoke("notify-application-status", {
+          body: {
+            application_id: selectedApplication.id,
+            new_status: newStatus,
+            old_status: oldStatus,
+            notes: actionNotes || null,
+          },
+        });
+
+        if (notifyError) {
+          console.error("Error sending notification:", notifyError);
+          // Don't fail the whole operation if notification fails
+          toast({
+            variant: "default",
+            title: "Statut mis à jour",
+            description: "La notification email n'a pas pu être envoyée.",
+          });
+        } else {
+          toast({
+            title: actionType === "approve" ? "Candidature approuvée" : "Candidature rejetée",
+            description: `La candidature de ${selectedApplication.startup.name} a été ${actionType === "approve" ? "approuvée" : "rejetée"}. Un email a été envoyé.`,
+          });
+        }
+      } catch (notifyErr) {
+        console.error("Error invoking notification function:", notifyErr);
+        toast({
+          title: actionType === "approve" ? "Candidature approuvée" : "Candidature rejetée",
+          description: `La candidature de ${selectedApplication.startup.name} a été ${actionType === "approve" ? "approuvée" : "rejetée"}.`,
+        });
+      }
 
       setShowActionDialog(false);
       setSelectedApplication(null);
