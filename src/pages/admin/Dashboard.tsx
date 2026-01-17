@@ -124,7 +124,7 @@ export default function AdminDashboard() {
   const [selectedApplication, setSelectedApplication] = useState<ApplicationWithStartup | null>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [showActionDialog, setShowActionDialog] = useState(false);
-  const [actionType, setActionType] = useState<"approve" | "reject" | null>(null);
+  const [actionType, setActionType] = useState<"approve" | "reject" | "review" | null>(null);
   const [actionNotes, setActionNotes] = useState("");
   
   // Role management
@@ -243,7 +243,7 @@ export default function AdminDashboard() {
     setActionLoading(true);
     try {
       const oldStatus = selectedApplication.status;
-      const newStatus = actionType === "approve" ? "approved" : "rejected";
+      const newStatus = actionType === "approve" ? "approved" : actionType === "reject" ? "rejected" : "under_review";
       
       const { error } = await supabase
         .from("applications")
@@ -263,6 +263,12 @@ export default function AdminDashboard() {
           .update({ status: "labeled" })
           .eq("id", selectedApplication.startup.id);
       }
+
+      const actionLabels = {
+        approve: { past: "approuvée", action: "Candidature approuvée" },
+        reject: { past: "rejetée", action: "Candidature rejetée" },
+        review: { past: "mise en cours d'examen", action: "Candidature en examen" },
+      };
 
       // Send email notification via edge function
       try {
@@ -285,15 +291,15 @@ export default function AdminDashboard() {
           });
         } else {
           toast({
-            title: actionType === "approve" ? "Candidature approuvée" : "Candidature rejetée",
-            description: `La candidature de ${selectedApplication.startup.name} a été ${actionType === "approve" ? "approuvée" : "rejetée"}. Un email a été envoyé.`,
+            title: actionLabels[actionType].action,
+            description: `La candidature de ${selectedApplication.startup.name} a été ${actionLabels[actionType].past}. Un email a été envoyé.`,
           });
         }
       } catch (notifyErr) {
         console.error("Error invoking notification function:", notifyErr);
         toast({
-          title: actionType === "approve" ? "Candidature approuvée" : "Candidature rejetée",
-          description: `La candidature de ${selectedApplication.startup.name} a été ${actionType === "approve" ? "approuvée" : "rejetée"}.`,
+          title: actionLabels[actionType].action,
+          description: `La candidature de ${selectedApplication.startup.name} a été ${actionLabels[actionType].past}.`,
         });
       }
 
@@ -369,7 +375,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const openActionDialog = (app: ApplicationWithStartup, type: "approve" | "reject") => {
+  const openActionDialog = (app: ApplicationWithStartup, type: "approve" | "reject" | "review") => {
     setSelectedApplication(app);
     setActionType(type);
     setActionNotes("");
@@ -524,6 +530,17 @@ export default function AdminDashboard() {
                                 >
                                   <Eye className="h-4 w-4" />
                                 </Button>
+                                {app.status === "pending" && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-blue-600 hover:text-blue-700"
+                                    onClick={() => openActionDialog(app, "review")}
+                                    title="Mettre en cours d'examen"
+                                  >
+                                    <Clock className="h-4 w-4" />
+                                  </Button>
+                                )}
                                 {(app.status === "pending" || app.status === "under_review") && (
                                   <>
                                     <Button
@@ -531,6 +548,7 @@ export default function AdminDashboard() {
                                       size="sm"
                                       className="text-green-600 hover:text-green-700"
                                       onClick={() => openActionDialog(app, "approve")}
+                                      title="Approuver"
                                     >
                                       <CheckCircle className="h-4 w-4" />
                                     </Button>
@@ -539,6 +557,7 @@ export default function AdminDashboard() {
                                       size="sm"
                                       className="text-red-600 hover:text-red-700"
                                       onClick={() => openActionDialog(app, "reject")}
+                                      title="Rejeter"
                                     >
                                       <XCircle className="h-4 w-4" />
                                     </Button>
@@ -717,12 +736,18 @@ export default function AdminDashboard() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {actionType === "approve" ? "Approuver la candidature" : "Rejeter la candidature"}
+              {actionType === "approve" 
+                ? "Approuver la candidature" 
+                : actionType === "reject" 
+                  ? "Rejeter la candidature"
+                  : "Mettre en cours d'examen"}
             </DialogTitle>
             <DialogDescription>
               {actionType === "approve"
                 ? `Vous êtes sur le point d'approuver la candidature de ${selectedApplication?.startup.name}.`
-                : `Vous êtes sur le point de rejeter la candidature de ${selectedApplication?.startup.name}.`}
+                : actionType === "reject"
+                  ? `Vous êtes sur le point de rejeter la candidature de ${selectedApplication?.startup.name}.`
+                  : `Vous êtes sur le point de mettre la candidature de ${selectedApplication?.startup.name} en cours d'examen.`}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -746,7 +771,7 @@ export default function AdminDashboard() {
               Annuler
             </Button>
             <Button
-              variant={actionType === "approve" ? "default" : "destructive"}
+              variant={actionType === "approve" ? "default" : actionType === "reject" ? "destructive" : "secondary"}
               onClick={handleStatusChange}
               disabled={actionLoading}
             >
@@ -754,10 +779,12 @@ export default function AdminDashboard() {
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : actionType === "approve" ? (
                 <CheckCircle className="h-4 w-4 mr-2" />
-              ) : (
+              ) : actionType === "reject" ? (
                 <XCircle className="h-4 w-4 mr-2" />
+              ) : (
+                <Clock className="h-4 w-4 mr-2" />
               )}
-              {actionType === "approve" ? "Approuver" : "Rejeter"}
+              {actionType === "approve" ? "Approuver" : actionType === "reject" ? "Rejeter" : "Mettre en examen"}
             </Button>
           </DialogFooter>
         </DialogContent>
