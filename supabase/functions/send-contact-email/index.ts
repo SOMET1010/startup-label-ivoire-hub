@@ -35,30 +35,60 @@ const handler = async (req: Request): Promise<Response> => {
       companyEmail 
     }: ContactEmailRequest = await req.json();
 
-    // Server-side validation
-    if (!name || name.length > 100) {
+    // Server-side validation with strict input sanitization
+    if (!name || typeof name !== 'string' || name.trim().length === 0 || name.length > 100) {
       throw new Error("Nom invalide");
     }
-    if (!email || email.length > 255 || !email.includes("@")) {
+    
+    // Strict email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || typeof email !== 'string' || !emailRegex.test(email) || email.length > 255) {
       throw new Error("Email invalide");
     }
-    if (phone && phone.length > 20) {
+    
+    if (phone && (typeof phone !== 'string' || phone.length > 20)) {
       throw new Error("Téléphone invalide");
     }
-    if (!subject || subject.length > 200) {
+    
+    if (!subject || typeof subject !== 'string' || subject.trim().length === 0 || subject.length > 200) {
       throw new Error("Sujet invalide");
     }
-    if (!message || message.length < 10 || message.length > 2000) {
+    
+    if (!message || typeof message !== 'string' || message.trim().length < 10 || message.length > 2000) {
       throw new Error("Message invalide (10-2000 caractères requis)");
     }
+    
+    if (!companyName || typeof companyName !== 'string' || companyName.length > 200) {
+      throw new Error("Nom d'entreprise invalide");
+    }
+    
+    if (!companyEmail || typeof companyEmail !== 'string' || !emailRegex.test(companyEmail) || companyEmail.length > 255) {
+      throw new Error("Email entreprise invalide");
+    }
 
-    console.log(`Sending contact emails for ${companyName}`);
+    // Sanitize inputs for HTML context (basic HTML entity encoding)
+    const escapeHtml = (str: string): string => {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    };
+    
+    const safeName = escapeHtml(name.trim());
+    const safeSubject = escapeHtml(subject.trim());
+    const safeMessage = escapeHtml(message.trim());
+    const safeCompanyName = escapeHtml(companyName.trim());
+    const safePhone = phone ? escapeHtml(phone.trim()) : null;
+
+    console.log(`Sending contact emails for company`);
 
     // Email 1: Confirmation au visiteur
     const confirmationEmail = await resend.emails.send({
       from: "Label Startup Numérique <onboarding@resend.dev>",
       to: [email],
-      subject: `Votre message a bien été envoyé à ${companyName}`,
+      subject: `Votre message a bien été envoyé à ${safeCompanyName}`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -82,14 +112,14 @@ const handler = async (req: Request): Promise<Response> => {
                 <h1>✓ Message envoyé avec succès</h1>
               </div>
               <div class="content">
-                <p>Bonjour <strong>${name}</strong>,</p>
-                <p>Nous avons bien reçu votre message destiné à <strong>${companyName}</strong>.</p>
+                <p>Bonjour <strong>${safeName}</strong>,</p>
+                <p>Nous avons bien reçu votre message destiné à <strong>${safeCompanyName}</strong>.</p>
                 
                 <div class="summary">
                   <h2>Résumé de votre demande</h2>
-                  <p><strong>Sujet :</strong> ${subject}</p>
+                  <p><strong>Sujet :</strong> ${safeSubject}</p>
                   <p><strong>Message :</strong></p>
-                  <p style="white-space: pre-wrap;">${message}</p>
+                  <p style="white-space: pre-wrap;">${safeMessage}</p>
                 </div>
                 
                 <p>L'entreprise vous répondra sous <strong>48 heures ouvrées</strong> à l'adresse : <strong>${email}</strong></p>
@@ -146,17 +176,17 @@ const handler = async (req: Request): Promise<Response> => {
                 
                 <div class="contact-details">
                   <h2>Informations du visiteur</h2>
-                  <p><strong>Nom :</strong> ${name}</p>
+                  <p><strong>Nom :</strong> ${safeName}</p>
                   <p><strong>Email :</strong> <a href="mailto:${email}">${email}</a></p>
-                  <p><strong>Téléphone :</strong> ${phone || "Non fourni"}</p>
+                  <p><strong>Téléphone :</strong> ${safePhone || "Non fourni"}</p>
                 </div>
                 
                 <p><strong>Sujet de la demande :</strong></p>
-                <p style="font-size: 16px; color: #667eea;"><strong>${subject}</strong></p>
+                <p style="font-size: 16px; color: #667eea;"><strong>${safeSubject}</strong></p>
                 
                 <div class="message-box">
                   <h2>Message complet</h2>
-                  <p style="white-space: pre-wrap;">${message}</p>
+                  <p style="white-space: pre-wrap;">${safeMessage}</p>
                 </div>
                 
                 <p><strong>Date de soumission :</strong> ${new Date().toLocaleString("fr-FR", { 
@@ -166,7 +196,7 @@ const handler = async (req: Request): Promise<Response> => {
                 })}</p>
                 
                 <center>
-                  <a href="mailto:${email}?subject=Re: ${encodeURIComponent(subject)}" class="button">
+                  <a href="mailto:${email}?subject=Re: ${encodeURIComponent(safeSubject)}" class="button">
                     Répondre par email
                   </a>
                 </center>

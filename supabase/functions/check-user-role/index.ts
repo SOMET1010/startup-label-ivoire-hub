@@ -12,23 +12,12 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
-        },
-      }
-    );
-
-    const {
-      data: { user },
-    } = await supabaseClient.auth.getUser();
-
-    if (!user) {
+    // Validate Authorization header exists
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      console.log('Missing or invalid Authorization header');
       return new Response(
-        JSON.stringify({ error: 'Not authenticated' }),
+        JSON.stringify({ error: 'Unauthorized - Missing token' }),
         {
           status: 401,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -36,13 +25,52 @@ serve(async (req) => {
       );
     }
 
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: { Authorization: authHeader },
+        },
+      }
+    );
+
+    // Verify JWT using getClaims for proper validation
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await supabaseClient.auth.getClaims(token);
+    
+    if (claimsError || !claimsData?.claims) {
+      console.error('JWT verification failed:', claimsError);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - Invalid token' }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    const userId = claimsData.claims.sub;
+    if (!userId) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - No user ID in token' }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    console.log('Fetching role for authenticated user:', userId);
+
     const { data: roleData, error: roleError } = await supabaseClient
       .from('user_roles')
       .select('role')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .single();
 
-    if (roleError) {
+    if (roleError && roleError.code !== 'PGRST116') {
+      // PGRST116 = no rows returned, which is fine (default to public)
       console.error('Error fetching role:', roleError);
       return new Response(
         JSON.stringify({ error: 'Error fetching role' }),
@@ -63,7 +91,7 @@ serve(async (req) => {
   } catch (error: any) {
     console.error('Error in check-user-role function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: 'Internal server error' }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
