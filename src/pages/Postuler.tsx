@@ -13,23 +13,69 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { ClipboardCheck, Loader2 } from "lucide-react";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { ClipboardCheck, Loader2, FileText, Building2, Users, Upload } from "lucide-react";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import FileUploadField from "@/components/forms/FileUploadField";
+
+// File validation helper - returns undefined if valid file or no file for optional, or File
+const fileSchema = (required: boolean = false) => {
+  return z.custom<File | null>((val) => {
+    if (required && !val) return false;
+    if (!val) return true;
+    if (!(val instanceof File)) return false;
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    return val.size <= maxSize;
+  }, {
+    message: required ? "Ce document est requis" : "Fichier invalide ou trop volumineux (max 10 Mo)"
+  }).nullable();
+};
 
 const startupFormSchema = z.object({
+  // Étape 1: Informations entreprise
   name: z.string().min(2, "Le nom doit contenir au moins 2 caractères").max(100, "Le nom ne peut pas dépasser 100 caractères"),
-  description: z.string().min(50, "La description doit contenir au moins 50 caractères").max(2000, "La description ne peut pas dépasser 2000 caractères"),
+  legal_status: z.string().min(1, "Veuillez sélectionner un statut juridique"),
+  rccm: z.string().min(1, "Le numéro RCCM est requis").max(50, "Numéro RCCM trop long"),
+  tax_id: z.string().min(1, "Le NIF est requis").max(50, "NIF trop long"),
   sector: z.string().min(1, "Veuillez sélectionner un secteur"),
+  address: z.string().min(5, "L'adresse doit contenir au moins 5 caractères").max(200, "Adresse trop longue"),
+  founded_date: z.string().min(1, "La date de création est requise"),
   website: z.string().url("URL invalide").or(z.literal("")).optional(),
-  stage: z.string().min(1, "Veuillez sélectionner un stade"),
   team_size: z.coerce.number().min(1, "Minimum 1 employé").max(10000, "Maximum 10000 employés"),
-  founded_date: z.string().optional(),
+
+  // Étape 2: Projet et équipe
+  description: z.string().min(50, "La description doit contenir au moins 50 caractères").max(2000, "La description ne peut pas dépasser 2000 caractères"),
+  innovation: z.string().min(20, "Décrivez votre innovation (min 20 caractères)").max(1000, "Maximum 1000 caractères"),
+  business_model: z.string().min(20, "Décrivez votre modèle économique (min 20 caractères)").max(1000, "Maximum 1000 caractères"),
+  growth_potential: z.string().min(20, "Décrivez votre potentiel de croissance (min 20 caractères)").max(1000, "Maximum 1000 caractères"),
+  stage: z.string().min(1, "Veuillez sélectionner un stade"),
+  founder_info: z.string().min(10, "Présentez brièvement les fondateurs (min 10 caractères)").max(500, "Maximum 500 caractères"),
+
+  // Étape 3: Documents (validés séparément)
+  doc_rccm: fileSchema(true),
+  doc_tax: fileSchema(true),
+  doc_business_plan: fileSchema(true),
+  doc_statutes: fileSchema(false),
+  doc_cv: fileSchema(false),
+  doc_pitch: fileSchema(false),
+
+  // Étape 4: Validation
   terms_accepted: z.boolean().refine(val => val === true, "Vous devez accepter les conditions"),
 });
 
 type StartupFormData = z.infer<typeof startupFormSchema>;
+
+const LEGAL_STATUS = [
+  { value: "sarl", label: "SARL" },
+  { value: "sa", label: "SA" },
+  { value: "sas", label: "SAS" },
+  { value: "sasu", label: "SASU" },
+  { value: "ei", label: "Entreprise Individuelle" },
+  { value: "association", label: "Association" },
+  { value: "cooperative", label: "Coopérative" },
+  { value: "other", label: "Autre" },
+];
 
 const SECTORS = [
   { value: "fintech", label: "FinTech" },
@@ -51,11 +97,19 @@ const STAGES = [
   { value: "scale", label: "Scale-up" },
 ];
 
+const STEPS = [
+  { id: 1, label: "Entreprise", icon: Building2 },
+  { id: 2, label: "Projet", icon: Users },
+  { id: 3, label: "Documents", icon: Upload },
+  { id: 4, label: "Validation", icon: ClipboardCheck },
+];
+
 const Postuler = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [trackingId, setTrackingId] = useState("");
 
@@ -63,15 +117,48 @@ const Postuler = () => {
     resolver: zodResolver(startupFormSchema),
     defaultValues: {
       name: "",
-      description: "",
+      legal_status: "",
+      rccm: "",
+      tax_id: "",
       sector: "",
-      website: "",
-      stage: "",
-      team_size: 1,
+      address: "",
       founded_date: "",
+      website: "",
+      team_size: 1,
+      description: "",
+      innovation: "",
+      business_model: "",
+      growth_potential: "",
+      stage: "",
+      founder_info: "",
+      doc_rccm: null,
+      doc_tax: null,
+      doc_business_plan: null,
+      doc_statutes: null,
+      doc_cv: null,
+      doc_pitch: null,
       terms_accepted: false,
     },
   });
+
+  const uploadFile = async (file: File, userId: string, startupId: string, docType: string): Promise<string | null> => {
+    const extension = file.name.split(".").pop();
+    const fileName = `${userId}/${startupId}/${docType}_${Date.now()}.${extension}`;
+    
+    const { error } = await supabase.storage
+      .from("application-documents")
+      .upload(fileName, file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (error) {
+      console.error(`Upload error for ${docType}:`, error);
+      throw new Error(`Erreur lors du téléversement de ${docType}`);
+    }
+
+    return fileName;
+  };
 
   const handleSubmit = async (data: StartupFormData) => {
     if (!user) {
@@ -84,19 +171,11 @@ const Postuler = () => {
       return;
     }
 
-    if (!supabase) {
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description: "Service non disponible. Veuillez réessayer plus tard.",
-      });
-      return;
-    }
-
     setIsLoading(true);
+    setIsUploading(true);
 
     try {
-      // Create startup record
+      // First create the startup record to get the ID
       const { data: startupData, error: startupError } = await supabase
         .from("startups")
         .insert({
@@ -108,12 +187,86 @@ const Postuler = () => {
           stage: data.stage,
           team_size: data.team_size,
           founded_date: data.founded_date || null,
+          legal_status: data.legal_status,
+          rccm: data.rccm.trim(),
+          tax_id: data.tax_id.trim(),
+          address: data.address.trim(),
+          founder_info: data.founder_info.trim(),
+          innovation: data.innovation.trim(),
+          business_model: data.business_model.trim(),
+          growth_potential: data.growth_potential.trim(),
           status: "submitted",
         })
         .select()
         .single();
 
       if (startupError) throw startupError;
+
+      // Upload documents
+      const documentUrls: Record<string, string | null> = {
+        doc_rccm: null,
+        doc_tax: null,
+        doc_business_plan: null,
+        doc_statutes: null,
+        doc_cv: null,
+        doc_pitch: null,
+      };
+
+      const uploadPromises: Promise<void>[] = [];
+
+      if (data.doc_rccm) {
+        uploadPromises.push(
+          uploadFile(data.doc_rccm, user.id, startupData.id, "rccm").then(url => {
+            documentUrls.doc_rccm = url;
+          })
+        );
+      }
+      if (data.doc_tax) {
+        uploadPromises.push(
+          uploadFile(data.doc_tax, user.id, startupData.id, "tax").then(url => {
+            documentUrls.doc_tax = url;
+          })
+        );
+      }
+      if (data.doc_business_plan) {
+        uploadPromises.push(
+          uploadFile(data.doc_business_plan, user.id, startupData.id, "business_plan").then(url => {
+            documentUrls.doc_business_plan = url;
+          })
+        );
+      }
+      if (data.doc_statutes) {
+        uploadPromises.push(
+          uploadFile(data.doc_statutes, user.id, startupData.id, "statutes").then(url => {
+            documentUrls.doc_statutes = url;
+          })
+        );
+      }
+      if (data.doc_cv) {
+        uploadPromises.push(
+          uploadFile(data.doc_cv, user.id, startupData.id, "cv").then(url => {
+            documentUrls.doc_cv = url;
+          })
+        );
+      }
+      if (data.doc_pitch) {
+        uploadPromises.push(
+          uploadFile(data.doc_pitch, user.id, startupData.id, "pitch").then(url => {
+            documentUrls.doc_pitch = url;
+          })
+        );
+      }
+
+      await Promise.all(uploadPromises);
+      setIsUploading(false);
+
+      // Update startup with document URLs
+      const { error: updateError } = await supabase
+        .from("startups")
+        .update(documentUrls)
+        .eq("id", startupData.id);
+
+      if (updateError) throw updateError;
 
       // Create application record
       const { data: applicationData, error: applicationError } = await supabase
@@ -147,6 +300,7 @@ const Postuler = () => {
       });
     } finally {
       setIsLoading(false);
+      setIsUploading(false);
     }
   };
 
@@ -154,9 +308,11 @@ const Postuler = () => {
     let fieldsToValidate: (keyof StartupFormData)[] = [];
     
     if (currentStep === 1) {
-      fieldsToValidate = ["name", "sector", "website", "team_size", "founded_date"];
+      fieldsToValidate = ["name", "legal_status", "rccm", "tax_id", "sector", "address", "founded_date", "website", "team_size"];
     } else if (currentStep === 2) {
-      fieldsToValidate = ["description", "stage"];
+      fieldsToValidate = ["description", "innovation", "business_model", "growth_potential", "stage", "founder_info"];
+    } else if (currentStep === 3) {
+      fieldsToValidate = ["doc_rccm", "doc_tax", "doc_business_plan"];
     }
 
     const isValid = await form.trigger(fieldsToValidate);
@@ -227,28 +383,39 @@ const Postuler = () => {
               <div className="w-full bg-muted rounded-full h-2.5">
                 <div
                   className="bg-gradient-to-r from-primary to-accent h-2.5 rounded-full transition-all duration-300"
-                  style={{ width: `${(currentStep / 3) * 100}%` }}
+                  style={{ width: `${(currentStep / 4) * 100}%` }}
                 ></div>
               </div>
-              <div className="flex justify-between mt-2 text-sm">
-                <span className={currentStep >= 1 ? "text-primary font-medium" : "text-muted-foreground"}>
-                  Informations générales
-                </span>
-                <span className={currentStep >= 2 ? "text-primary font-medium" : "text-muted-foreground"}>
-                  Description & Stade
-                </span>
-                <span className={currentStep >= 3 ? "text-primary font-medium" : "text-muted-foreground"}>
-                  Validation
-                </span>
+              <div className="flex justify-between mt-3">
+                {STEPS.map((step) => {
+                  const Icon = step.icon;
+                  return (
+                    <div
+                      key={step.id}
+                      className={`flex flex-col items-center gap-1 ${
+                        currentStep >= step.id ? "text-primary" : "text-muted-foreground"
+                      }`}
+                    >
+                      <Icon className="h-5 w-5" />
+                      <span className={`text-xs font-medium ${currentStep >= step.id ? "" : ""}`}>
+                        {step.label}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleSubmit)}>
                 <div className="bg-card rounded-xl shadow-sm p-8">
+                  {/* Étape 1: Informations entreprise */}
                   {currentStep === 1 && (
                     <div>
-                      <h2 className="text-xl font-bold mb-6">Informations générales de la startup</h2>
+                      <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+                        <Building2 className="h-5 w-5" />
+                        Informations de l'entreprise
+                      </h2>
 
                       <div className="space-y-4">
                         <FormField
@@ -266,6 +433,31 @@ const Postuler = () => {
                         />
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="legal_status"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Statut juridique *</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Sélectionner" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {LEGAL_STATUS.map((status) => (
+                                      <SelectItem key={status.value} value={status.value}>
+                                        {status.label}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
                           <FormField
                             control={form.control}
                             name="sector"
@@ -290,15 +482,31 @@ const Postuler = () => {
                               </FormItem>
                             )}
                           />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="rccm"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Numéro RCCM *</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="Ex: CI-ABJ-2023-B-12345" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
 
                           <FormField
                             control={form.control}
-                            name="founded_date"
+                            name="tax_id"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Date de création</FormLabel>
+                                <FormLabel>Numéro d'Identification Fiscale (NIF) *</FormLabel>
                                 <FormControl>
-                                  <Input type="date" {...field} />
+                                  <Input placeholder="Ex: 1234567890" {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -306,15 +514,29 @@ const Postuler = () => {
                           />
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="address"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Adresse du siège social *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Ex: Cocody, Rue des Jardins, Abidjan" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <FormField
                             control={form.control}
-                            name="website"
+                            name="founded_date"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Site web</FormLabel>
+                                <FormLabel>Date de création *</FormLabel>
                                 <FormControl>
-                                  <Input type="url" placeholder="https://example.com" {...field} />
+                                  <Input type="date" {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -334,6 +556,20 @@ const Postuler = () => {
                               </FormItem>
                             )}
                           />
+
+                          <FormField
+                            control={form.control}
+                            name="website"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Site web</FormLabel>
+                                <FormControl>
+                                  <Input type="url" placeholder="https://..." {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
                         </div>
                       </div>
 
@@ -345,9 +581,13 @@ const Postuler = () => {
                     </div>
                   )}
 
+                  {/* Étape 2: Projet et équipe */}
                   {currentStep === 2 && (
                     <div>
-                      <h2 className="text-xl font-bold mb-6">Description & Stade de développement</h2>
+                      <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+                        <Users className="h-5 w-5" />
+                        Projet et Équipe
+                      </h2>
 
                       <div className="space-y-6">
                         <FormField
@@ -358,39 +598,125 @@ const Postuler = () => {
                               <FormLabel>Description du projet *</FormLabel>
                               <FormControl>
                                 <Textarea
-                                  rows={6}
-                                  placeholder="Décrivez votre projet, votre proposition de valeur, votre marché cible et ce qui vous différencie de la concurrence..."
+                                  rows={4}
+                                  placeholder="Décrivez votre projet, votre proposition de valeur et votre marché cible..."
                                   {...field}
                                 />
                               </FormControl>
-                              <FormMessage />
-                              <p className="text-xs text-muted-foreground">
+                              <FormDescription>
                                 {field.value.length}/2000 caractères (minimum 50)
-                              </p>
+                              </FormDescription>
+                              <FormMessage />
                             </FormItem>
                           )}
                         />
 
                         <FormField
                           control={form.control}
-                          name="stage"
+                          name="innovation"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Stade de développement *</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Sélectionner le stade" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {STAGES.map((stage) => (
-                                    <SelectItem key={stage.value} value={stage.value}>
-                                      {stage.label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                              <FormLabel>Innovation et différenciation *</FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  rows={3}
+                                  placeholder="Qu'est-ce qui rend votre solution innovante ? Quels sont vos avantages concurrentiels ?"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                {field.value.length}/1000 caractères
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="business_model"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Modèle économique *</FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  rows={3}
+                                  placeholder="Comment générez-vous des revenus ? Décrivez votre stratégie de monétisation..."
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                {field.value.length}/1000 caractères
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="growth_potential"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Potentiel de croissance *</FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  rows={3}
+                                  placeholder="Quel est le potentiel de marché ? Quels sont vos objectifs à 3-5 ans ?"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                {field.value.length}/1000 caractères
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <FormField
+                            control={form.control}
+                            name="stage"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Stade de développement *</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Sélectionner le stade" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {STAGES.map((stage) => (
+                                      <SelectItem key={stage.value} value={stage.value}>
+                                        {stage.label}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        <FormField
+                          control={form.control}
+                          name="founder_info"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Présentation des fondateurs *</FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  rows={3}
+                                  placeholder="Présentez brièvement les fondateurs et leurs parcours..."
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                {field.value.length}/500 caractères
+                              </FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -401,7 +727,6 @@ const Postuler = () => {
                         <Button type="button" variant="outline" onClick={prevStep}>
                           Étape précédente
                         </Button>
-
                         <Button type="button" onClick={nextStep}>
                           Étape suivante
                         </Button>
@@ -409,9 +734,156 @@ const Postuler = () => {
                     </div>
                   )}
 
+                  {/* Étape 3: Documents */}
                   {currentStep === 3 && (
                     <div>
-                      <h2 className="text-xl font-bold mb-6">Révision et soumission</h2>
+                      <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+                        <Upload className="h-5 w-5" />
+                        Documents justificatifs
+                      </h2>
+
+                      <div className="bg-muted/50 p-4 rounded-lg mb-6">
+                        <p className="text-sm text-muted-foreground">
+                          Téléversez les documents requis pour compléter votre dossier de candidature.
+                          Les formats acceptés sont : PDF, DOC, DOCX, PPT, PPTX (max. 10 Mo par fichier).
+                        </p>
+                      </div>
+
+                      <div className="space-y-6">
+                        <div className="border-b pb-4">
+                          <h3 className="font-semibold mb-4 text-primary">Documents obligatoires</h3>
+                          <div className="grid gap-6">
+                            <FormField
+                              control={form.control}
+                              name="doc_rccm"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FileUploadField
+                                    name="doc_rccm"
+                                    label="Extrait RCCM"
+                                    description="Registre du Commerce et du Crédit Mobilier"
+                                    required
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    error={form.formState.errors.doc_rccm?.message}
+                                  />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="doc_tax"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FileUploadField
+                                    name="doc_tax"
+                                    label="Attestation fiscale"
+                                    description="Attestation de situation fiscale en cours de validité"
+                                    required
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    error={form.formState.errors.doc_tax?.message}
+                                  />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="doc_business_plan"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FileUploadField
+                                    name="doc_business_plan"
+                                    label="Business Plan"
+                                    description="Plan d'affaires détaillé avec projections financières"
+                                    required
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    error={form.formState.errors.doc_business_plan?.message}
+                                  />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <h3 className="font-semibold mb-4 text-muted-foreground">Documents optionnels</h3>
+                          <div className="grid gap-6">
+                            <FormField
+                              control={form.control}
+                              name="doc_statutes"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FileUploadField
+                                    name="doc_statutes"
+                                    label="Statuts de l'entreprise"
+                                    description="Copie des statuts enregistrés"
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    error={form.formState.errors.doc_statutes?.message}
+                                  />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="doc_cv"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FileUploadField
+                                    name="doc_cv"
+                                    label="CV des fondateurs"
+                                    description="Curriculum vitae des principaux dirigeants"
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    error={form.formState.errors.doc_cv?.message}
+                                  />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="doc_pitch"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FileUploadField
+                                    name="doc_pitch"
+                                    label="Pitch Deck"
+                                    description="Présentation de votre projet (PowerPoint ou PDF)"
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    error={form.formState.errors.doc_pitch?.message}
+                                  />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-8 flex justify-between">
+                        <Button type="button" variant="outline" onClick={prevStep}>
+                          Étape précédente
+                        </Button>
+                        <Button type="button" onClick={nextStep}>
+                          Étape suivante
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Étape 4: Validation */}
+                  {currentStep === 4 && (
+                    <div>
+                      <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+                        <ClipboardCheck className="h-5 w-5" />
+                        Révision et soumission
+                      </h2>
 
                       <div className="space-y-6">
                         <div className="bg-muted/50 p-4 rounded-lg">
@@ -420,21 +892,38 @@ const Postuler = () => {
                             Veuillez vérifier attentivement les informations renseignées avant de soumettre votre candidature.
                           </p>
 
-                          <Tabs defaultValue="general">
-                            <TabsList className="mb-4">
-                              <TabsTrigger value="general">Informations générales</TabsTrigger>
-                              <TabsTrigger value="description">Description</TabsTrigger>
+                          <Tabs defaultValue="entreprise">
+                            <TabsList className="mb-4 flex-wrap h-auto">
+                              <TabsTrigger value="entreprise">Entreprise</TabsTrigger>
+                              <TabsTrigger value="projet">Projet</TabsTrigger>
+                              <TabsTrigger value="documents">Documents</TabsTrigger>
                             </TabsList>
 
-                            <TabsContent value="general">
+                            <TabsContent value="entreprise">
                               <div className="text-sm space-y-2">
                                 <div className="grid grid-cols-2 gap-2">
-                                  <div className="font-medium">Nom de la startup :</div>
+                                  <div className="font-medium">Nom :</div>
                                   <div>{formValues.name || "-"}</div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-2">
-                                  <div className="font-medium">Secteur d'activité :</div>
+                                  <div className="font-medium">Statut juridique :</div>
+                                  <div>{LEGAL_STATUS.find(s => s.value === formValues.legal_status)?.label || "-"}</div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div className="font-medium">RCCM :</div>
+                                  <div>{formValues.rccm || "-"}</div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div className="font-medium">NIF :</div>
+                                  <div>{formValues.tax_id || "-"}</div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div className="font-medium">Secteur :</div>
                                   <div>{SECTORS.find(s => s.value === formValues.sector)?.label || "-"}</div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div className="font-medium">Adresse :</div>
+                                  <div>{formValues.address || "-"}</div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-2">
                                   <div className="font-medium">Date de création :</div>
@@ -445,21 +934,94 @@ const Postuler = () => {
                                   <div>{formValues.website || "-"}</div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-2">
-                                  <div className="font-medium">Nombre d'employés :</div>
+                                  <div className="font-medium">Employés :</div>
                                   <div>{formValues.team_size}</div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-2">
-                                  <div className="font-medium">Stade de développement :</div>
-                                  <div>{STAGES.find(s => s.value === formValues.stage)?.label || "-"}</div>
                                 </div>
                               </div>
                             </TabsContent>
 
-                            <TabsContent value="description">
-                              <div className="text-sm">
-                                <div className="font-medium mb-2">Description du projet :</div>
-                                <div className="text-muted-foreground whitespace-pre-wrap">
-                                  {formValues.description || "-"}
+                            <TabsContent value="projet">
+                              <div className="text-sm space-y-3">
+                                <div>
+                                  <div className="font-medium mb-1">Description :</div>
+                                  <div className="text-muted-foreground whitespace-pre-wrap text-xs">
+                                    {formValues.description || "-"}
+                                  </div>
+                                </div>
+                                <div>
+                                  <div className="font-medium mb-1">Innovation :</div>
+                                  <div className="text-muted-foreground whitespace-pre-wrap text-xs">
+                                    {formValues.innovation || "-"}
+                                  </div>
+                                </div>
+                                <div>
+                                  <div className="font-medium mb-1">Modèle économique :</div>
+                                  <div className="text-muted-foreground whitespace-pre-wrap text-xs">
+                                    {formValues.business_model || "-"}
+                                  </div>
+                                </div>
+                                <div>
+                                  <div className="font-medium mb-1">Potentiel de croissance :</div>
+                                  <div className="text-muted-foreground whitespace-pre-wrap text-xs">
+                                    {formValues.growth_potential || "-"}
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div className="font-medium">Stade :</div>
+                                  <div>{STAGES.find(s => s.value === formValues.stage)?.label || "-"}</div>
+                                </div>
+                                <div>
+                                  <div className="font-medium mb-1">Fondateurs :</div>
+                                  <div className="text-muted-foreground whitespace-pre-wrap text-xs">
+                                    {formValues.founder_info || "-"}
+                                  </div>
+                                </div>
+                              </div>
+                            </TabsContent>
+
+                            <TabsContent value="documents">
+                              <div className="text-sm space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <FileText className="h-4 w-4" />
+                                  <span className="font-medium">RCCM :</span>
+                                  <span className={formValues.doc_rccm ? "text-green-600" : "text-destructive"}>
+                                    {formValues.doc_rccm?.name || "Non fourni"}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <FileText className="h-4 w-4" />
+                                  <span className="font-medium">Attestation fiscale :</span>
+                                  <span className={formValues.doc_tax ? "text-green-600" : "text-destructive"}>
+                                    {formValues.doc_tax?.name || "Non fourni"}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <FileText className="h-4 w-4" />
+                                  <span className="font-medium">Business Plan :</span>
+                                  <span className={formValues.doc_business_plan ? "text-green-600" : "text-destructive"}>
+                                    {formValues.doc_business_plan?.name || "Non fourni"}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <FileText className="h-4 w-4" />
+                                  <span className="font-medium">Statuts :</span>
+                                  <span className={formValues.doc_statutes ? "text-green-600" : "text-muted-foreground"}>
+                                    {formValues.doc_statutes?.name || "Non fourni (optionnel)"}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <FileText className="h-4 w-4" />
+                                  <span className="font-medium">CV fondateurs :</span>
+                                  <span className={formValues.doc_cv ? "text-green-600" : "text-muted-foreground"}>
+                                    {formValues.doc_cv?.name || "Non fourni (optionnel)"}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <FileText className="h-4 w-4" />
+                                  <span className="font-medium">Pitch Deck :</span>
+                                  <span className={formValues.doc_pitch ? "text-green-600" : "text-muted-foreground"}>
+                                    {formValues.doc_pitch?.name || "Non fourni (optionnel)"}
+                                  </span>
                                 </div>
                               </div>
                             </TabsContent>
@@ -501,7 +1063,7 @@ const Postuler = () => {
                           {isLoading ? (
                             <>
                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Soumission en cours...
+                              {isUploading ? "Téléversement..." : "Soumission..."}
                             </>
                           ) : (
                             "Soumettre ma candidature"
