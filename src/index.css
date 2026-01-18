@@ -106,46 +106,53 @@
 
   /* =========================
      THEME: ANSUT / ÉTAT
-     Institutional, formal (Blue + Orange)
+     Institutional, formal - Charte CICG
      ========================= */
   :root[data-brand="ansut"] {
-    --background: 210 20% 98%;
-    --foreground: 209 88% 20%;
+    /* Couleurs officielles gouvernementales CICG */
+    --gouv-vert: 153 100% 29%;      /* #009639 - Vert national */
+    --gouv-bleu: 209 88% 35%;       /* #0B5FA6 - Bleu institutionnel */
+    --gouv-orange: 25 100% 48%;     /* #F57C00 - Orange action */
+    --gouv-or: 43 100% 50%;         /* #FFB400 - Or armoiries */
+    --gouv-creme: 48 33% 97%;       /* Fond crème officiel */
+
+    --background: 48 33% 97%;       /* Fond crème institutionnel */
+    --foreground: 220 13% 13%;      /* Texte foncé #1A1A1A */
 
     --card: 0 0% 100%;
-    --card-foreground: 209 88% 20%;
+    --card-foreground: 220 13% 13%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 209 88% 20%;
+    --popover-foreground: 220 13% 13%;
 
-    --primary: 209 88% 35%; /* Bleu institutionnel #0B5FA6 */
+    --primary: 209 88% 35%;         /* Bleu institutionnel #0B5FA6 */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 209 88% 35%; /* Bleu comme secondaire */
+    --secondary: 153 100% 29%;      /* Vert national comme secondaire */
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 20% 94%;
-    --muted-foreground: 209 40% 40%;
+    --muted: 48 20% 94%;
+    --muted-foreground: 220 8% 46%; /* Gris institutionnel #4A5568 */
 
-    --accent: 25 100% 48%; /* Orange ANSUT action #F57C00 */
+    --accent: 25 100% 48%;          /* Orange ANSUT action #F57C00 */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 210 20% 88%;
-    --input: 210 20% 88%;
-    --ring: 209 88% 35%; /* Focus bleu */
+    --border: 48 20% 88%;
+    --input: 48 20% 88%;
+    --ring: 209 88% 35%;            /* Focus bleu */
 
-    /* Couleurs additionnelles institutionnelles */
-    --premium-green: 209 88% 35%;
-    --premium-green-light: 209 50% 95%;
-    --premium-gold: 25 100% 48%;
-    --premium-gold-light: 25 80% 92%;
-    --premium-cream: 210 20% 98%;
+    /* Couleurs institutionnelles */
+    --premium-green: 153 100% 29%;  /* Vert national */
+    --premium-green-light: 153 50% 95%;
+    --premium-gold: 43 100% 50%;    /* Or armoiries */
+    --premium-gold-light: 43 67% 92%;
+    --premium-cream: 48 33% 97%;
 
     /* Couleurs fonctionnelles */
-    --success: 152 74% 24%;
+    --success: 153 100% 29%;        /* Vert national */
     --success-foreground: 0 0% 100%;
     --warning: 25 100% 50%;
     --warning-foreground: 0 0% 100%;
@@ -154,14 +161,22 @@
     --danger: 0 84% 60%;
     --danger-foreground: 0 0% 100%;
 
+    /* Badges officiels */
+    --badge-officiel: 153 100% 29%;
+    --badge-certifie: 209 88% 35%;
+    
+    /* Barre gouvernementale */
+    --topbar-bg: 25 100% 48%;
+    --topbar-text: 0 0% 100%;
+
     /* Sidebar */
-    --sidebar-background: 209 30% 98%;
-    --sidebar-foreground: 209 88% 20%;
+    --sidebar-background: 48 33% 97%;
+    --sidebar-foreground: 220 13% 13%;
     --sidebar-primary: 209 88% 35%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 20% 94%;
-    --sidebar-accent-foreground: 209 88% 20%;
-    --sidebar-border: 210 20% 88%;
+    --sidebar-accent: 48 20% 94%;
+    --sidebar-accent-foreground: 220 13% 13%;
+    --sidebar-border: 48 20% 88%;
     --sidebar-ring: 209 88% 35%;
   }
 
@@ -453,5 +468,77 @@
 
   .leaflet-container {
     font-family: var(--font-sans);
+  }
+
+  /* =========================
+     STYLES INSTITUTIONNELS CICG
+     ========================= */
+  
+  /* Barre gouvernementale supérieure */
+  .gov-topbar {
+    @apply py-2 px-4 text-sm flex items-center justify-between;
+    background-color: hsl(var(--topbar-bg));
+    color: hsl(var(--topbar-text));
+  }
+
+  /* Badge officiel vert */
+  .gov-badge-officiel {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 
+           rounded-full text-xs font-medium;
+    background-color: hsl(var(--badge-officiel) / 0.1);
+    color: hsl(var(--badge-officiel));
+    border: 1px solid hsl(var(--badge-officiel) / 0.3);
+  }
+
+  /* Badge certifié bleu */
+  .gov-badge-certifie {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 
+           rounded-full text-xs font-medium;
+    background-color: hsl(var(--badge-certifie) / 0.1);
+    color: hsl(var(--badge-certifie));
+    border: 1px solid hsl(var(--badge-certifie) / 0.3);
+  }
+
+  /* Carte institutionnelle */
+  .institutional-card {
+    @apply bg-card rounded-r-lg shadow-sm;
+    border-left: 4px solid hsl(var(--primary));
+  }
+
+  .institutional-card-success {
+    border-left-color: hsl(var(--secondary));
+  }
+
+  /* Hero institutionnel avec motif */
+  .institutional-hero {
+    @apply relative overflow-hidden;
+    background: linear-gradient(135deg, 
+      hsl(var(--primary)) 0%, 
+      hsl(var(--primary) / 0.85) 100%);
+  }
+
+  .institutional-hero::before {
+    content: '';
+    @apply absolute inset-0 opacity-[0.03];
+    background-image: url('/images/armoiries-ci.svg');
+    background-repeat: repeat;
+    background-size: 150px;
+  }
+
+  /* Typographie institutionnelle */
+  [data-brand="ansut"] h1,
+  [data-brand="ansut"] h2,
+  [data-brand="ansut"] h3 {
+    @apply font-semibold;
+    font-family: var(--font-sans);
+  }
+
+  /* Footer institutionnel */
+  .footer-institutional {
+    @apply bg-slate-900;
+  }
+
+  .footer-institutional-divider {
+    @apply border-t border-slate-700;
   }
 }
