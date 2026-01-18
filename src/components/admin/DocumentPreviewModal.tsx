@@ -65,6 +65,8 @@ const DocumentPreviewModal = ({
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [initialPinchDistance, setInitialPinchDistance] = useState<number | null>(null);
+  const [initialPinchZoom, setInitialPinchZoom] = useState(100);
   const contentRef = useRef<HTMLDivElement>(null);
   const imageContainerRef = useRef<HTMLDivElement>(null);
 
@@ -205,6 +207,66 @@ const DocumentPreviewModal = ({
 
   const handleMouseLeave = useCallback(() => {
     setIsDragging(false);
+  }, []);
+
+  // Touch handlers for mobile
+  const getTouchDistance = (touches: React.TouchList): number => {
+    const touch1 = touches[0];
+    const touch2 = touches[1];
+    return Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
+  };
+
+  const getTouchCenter = (touches: React.TouchList): { x: number; y: number } => {
+    const touch1 = touches[0];
+    const touch2 = touches[1];
+    return {
+      x: (touch1.clientX + touch2.clientX) / 2,
+      y: (touch1.clientY + touch2.clientY) / 2
+    };
+  };
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      // Pinch-to-zoom start
+      e.preventDefault();
+      const distance = getTouchDistance(e.touches);
+      setInitialPinchDistance(distance);
+      setInitialPinchZoom(zoomLevel);
+    } else if (e.touches.length === 1 && zoomLevel > 100) {
+      // Single touch drag start
+      const touch = e.touches[0];
+      setIsDragging(true);
+      setDragStart({ x: touch.clientX - dragOffset.x, y: touch.clientY - dragOffset.y });
+    }
+  }, [zoomLevel, dragOffset]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2 && initialPinchDistance !== null) {
+      // Pinch-to-zoom
+      e.preventDefault();
+      const currentDistance = getTouchDistance(e.touches);
+      const scale = currentDistance / initialPinchDistance;
+      const newZoom = Math.round(initialPinchZoom * scale);
+      const clampedZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, newZoom));
+      setZoomLevel(clampedZoom);
+    } else if (e.touches.length === 1 && isDragging) {
+      // Single touch drag
+      e.preventDefault();
+      const touch = e.touches[0];
+      setDragOffset({
+        x: touch.clientX - dragStart.x,
+        y: touch.clientY - dragStart.y
+      });
+    }
+  }, [initialPinchDistance, initialPinchZoom, isDragging, dragStart]);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length < 2) {
+      setInitialPinchDistance(null);
+    }
+    if (e.touches.length === 0) {
+      setIsDragging(false);
+    }
   }, []);
 
   // Reset drag offset when zoom changes to 100% or less
@@ -358,6 +420,10 @@ const DocumentPreviewModal = ({
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseLeave}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          style={{ touchAction: 'none' }}
         >
           <div 
             className="flex items-center justify-center min-h-full p-4"
