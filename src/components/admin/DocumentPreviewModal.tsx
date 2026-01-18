@@ -24,7 +24,8 @@ import {
   FlipVertical,
   Maximize2,
   Minimize2,
-  Scan
+  Scan,
+  Move
 } from "lucide-react";
 
 // Zoom constants
@@ -61,6 +62,9 @@ const DocumentPreviewModal = ({
   const [flipV, setFlipV] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const contentRef = useRef<HTMLDivElement>(null);
   const imageContainerRef = useRef<HTMLDivElement>(null);
 
@@ -73,6 +77,7 @@ const DocumentPreviewModal = ({
       setFlipH(false);
       setFlipV(false);
       setImageDimensions(null);
+      setDragOffset({ x: 0, y: 0 });
     }
   }, [isOpen, documentUrl]);
 
@@ -174,7 +179,40 @@ const DocumentPreviewModal = ({
     setRotation(0);
     setFlipH(false);
     setFlipV(false);
+    setDragOffset({ x: 0, y: 0 });
   }, []);
+
+  // Drag handlers
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (zoomLevel <= 100) return;
+    e.preventDefault();
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - dragOffset.x, y: e.clientY - dragOffset.y });
+  }, [zoomLevel, dragOffset]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    setDragOffset({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y
+    });
+  }, [isDragging, dragStart]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  // Reset drag offset when zoom changes to 100% or less
+  useEffect(() => {
+    if (zoomLevel <= 100) {
+      setDragOffset({ x: 0, y: 0 });
+    }
+  }, [zoomLevel]);
 
   const handleOpenInNewTab = () => {
     if (documentUrl) {
@@ -306,19 +344,43 @@ const DocumentPreviewModal = ({
     }
 
     if (documentType === "image" && documentUrl) {
+      const canDrag = zoomLevel > 100;
+      
       return (
-        <div ref={imageContainerRef} className="relative flex items-center justify-center h-full overflow-auto bg-muted/30">
-          <div className="flex items-center justify-center min-h-full p-4">
+        <div 
+          ref={imageContainerRef} 
+          className={cn(
+            "relative flex items-center justify-center h-full overflow-hidden bg-muted/30",
+            canDrag && "cursor-grab",
+            isDragging && "cursor-grabbing"
+          )}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseLeave}
+        >
+          <div 
+            className="flex items-center justify-center min-h-full p-4"
+            style={{
+              transform: `translate(${dragOffset.x}px, ${dragOffset.y}px)`,
+              transition: isDragging ? 'none' : 'transform 0.1s ease-out'
+            }}
+          >
             <img
               src={documentUrl}
               alt={documentName}
-              className="object-contain rounded-lg shadow-lg transition-transform duration-200"
+              className={cn(
+                "object-contain rounded-lg shadow-lg",
+                !isDragging && "transition-transform duration-200"
+              )}
               style={{ 
                 transform: `scale(${zoomLevel / 100}) rotate(${rotation}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`,
-                transformOrigin: 'center center'
+                transformOrigin: 'center center',
+                pointerEvents: 'none'
               }}
               onLoad={handleImageLoad}
               onError={handleError}
+              draggable={false}
             />
           </div>
           
@@ -414,12 +476,19 @@ const DocumentPreviewModal = ({
                 
                 <Separator orientation="vertical" className="h-5" />
                 
-                {/* Reset all */}
+                {/* Drag indicator */}
+                {zoomLevel > 100 && (
+                  <div className="flex items-center gap-1 text-muted-foreground" title="Glissez pour déplacer l'image">
+                    <Move className="h-4 w-4" />
+                  </div>
+                )}
+                
+                <Separator orientation="vertical" className="h-5" />
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleResetAll}
-                  disabled={zoomLevel === 100 && rotation === 0 && !flipH && !flipV}
+                  disabled={zoomLevel === 100 && rotation === 0 && !flipH && !flipV && dragOffset.x === 0 && dragOffset.y === 0}
                   title="Réinitialiser (0)"
                 >
                   <RotateCcw className="h-4 w-4" />
