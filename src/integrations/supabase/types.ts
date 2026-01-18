@@ -50,6 +50,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          label_valid_until: string | null
           notes: string | null
           reviewed_at: string | null
           reviewer_id: string | null
@@ -62,6 +63,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          label_valid_until?: string | null
           notes?: string | null
           reviewed_at?: string | null
           reviewer_id?: string | null
@@ -74,6 +76,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          label_valid_until?: string | null
           notes?: string | null
           reviewed_at?: string | null
           reviewer_id?: string | null
@@ -189,6 +192,171 @@ export type Database = {
         }
         Relationships: []
       }
+      label_events: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          event_date: string
+          id: string
+          is_virtual: boolean | null
+          location: string | null
+          max_participants: number | null
+          registration_url: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          event_date: string
+          id?: string
+          is_virtual?: boolean | null
+          location?: string | null
+          max_participants?: number | null
+          registration_url?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          event_date?: string
+          id?: string
+          is_virtual?: boolean | null
+          location?: string | null
+          max_participants?: number | null
+          registration_url?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      label_opportunities: {
+        Row: {
+          contact_info: string | null
+          created_at: string | null
+          deadline: string | null
+          description: string
+          eligibility_criteria: string | null
+          external_url: string | null
+          id: string
+          is_active: boolean | null
+          title: string
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          contact_info?: string | null
+          created_at?: string | null
+          deadline?: string | null
+          description: string
+          eligibility_criteria?: string | null
+          external_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          title: string
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          contact_info?: string | null
+          created_at?: string | null
+          deadline?: string | null
+          description?: string
+          eligibility_criteria?: string | null
+          external_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          title?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      label_renewals: {
+        Row: {
+          application_id: string | null
+          expires_at: string | null
+          id: string
+          notes: string | null
+          requested_at: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          startup_id: string
+          status: string | null
+        }
+        Insert: {
+          application_id?: string | null
+          expires_at?: string | null
+          id?: string
+          notes?: string | null
+          requested_at?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          startup_id: string
+          status?: string | null
+        }
+        Update: {
+          application_id?: string | null
+          expires_at?: string | null
+          id?: string
+          notes?: string | null
+          requested_at?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          startup_id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "label_renewals_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "label_renewals_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      label_resources: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          external_url: string | null
+          file_url: string | null
+          id: string
+          is_premium: boolean | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description?: string | null
+          external_url?: string | null
+          file_url?: string | null
+          id?: string
+          is_premium?: boolean | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          external_url?: string | null
+          file_url?: string | null
+          id?: string
+          is_premium?: boolean | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       news: {
         Row: {
           author_id: string | null
@@ -282,6 +450,9 @@ export type Database = {
           growth_potential: string | null
           id: string
           innovation: string | null
+          is_visible_in_directory: boolean | null
+          label_expires_at: string | null
+          label_granted_at: string | null
           legal_status: string | null
           logo_url: string | null
           name: string
@@ -312,6 +483,9 @@ export type Database = {
           growth_potential?: string | null
           id?: string
           innovation?: string | null
+          is_visible_in_directory?: boolean | null
+          label_expires_at?: string | null
+          label_granted_at?: string | null
           legal_status?: string | null
           logo_url?: string | null
           name: string
@@ -342,6 +516,9 @@ export type Database = {
           growth_potential?: string | null
           id?: string
           innovation?: string | null
+          is_visible_in_directory?: boolean | null
+          label_expires_at?: string | null
+          label_granted_at?: string | null
           legal_status?: string | null
           logo_url?: string | null
           name?: string
