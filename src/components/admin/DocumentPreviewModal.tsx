@@ -19,6 +19,7 @@ import {
   ZoomIn,
   ZoomOut,
   RotateCcw,
+  RotateCw,
   Maximize2,
   Minimize2
 } from "lucide-react";
@@ -52,6 +53,7 @@ const DocumentPreviewModal = ({
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(100);
+  const [rotation, setRotation] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -60,6 +62,7 @@ const DocumentPreviewModal = ({
       setIsLoading(true);
       setHasError(false);
       setZoomLevel(100);
+      setRotation(0);
     }
   }, [isOpen, documentUrl]);
 
@@ -111,6 +114,19 @@ const DocumentPreviewModal = ({
     setZoomLevel(100);
   }, []);
 
+  const handleRotateRight = useCallback(() => {
+    setRotation((prev) => (prev + 90) % 360);
+  }, []);
+
+  const handleRotateLeft = useCallback(() => {
+    setRotation((prev) => (prev - 90 + 360) % 360);
+  }, []);
+
+  const handleResetAll = useCallback(() => {
+    setZoomLevel(100);
+    setRotation(0);
+  }, []);
+
   const handleOpenInNewTab = () => {
     if (documentUrl) {
       window.open(documentUrl, "_blank");
@@ -133,7 +149,7 @@ const DocumentPreviewModal = ({
         toggleFullscreen();
       }
       
-      // Zoom shortcuts for images only
+      // Zoom and rotation shortcuts for images only
       if (documentType === "image") {
         if (e.key === "+" || e.key === "=") {
           e.preventDefault();
@@ -143,14 +159,20 @@ const DocumentPreviewModal = ({
           handleZoomOut();
         } else if (e.key === "0") {
           e.preventDefault();
-          handleResetZoom();
+          handleResetAll();
+        } else if (e.key === "r" || e.key === "R") {
+          e.preventDefault();
+          handleRotateRight();
+        } else if (e.key === "l" || e.key === "L") {
+          e.preventDefault();
+          handleRotateLeft();
         }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, handleClose, onDownload, isDownloading, documentType, handleZoomIn, handleZoomOut, handleResetZoom, toggleFullscreen]);
+  }, [isOpen, handleClose, onDownload, isDownloading, documentType, handleZoomIn, handleZoomOut, handleResetAll, handleRotateRight, handleRotateLeft, toggleFullscreen]);
 
   // Handle mouse wheel zoom for images
   useEffect(() => {
@@ -234,7 +256,7 @@ const DocumentPreviewModal = ({
               alt={documentName}
               className="object-contain rounded-lg shadow-lg transition-transform duration-200"
               style={{ 
-                transform: `scale(${zoomLevel / 100})`,
+                transform: `scale(${zoomLevel / 100}) rotate(${rotation}deg)`,
                 transformOrigin: 'center center'
               }}
               onLoad={handleLoad}
@@ -242,10 +264,38 @@ const DocumentPreviewModal = ({
             />
           </div>
           
-          {/* Zoom controls */}
+          {/* Zoom and rotation controls */}
           {!isLoading && !hasError && (
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20">
               <div className="flex items-center gap-2 bg-background/90 backdrop-blur-sm border rounded-lg shadow-lg px-3 py-2">
+                {/* Rotation controls */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRotateLeft}
+                  title="Rotation anti-horaire (L)"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRotateRight}
+                  title="Rotation horaire (R)"
+                >
+                  <RotateCw className="h-4 w-4" />
+                </Button>
+                
+                {rotation !== 0 && (
+                  <span className="text-sm font-medium text-muted-foreground tabular-nums">
+                    {rotation}°
+                  </span>
+                )}
+                
+                <Separator orientation="vertical" className="h-5" />
+                
+                {/* Zoom controls */}
                 <Button
                   variant="ghost"
                   size="sm"
@@ -272,14 +322,16 @@ const DocumentPreviewModal = ({
                 
                 <Separator orientation="vertical" className="h-5" />
                 
+                {/* Reset all */}
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={handleResetZoom}
-                  disabled={zoomLevel === 100}
-                  title="Réinitialiser le zoom (0)"
+                  onClick={handleResetAll}
+                  disabled={zoomLevel === 100 && rotation === 0}
+                  title="Réinitialiser (0)"
                 >
                   <RotateCcw className="h-4 w-4" />
+                  <span className="ml-1 text-xs">Reset</span>
                 </Button>
               </div>
             </div>
