@@ -3,10 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { StatusActionCard, StatusQuickActions } from "@/components/suivi/StatusActionCard";
+import { ProcessTimeline, ProcessTimelineCompact } from "@/components/suivi/ProcessTimeline";
 import { 
   Clock, 
   CheckCircle, 
@@ -113,12 +114,6 @@ const STAGE_LABELS: Record<string, string> = {
   scale: "Scale-up",
 };
 
-const PROCESS_STEPS = [
-  { id: 1, name: "Soumission", description: "Dossier soumis au comité" },
-  { id: 2, name: "Examen", description: "Évaluation par les experts" },
-  { id: 3, name: "Décision", description: "Délibération du comité" },
-  { id: 4, name: "Résultat", description: "Notification de la décision" },
-];
 
 const SuiviCandidature = () => {
   const navigate = useNavigate();
@@ -267,20 +262,6 @@ const SuiviCandidature = () => {
     };
   }, [user]);
 
-  const getProgressPercentage = (status: string) => {
-    const step = STATUS_CONFIG[status]?.step || 1;
-    return Math.round((step / 4) * 100);
-  };
-
-  const getStepStatus = (stepId: number, currentStep: number, isFinal: boolean, isApproved: boolean) => {
-    if (stepId < currentStep) return "completed";
-    if (stepId === currentStep && !isFinal) return "in-progress";
-    if (isFinal && stepId === 4) {
-      return isApproved ? "completed" : "rejected";
-    }
-    return "pending";
-  };
-
   const generateTrackingId = (appId: string, createdAt: string) => {
     const year = new Date(createdAt).getFullYear();
     const shortId = appId.slice(0, 8).toUpperCase();
@@ -400,6 +381,13 @@ const SuiviCandidature = () => {
                 <div className="lg:col-span-2 space-y-6">
                   {selectedApp ? (
                     <>
+                      {/* Status Action Card - THE MAIN ACTION */}
+                      <StatusActionCard 
+                        status={selectedApp.application.status}
+                        hasUnreadComments={selectedApp.comments.length > 0 && selectedApp.application.status === 'under_review'}
+                      />
+                      <StatusQuickActions status={selectedApp.application.status} />
+
                       {/* Header Card */}
                       <Card>
                         <CardHeader className="pb-3">
@@ -419,53 +407,13 @@ const SuiviCandidature = () => {
                           </div>
                         </CardHeader>
                         <CardContent>
-                          {/* Progress Bar */}
-                          <div className="mb-6">
-                            <div className="flex justify-between mb-2">
-                              <span className="text-sm font-medium">Progression du dossier</span>
-                              <span className="text-sm font-medium">
-                                {getProgressPercentage(selectedApp.application.status)}%
-                              </span>
-                            </div>
-                            <Progress 
-                              value={getProgressPercentage(selectedApp.application.status)} 
-                              className="h-2" 
-                            />
-                          </div>
-
-                          {/* Process Steps */}
+                          {/* Process Timeline - Visual Progress */}
                           <div className="space-y-4">
-                            <h3 className="font-medium">Étapes du processus</h3>
-                            <div className="space-y-3">
-                              {PROCESS_STEPS.map((step) => {
-                                const currentStep = STATUS_CONFIG[selectedApp.application.status]?.step || 1;
-                                const isFinal = selectedApp.application.status === "approved" || selectedApp.application.status === "rejected";
-                                const isApproved = selectedApp.application.status === "approved";
-                                const stepStatus = getStepStatus(step.id, currentStep, isFinal, isApproved);
-
-                                return (
-                                  <div key={step.id} className="flex gap-4">
-                                    <div className="flex-shrink-0 mt-1">
-                                      {stepStatus === "completed" ? (
-                                        <CheckCircle className="h-5 w-5 text-green-500" />
-                                      ) : stepStatus === "rejected" ? (
-                                        <XCircle className="h-5 w-5 text-red-500" />
-                                      ) : stepStatus === "in-progress" ? (
-                                        <Clock className="h-5 w-5 text-blue-500" />
-                                      ) : (
-                                        <Clock className="h-5 w-5 text-muted-foreground/40" />
-                                      )}
-                                    </div>
-                                    <div className="flex-grow">
-                                      <p className={`font-medium ${stepStatus === "pending" ? "text-muted-foreground" : ""}`}>
-                                        {step.name}
-                                      </p>
-                                      <p className="text-sm text-muted-foreground">{step.description}</p>
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
+                            <h3 className="font-medium">Progression de votre dossier</h3>
+                            <ProcessTimeline 
+                              currentStatus={selectedApp.application.status}
+                              submittedAt={selectedApp.application.submitted_at}
+                            />
                           </div>
                         </CardContent>
                       </Card>
