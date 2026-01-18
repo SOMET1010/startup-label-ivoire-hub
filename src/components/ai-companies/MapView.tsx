@@ -1,242 +1,220 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
 import { useNavigate } from 'react-router-dom';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
-import { Building2 } from 'lucide-react';
+import { Building2, MapPin, Users, ExternalLink, Award } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import 'leaflet/dist/leaflet.css';
 
 interface Company {
-  id: number;
+  id: string | number;
   name: string;
-  logo: string;
   description: string;
   sector: string;
   specialization: string;
   location: string;
   coordinates: { lat: number; lng: number };
+  logo: string;
   employees: string;
-  website: string;
-  isLabeled: boolean;
-  services: string[];
+  isLabeled?: boolean;
+  website?: string;
 }
 
 interface MapViewProps {
   companies: Company[];
-  apiKey: string;
 }
 
-const MapView = ({ companies, apiKey }: MapViewProps) => {
-  const navigate = useNavigate();
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const markers = useRef<mapboxgl.Marker[]>([]);
+// Fix for default Leaflet marker icons
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
+
+// Custom marker icon creator
+const createCustomIcon = (isLabeled: boolean) => {
+  const color = isLabeled ? 'hsl(142, 76%, 36%)' : 'hsl(215, 16%, 47%)';
+  
+  return L.divIcon({
+    className: 'custom-leaflet-marker',
+    html: `
+      <div style="
+        background: ${color};
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        border: 3px solid white;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+      ">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/>
+          <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/>
+          <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/>
+          <path d="M10 6h4"/>
+          <path d="M10 10h4"/>
+          <path d="M10 14h4"/>
+          <path d="M10 18h4"/>
+        </svg>
+      </div>
+    `,
+    iconSize: [36, 36],
+    iconAnchor: [18, 36],
+    popupAnchor: [0, -36],
+  });
+};
+
+// Component to fit bounds to all markers
+const FitBounds = ({ companies }: { companies: Company[] }) => {
+  const map = useMap();
 
   useEffect(() => {
-    if (!mapContainer.current || !apiKey) return;
+    if (companies.length === 0) return;
 
-    // Initialize map
-    mapboxgl.accessToken = apiKey;
-    
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/light-v11',
-      center: [-5.5471, 7.5400], // Center on Côte d'Ivoire
-      zoom: 6.5,
-    });
-
-    // Add navigation controls
-    map.current.addControl(
-      new mapboxgl.NavigationControl({
-        visualizePitch: true,
-      }),
-      'top-right'
+    const bounds = L.latLngBounds(
+      companies.map(c => [c.coordinates.lat, c.coordinates.lng] as [number, number])
     );
 
-    // Cleanup function
-    return () => {
-      markers.current.forEach(marker => marker.remove());
-      markers.current = [];
-      map.current?.remove();
-    };
-  }, [apiKey]);
+    map.fitBounds(bounds, { padding: [50, 50], maxZoom: 10 });
+  }, [companies, map]);
 
-  // Update markers when companies change
-  useEffect(() => {
-    if (!map.current) return;
+  return null;
+};
 
-    // Remove existing markers
-    markers.current.forEach(marker => marker.remove());
-    markers.current = [];
+const MapView = ({ companies }: MapViewProps) => {
+  const navigate = useNavigate();
 
-    // Add new markers for each company
-    companies.forEach(company => {
-      // Create custom marker element
-      const el = document.createElement('div');
-      el.className = 'custom-marker';
-      el.style.width = '40px';
-      el.style.height = '40px';
-      el.style.borderRadius = '50%';
-      el.style.cursor = 'pointer';
-      el.style.display = 'flex';
-      el.style.alignItems = 'center';
-      el.style.justifyContent = 'center';
-      el.style.transition = 'transform 0.2s';
-      el.style.backgroundColor = company.isLabeled ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground))';
-      el.style.border = '3px solid white';
-      el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
-      
-      // Add building icon
-      const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      icon.setAttribute('width', '20');
-      icon.setAttribute('height', '20');
-      icon.setAttribute('viewBox', '0 0 24 24');
-      icon.setAttribute('fill', 'none');
-      icon.setAttribute('stroke', 'white');
-      icon.setAttribute('stroke-width', '2');
-      icon.innerHTML = '<rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/>';
-      el.appendChild(icon);
-
-      // Add hover effect
-      el.addEventListener('mouseenter', () => {
-        el.style.transform = 'scale(1.1)';
-      });
-      el.addEventListener('mouseleave', () => {
-        el.style.transform = 'scale(1)';
-      });
-
-      // Create popup content as DOM element for better interactivity (XSS-safe)
-      const popupContent = document.createElement('div');
-      popupContent.style.minWidth = '250px';
-      popupContent.style.maxWidth = '300px';
-      
-      // Build popup using safe DOM methods instead of innerHTML
-      const container = document.createElement('div');
-      
-      // Header with logo and name
-      const header = document.createElement('div');
-      header.style.cssText = 'display: flex; align-items: start; margin-bottom: 12px;';
-      
-      const logoContainer = document.createElement('div');
-      logoContainer.style.cssText = 'width: 40px; height: 40px; border-radius: 8px; background: hsl(var(--muted)); margin-right: 12px; overflow: hidden;';
-      const logo = document.createElement('img');
-      logo.src = company.logo;
-      logo.alt = company.name;
-      logo.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
-      logoContainer.appendChild(logo);
-      
-      const headerInfo = document.createElement('div');
-      headerInfo.style.flexGrow = '1';
-      const nameEl = document.createElement('h3');
-      nameEl.style.cssText = 'font-weight: bold; font-size: 16px; margin-bottom: 4px; color: hsl(var(--foreground));';
-      nameEl.textContent = company.name;
-      const labelBadge = document.createElement('span');
-      labelBadge.style.cssText = `display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 500; ${company.isLabeled ? 'background: hsl(var(--primary)); color: hsl(var(--primary-foreground));' : 'border: 1px solid hsl(var(--border)); color: hsl(var(--foreground));'}`;
-      labelBadge.textContent = company.isLabeled ? 'Labellisée' : 'Non labellisée';
-      headerInfo.appendChild(nameEl);
-      headerInfo.appendChild(labelBadge);
-      
-      header.appendChild(logoContainer);
-      header.appendChild(headerInfo);
-      container.appendChild(header);
-      
-      // Description
-      const description = document.createElement('p');
-      description.style.cssText = 'font-size: 13px; color: hsl(var(--muted-foreground)); margin-bottom: 12px; line-height: 1.4;';
-      const descText = company.description.substring(0, 120) + (company.description.length > 120 ? '...' : '');
-      description.textContent = descText;
-      container.appendChild(description);
-      
-      // Details
-      const details = document.createElement('div');
-      details.style.marginBottom = '8px';
-      
-      const createDetailRow = (label: string, value: string) => {
-        const row = document.createElement('div');
-        row.style.cssText = 'font-size: 12px; color: hsl(var(--muted-foreground)); margin-bottom: 4px;';
-        const strong = document.createElement('strong');
-        strong.textContent = label;
-        row.appendChild(strong);
-        row.appendChild(document.createTextNode(' ' + value));
-        return row;
-      };
-      
-      details.appendChild(createDetailRow('Spécialisation:', company.specialization));
-      details.appendChild(createDetailRow('Secteur:', company.sector));
-      details.appendChild(createDetailRow('Employés:', company.employees));
-      container.appendChild(details);
-      
-      // Website link
-      const linkContainer = document.createElement('div');
-      linkContainer.style.cssText = 'margin-top: 12px; padding-top: 12px; border-top: 1px solid hsl(var(--border)); display: flex; gap: 8px;';
-      const websiteLink = document.createElement('a');
-      websiteLink.href = company.website;
-      websiteLink.target = '_blank';
-      websiteLink.rel = 'noopener noreferrer';
-      websiteLink.style.cssText = 'color: hsl(var(--primary)); text-decoration: none; font-size: 13px; font-weight: 500;';
-      websiteLink.textContent = 'Visiter le site →';
-      linkContainer.appendChild(websiteLink);
-      container.appendChild(linkContainer);
-      
-      popupContent.appendChild(container);
-      
-      // Add details button
-      const detailsButton = document.createElement('button');
-      detailsButton.textContent = 'Voir tous les détails';
-      detailsButton.style.cssText = 'width: 100%; margin-top: 12px; padding: 8px 12px; background: hsl(var(--primary)); color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity 0.2s;';
-      detailsButton.onmouseover = () => detailsButton.style.opacity = '0.9';
-      detailsButton.onmouseout = () => detailsButton.style.opacity = '1';
-      detailsButton.onclick = () => navigate(`/entreprises-ia/${company.id}`);
-      
-      popupContent.appendChild(detailsButton);
-
-      // Create popup
-      const popup = new mapboxgl.Popup({
-        offset: 25,
-        closeButton: true,
-        closeOnClick: false,
-        maxWidth: '320px'
-      }).setDOMContent(popupContent);
-
-      // Create and add marker
-      const marker = new mapboxgl.Marker(el)
-        .setLngLat([company.coordinates.lng, company.coordinates.lat])
-        .setPopup(popup)
-        .addTo(map.current!);
-
-      markers.current.push(marker);
-    });
-
-    // Fit map to show all markers
-    if (companies.length > 0) {
-      const bounds = new mapboxgl.LngLatBounds();
-      companies.forEach(company => {
-        bounds.extend([company.coordinates.lng, company.coordinates.lat]);
-      });
-      map.current?.fitBounds(bounds, {
-        padding: { top: 50, bottom: 50, left: 50, right: 50 },
-        maxZoom: 12
-      });
-    }
-  }, [companies]);
+  // Center on Côte d'Ivoire
+  const defaultCenter: [number, number] = [7.54, -5.55];
+  const defaultZoom = 7;
 
   return (
-    <div className="relative w-full" style={{ height: '600px' }}>
-      <div ref={mapContainer} className="absolute inset-0 rounded-lg overflow-hidden shadow-lg" />
-      <div className="absolute bottom-4 left-4 bg-background/95 backdrop-blur-sm px-4 py-2 rounded-lg shadow-md border text-sm">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'hsl(var(--primary))' }}></div>
-            <span className="text-muted-foreground">Labellisée</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: 'hsl(var(--muted-foreground))' }}></div>
-            <span className="text-muted-foreground">Non labellisée</span>
-          </div>
-        </div>
+    <div className="relative w-full h-[600px] rounded-xl overflow-hidden border border-border shadow-lg">
+      <MapContainer
+        center={defaultCenter}
+        zoom={defaultZoom}
+        className="w-full h-full z-0"
+        scrollWheelZoom={true}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        
+        <FitBounds companies={companies} />
+        
+        {companies.map((company) => (
+          <Marker
+            key={company.id}
+            position={[company.coordinates.lat, company.coordinates.lng]}
+            icon={createCustomIcon(company.isLabeled ?? false)}
+          >
+            <Popup className="leaflet-custom-popup" maxWidth={320} minWidth={280}>
+              <div className="p-1">
+                {/* Header with logo and name */}
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+                    {company.logo ? (
+                      <img 
+                        src={company.logo} 
+                        alt={company.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                          (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                    ) : null}
+                    <Building2 className={`w-6 h-6 text-gray-500 ${company.logo ? 'hidden' : ''}`} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-gray-900 text-base leading-tight mb-1">
+                      {company.name}
+                    </h3>
+                    {company.isLabeled && (
+                      <Badge className="bg-green-100 text-green-700 text-xs">
+                        <Award className="w-3 h-3 mr-1" />
+                        Labellisée
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Description */}
+                <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                  {company.description}
+                </p>
+                
+                {/* Info badges */}
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <div className="flex items-center gap-1 text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
+                    <MapPin className="w-3 h-3" />
+                    {company.location}
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
+                    <Users className="w-3 h-3" />
+                    {company.employees}
+                  </div>
+                </div>
+                
+                {/* Specialization */}
+                <div className="mb-3">
+                  <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-700">
+                    {company.specialization}
+                  </Badge>
+                </div>
+                
+                {/* Actions */}
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => navigate(`/entreprises-ia/${company.id}`)}
+                  >
+                    Voir les détails
+                  </Button>
+                  {company.website && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => window.open(company.website, '_blank')}
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
+      
+      {/* Overlay - Company count */}
+      <div className="absolute top-4 left-4 z-[1000] bg-background/95 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg border border-border">
+        <span className="font-semibold text-foreground">{companies.length}</span>
+        <span className="text-muted-foreground ml-1">
+          entreprise{companies.length !== 1 ? 's' : ''}
+        </span>
       </div>
-      <div className="absolute top-4 left-4 bg-background/95 backdrop-blur-sm px-4 py-2 rounded-lg shadow-md border">
-        <div className="flex items-center gap-2">
-          <Building2 className="h-4 w-4 text-primary" />
-          <span className="text-sm font-medium">{companies.length} entreprise{companies.length !== 1 ? 's' : ''}</span>
+      
+      {/* Legend */}
+      <div className="absolute bottom-4 left-4 z-[1000] bg-background/95 backdrop-blur-sm rounded-lg px-4 py-3 shadow-lg border border-border">
+        <p className="text-xs font-medium text-foreground mb-2">Légende</p>
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-green-600" />
+            <span className="text-xs text-muted-foreground">Labellisée</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-gray-500" />
+            <span className="text-xs text-muted-foreground">Non labellisée</span>
+          </div>
         </div>
       </div>
     </div>
