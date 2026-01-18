@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,11 +13,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { ClipboardCheck, Loader2, FileText, Building2, Users, Upload } from "lucide-react";
+import { ClipboardCheck, Loader2, FileText, Building2, Users, Upload, Save } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import FileUploadField from "@/components/forms/FileUploadField";
+import DraftStatusIndicator from "@/components/forms/DraftStatusIndicator";
+import DraftResumeBanner from "@/components/forms/DraftResumeBanner";
+import useDraftApplication from "@/hooks/useDraftApplication";
 
 // File validation helper - returns undefined if valid file or no file for optional, or File
 const fileSchema = (required: boolean = false) => {
@@ -112,6 +115,27 @@ const Postuler = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [trackingId, setTrackingId] = useState("");
+  const [showDraftBanner, setShowDraftBanner] = useState(false);
+  const [draftLoaded, setDraftLoaded] = useState(false);
+  const hasInitializedDraft = useRef(false);
+
+  // Draft management hook
+  const {
+    draft,
+    isLoading: isDraftLoading,
+    isSaving,
+    hasChanges,
+    hasDraft,
+    saveDraft,
+    updateFormData,
+    deleteDraft,
+  } = useDraftApplication({
+    autoSaveInterval: 30000, // 30 seconds
+    onSaveSuccess: () => {},
+    onSaveError: (error) => {
+      console.error("Draft save error:", error);
+    },
+  });
 
   const form = useForm<StartupFormData>({
     resolver: zodResolver(startupFormSchema),
@@ -140,6 +164,118 @@ const Postuler = () => {
       terms_accepted: false,
     },
   });
+
+  // Check for existing draft on load
+  useEffect(() => {
+    if (!isDraftLoading && hasDraft && draft && !hasInitializedDraft.current) {
+      hasInitializedDraft.current = true;
+      setShowDraftBanner(true);
+    }
+  }, [isDraftLoading, hasDraft, draft]);
+
+  // Handle resuming draft
+  const handleResumeDraft = useCallback(() => {
+    if (draft?.formData) {
+      // Reset form with draft data
+      form.reset({
+        ...form.getValues(),
+        name: draft.formData.name || "",
+        legal_status: draft.formData.legal_status || "",
+        rccm: draft.formData.rccm || "",
+        tax_id: draft.formData.tax_id || "",
+        sector: draft.formData.sector || "",
+        address: draft.formData.address || "",
+        founded_date: draft.formData.founded_date || "",
+        website: draft.formData.website || "",
+        team_size: draft.formData.team_size || 1,
+        description: draft.formData.description || "",
+        innovation: draft.formData.innovation || "",
+        business_model: draft.formData.business_model || "",
+        growth_potential: draft.formData.growth_potential || "",
+        stage: draft.formData.stage || "",
+        founder_info: draft.formData.founder_info || "",
+      });
+      
+      // Go to saved step
+      if (draft.currentStep) {
+        setCurrentStep(draft.currentStep);
+      }
+      
+      setDraftLoaded(true);
+      setShowDraftBanner(false);
+      
+      toast({
+        title: "Brouillon chargé",
+        description: "Votre brouillon a été restauré. Vous pouvez continuer votre candidature.",
+      });
+    }
+  }, [draft, form]);
+
+  // Handle deleting draft
+  const handleDeleteDraft = useCallback(async () => {
+    await deleteDraft();
+    setShowDraftBanner(false);
+    hasInitializedDraft.current = false;
+    
+    // Reset form to defaults
+    form.reset();
+    setCurrentStep(1);
+  }, [deleteDraft, form]);
+
+  // Watch form changes for auto-save
+  useEffect(() => {
+    if (!draftLoaded && !showDraftBanner) return;
+    
+    const subscription = form.watch((values) => {
+      // Only update if we have some data
+      if (values.name || values.description) {
+        const formData = {
+          name: values.name || "",
+          legal_status: values.legal_status || "",
+          rccm: values.rccm || "",
+          tax_id: values.tax_id || "",
+          sector: values.sector || "",
+          address: values.address || "",
+          founded_date: values.founded_date || "",
+          website: values.website || "",
+          team_size: values.team_size || 1,
+          description: values.description || "",
+          innovation: values.innovation || "",
+          business_model: values.business_model || "",
+          growth_potential: values.growth_potential || "",
+          stage: values.stage || "",
+          founder_info: values.founder_info || "",
+        };
+        updateFormData(formData, currentStep);
+      }
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [form, currentStep, updateFormData, draftLoaded, showDraftBanner]);
+
+  // Manual save handler
+  const handleManualSave = useCallback(async () => {
+    const values = form.getValues();
+    const formData = {
+      name: values.name || "",
+      legal_status: values.legal_status || "",
+      rccm: values.rccm || "",
+      tax_id: values.tax_id || "",
+      sector: values.sector || "",
+      address: values.address || "",
+      founded_date: values.founded_date || "",
+      website: values.website || "",
+      team_size: values.team_size || 1,
+      description: values.description || "",
+      innovation: values.innovation || "",
+      business_model: values.business_model || "",
+      growth_potential: values.growth_potential || "",
+      stage: values.stage || "",
+      founder_info: values.founder_info || "",
+    };
+    await saveDraft(formData, currentStep, false);
+    setDraftLoaded(true);
+  }, [form, currentStep, saveDraft]);
 
   const uploadFile = async (file: File, userId: string, startupId: string, docType: string): Promise<string | null> => {
     const extension = file.name.split(".").pop();
@@ -175,32 +311,62 @@ const Postuler = () => {
     setIsUploading(true);
 
     try {
-      // First create the startup record to get the ID
-      const { data: startupData, error: startupError } = await supabase
-        .from("startups")
-        .insert({
-          user_id: user.id,
-          name: data.name.trim(),
-          description: data.description.trim(),
-          sector: data.sector,
-          website: data.website?.trim() || null,
-          stage: data.stage,
-          team_size: data.team_size,
-          founded_date: data.founded_date || null,
-          legal_status: data.legal_status,
-          rccm: data.rccm.trim(),
-          tax_id: data.tax_id.trim(),
-          address: data.address.trim(),
-          founder_info: data.founder_info.trim(),
-          innovation: data.innovation.trim(),
-          business_model: data.business_model.trim(),
-          growth_potential: data.growth_potential.trim(),
-          status: "submitted",
-        })
-        .select()
-        .single();
+      let startupId = draft?.startupId;
+      
+      // If we have a draft, update the existing startup
+      if (startupId) {
+        const { error: updateError } = await supabase
+          .from("startups")
+          .update({
+            name: data.name.trim(),
+            description: data.description.trim(),
+            sector: data.sector,
+            website: data.website?.trim() || null,
+            stage: data.stage,
+            team_size: data.team_size,
+            founded_date: data.founded_date || null,
+            legal_status: data.legal_status,
+            rccm: data.rccm.trim(),
+            tax_id: data.tax_id.trim(),
+            address: data.address.trim(),
+            founder_info: data.founder_info.trim(),
+            innovation: data.innovation.trim(),
+            business_model: data.business_model.trim(),
+            growth_potential: data.growth_potential.trim(),
+            status: "submitted",
+          })
+          .eq("id", startupId);
 
-      if (startupError) throw startupError;
+        if (updateError) throw updateError;
+      } else {
+        // Create new startup record
+        const { data: startupData, error: startupError } = await supabase
+          .from("startups")
+          .insert({
+            user_id: user.id,
+            name: data.name.trim(),
+            description: data.description.trim(),
+            sector: data.sector,
+            website: data.website?.trim() || null,
+            stage: data.stage,
+            team_size: data.team_size,
+            founded_date: data.founded_date || null,
+            legal_status: data.legal_status,
+            rccm: data.rccm.trim(),
+            tax_id: data.tax_id.trim(),
+            address: data.address.trim(),
+            founder_info: data.founder_info.trim(),
+            innovation: data.innovation.trim(),
+            business_model: data.business_model.trim(),
+            growth_potential: data.growth_potential.trim(),
+            status: "submitted",
+          })
+          .select()
+          .single();
+
+        if (startupError) throw startupError;
+        startupId = startupData.id;
+      }
 
       // Upload documents
       const documentUrls: Record<string, string | null> = {
@@ -216,42 +382,42 @@ const Postuler = () => {
 
       if (data.doc_rccm) {
         uploadPromises.push(
-          uploadFile(data.doc_rccm, user.id, startupData.id, "rccm").then(url => {
+          uploadFile(data.doc_rccm, user.id, startupId!, "rccm").then(url => {
             documentUrls.doc_rccm = url;
           })
         );
       }
       if (data.doc_tax) {
         uploadPromises.push(
-          uploadFile(data.doc_tax, user.id, startupData.id, "tax").then(url => {
+          uploadFile(data.doc_tax, user.id, startupId!, "tax").then(url => {
             documentUrls.doc_tax = url;
           })
         );
       }
       if (data.doc_business_plan) {
         uploadPromises.push(
-          uploadFile(data.doc_business_plan, user.id, startupData.id, "business_plan").then(url => {
+          uploadFile(data.doc_business_plan, user.id, startupId!, "business_plan").then(url => {
             documentUrls.doc_business_plan = url;
           })
         );
       }
       if (data.doc_statutes) {
         uploadPromises.push(
-          uploadFile(data.doc_statutes, user.id, startupData.id, "statutes").then(url => {
+          uploadFile(data.doc_statutes, user.id, startupId!, "statutes").then(url => {
             documentUrls.doc_statutes = url;
           })
         );
       }
       if (data.doc_cv) {
         uploadPromises.push(
-          uploadFile(data.doc_cv, user.id, startupData.id, "cv").then(url => {
+          uploadFile(data.doc_cv, user.id, startupId!, "cv").then(url => {
             documentUrls.doc_cv = url;
           })
         );
       }
       if (data.doc_pitch) {
         uploadPromises.push(
-          uploadFile(data.doc_pitch, user.id, startupData.id, "pitch").then(url => {
+          uploadFile(data.doc_pitch, user.id, startupId!, "pitch").then(url => {
             documentUrls.doc_pitch = url;
           })
         );
@@ -261,19 +427,19 @@ const Postuler = () => {
       setIsUploading(false);
 
       // Update startup with document URLs
-      const { error: updateError } = await supabase
+      const { error: docUpdateError } = await supabase
         .from("startups")
         .update(documentUrls)
-        .eq("id", startupData.id);
+        .eq("id", startupId);
 
-      if (updateError) throw updateError;
+      if (docUpdateError) throw docUpdateError;
 
       // Create application record
       const { data: applicationData, error: applicationError } = await supabase
         .from("applications")
         .insert({
           user_id: user.id,
-          startup_id: startupData.id,
+          startup_id: startupId!,
           status: "pending",
           submitted_at: new Date().toISOString(),
         })
@@ -317,6 +483,29 @@ const Postuler = () => {
 
     const isValid = await form.trigger(fieldsToValidate);
     if (isValid) {
+      // Save draft when changing step
+      if (draftLoaded || hasChanges) {
+        const values = form.getValues();
+        const formData = {
+          name: values.name || "",
+          legal_status: values.legal_status || "",
+          rccm: values.rccm || "",
+          tax_id: values.tax_id || "",
+          sector: values.sector || "",
+          address: values.address || "",
+          founded_date: values.founded_date || "",
+          website: values.website || "",
+          team_size: values.team_size || 1,
+          description: values.description || "",
+          innovation: values.innovation || "",
+          business_model: values.business_model || "",
+          growth_potential: values.growth_potential || "",
+          stage: values.stage || "",
+          founder_info: values.founder_info || "",
+        };
+        await saveDraft(formData, currentStep + 1, true);
+      }
+      
       setCurrentStep(currentStep + 1);
       window.scrollTo(0, 0);
     }
@@ -327,8 +516,8 @@ const Postuler = () => {
     window.scrollTo(0, 0);
   };
 
-  // Show loading state while checking auth
-  if (authLoading) {
+  // Show loading state while checking auth or draft
+  if (authLoading || isDraftLoading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
@@ -377,6 +566,28 @@ const Postuler = () => {
                 Complétez ce formulaire pour soumettre votre candidature au Label Startup numérique
               </p>
             </div>
+
+            {/* Draft Resume Banner */}
+            {showDraftBanner && draft && (
+              <DraftResumeBanner
+                startupName={draft.formData?.name || "Candidature"}
+                lastModified={draft.lastSaved}
+                onResume={handleResumeDraft}
+                onDelete={handleDeleteDraft}
+              />
+            )}
+
+            {/* Draft Status Indicator */}
+            {(draftLoaded || hasDraft) && !showDraftBanner && (
+              <div className="mb-6">
+                <DraftStatusIndicator
+                  isSaving={isSaving}
+                  hasChanges={hasChanges}
+                  lastSaved={draft?.lastSaved}
+                  onManualSave={handleManualSave}
+                />
+              </div>
+            )}
 
             {/* Progress bar */}
             <div className="mb-8">
@@ -439,7 +650,7 @@ const Postuler = () => {
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Statut juridique *</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <Select onValueChange={field.onChange} value={field.value}>
                                   <FormControl>
                                     <SelectTrigger>
                                       <SelectValue placeholder="Sélectionner" />
@@ -464,7 +675,7 @@ const Postuler = () => {
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Secteur d'activité *</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <Select onValueChange={field.onChange} value={field.value}>
                                   <FormControl>
                                     <SelectTrigger>
                                       <SelectValue placeholder="Sélectionner" />
@@ -573,7 +784,17 @@ const Postuler = () => {
                         </div>
                       </div>
 
-                      <div className="mt-8 flex justify-end">
+                      <div className="mt-8 flex justify-between">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handleManualSave}
+                          disabled={isSaving}
+                          className="gap-2"
+                        >
+                          <Save className="h-4 w-4" />
+                          Sauvegarder
+                        </Button>
                         <Button type="button" onClick={nextStep}>
                           Étape suivante
                         </Button>
@@ -681,7 +902,7 @@ const Postuler = () => {
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Stade de développement *</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <Select onValueChange={field.onChange} value={field.value}>
                                   <FormControl>
                                     <SelectTrigger>
                                       <SelectValue placeholder="Sélectionner le stade" />
@@ -724,9 +945,21 @@ const Postuler = () => {
                       </div>
 
                       <div className="mt-8 flex justify-between">
-                        <Button type="button" variant="outline" onClick={prevStep}>
-                          Étape précédente
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button type="button" variant="outline" onClick={prevStep}>
+                            Étape précédente
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={handleManualSave}
+                            disabled={isSaving}
+                            className="gap-2"
+                          >
+                            <Save className="h-4 w-4" />
+                            Sauvegarder
+                          </Button>
+                        </div>
                         <Button type="button" onClick={nextStep}>
                           Étape suivante
                         </Button>
