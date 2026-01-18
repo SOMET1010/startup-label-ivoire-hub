@@ -4,32 +4,36 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ProtectedRoute } from "./components/auth/ProtectedRoute";
-import { RoleGate } from "./components/auth/RoleGate";
-
-// Components
+import { AuthProvider } from "./contexts/AuthContext";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import RoleGate from "./components/auth/RoleGate";
+import { LabelGate } from "./components/auth/LabelGate";
 import CloudStatusBanner from "./components/CloudStatusBanner";
 import LabelCoach from "./components/LabelCoach";
-
-// Public pages
 import Index from "./pages/Index";
 import Criteres from "./pages/Criteres";
-import EligibiliteQuiz from "./pages/EligibiliteQuiz";
 import Avantages from "./pages/Avantages";
+import EligibiliteQuiz from "./pages/EligibiliteQuiz";
 import Postuler from "./pages/Postuler";
-import Annuaire from "./pages/Annuaire";
+import FAQ from "./pages/FAQ";
+import Actualites from "./pages/Actualites";
+import ActualiteDetail from "./pages/ActualiteDetail";
 import Accompagnement from "./pages/Accompagnement";
 import Investisseurs from "./pages/Investisseurs";
 import EntreprisesIA from "./pages/EntreprisesIA";
 import EntrepriseIADetail from "./pages/EntrepriseIADetail";
+import Annuaire from "./pages/Annuaire";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import SuiviCandidature from "./pages/SuiviCandidature";
-import FAQ from "./pages/FAQ";
-import Actualites from "./pages/Actualites";
-
-// Startup pages
+import AdminDashboard from "./pages/admin/Dashboard";
 import StartupDashboard from "./pages/startup/Dashboard";
+import LabelSpace from "./pages/startup/LabelSpace";
+import Resources from "./pages/startup/Resources";
+import Opportunities from "./pages/startup/Opportunities";
+import Events from "./pages/startup/Events";
+import Network from "./pages/startup/Network";
+import Renewal from "./pages/startup/Renewal";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/Dashboard";
