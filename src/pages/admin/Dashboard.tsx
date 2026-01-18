@@ -43,6 +43,7 @@ import {
   RefreshCw,
   Shield,
   Star,
+  FileQuestion,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -54,6 +55,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import EvaluationList from "@/components/evaluation/EvaluationList";
 import ApplicationFilters from "@/components/admin/ApplicationFilters";
 import DocumentViewer from "@/components/admin/DocumentViewer";
+import RequestDocumentDialog, { DOCUMENT_TYPES } from "@/components/admin/RequestDocumentDialog";
 
 interface StartupDocuments {
   doc_rccm: string | null;
@@ -107,6 +109,7 @@ interface Stats {
 const STATUS_LABELS: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   pending: { label: "En attente", variant: "secondary" },
   under_review: { label: "En cours d'examen", variant: "outline" },
+  incomplete: { label: "Documents manquants", variant: "outline" },
   approved: { label: "Approuvée", variant: "default" },
   rejected: { label: "Rejetée", variant: "destructive" },
 };
@@ -150,6 +153,9 @@ export default function AdminDashboard() {
   const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
   const [showRoleDialog, setShowRoleDialog] = useState(false);
   const [newRole, setNewRole] = useState("");
+
+  // Document request
+  const [showDocumentRequestDialog, setShowDocumentRequestDialog] = useState(false);
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");
@@ -533,6 +539,11 @@ export default function AdminDashboard() {
     setShowRoleDialog(true);
   };
 
+  const openDocumentRequestDialog = (app: ApplicationWithStartup) => {
+    setSelectedApplication(app);
+    setShowDocumentRequestDialog(true);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -697,6 +708,17 @@ export default function AdminDashboard() {
                                 >
                                   <Eye className="h-4 w-4" />
                                 </Button>
+                                {(app.status === "pending" || app.status === "under_review" || app.status === "incomplete") && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-orange-600 hover:text-orange-700"
+                                    onClick={() => openDocumentRequestDialog(app)}
+                                    title="Demander un document"
+                                  >
+                                    <FileQuestion className="h-4 w-4" />
+                                  </Button>
+                                )}
                                 {app.status === "pending" && (
                                   <Button
                                     variant="ghost"
@@ -708,7 +730,7 @@ export default function AdminDashboard() {
                                     <Clock className="h-4 w-4" />
                                   </Button>
                                 )}
-                                {(app.status === "pending" || app.status === "under_review") && (
+                                {(app.status === "pending" || app.status === "under_review" || app.status === "incomplete") && (
                                   <>
                                     <Button
                                       variant="ghost"
@@ -1058,6 +1080,19 @@ export default function AdminDashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Document Request Dialog */}
+      <RequestDocumentDialog
+        open={showDocumentRequestDialog}
+        onOpenChange={setShowDocumentRequestDialog}
+        application={selectedApplication}
+        onSuccess={() => {
+          fetchData();
+          setShowDocumentRequestDialog(false);
+          setSelectedApplication(null);
+        }}
+        adminUserId={user?.id || ""}
+      />
 
       <Footer />
     </div>

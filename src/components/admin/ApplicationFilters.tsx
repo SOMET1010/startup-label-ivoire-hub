@@ -42,6 +42,7 @@ const STATUS_OPTIONS = [
   { value: "all", label: "Tous les statuts" },
   { value: "pending", label: "En attente" },
   { value: "under_review", label: "En cours d'examen" },
+  { value: "incomplete", label: "Documents manquants" },
   { value: "approved", label: "Approuvée" },
   { value: "rejected", label: "Rejetée" },
 ];

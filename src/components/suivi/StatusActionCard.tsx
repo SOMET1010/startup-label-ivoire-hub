@@ -63,6 +63,15 @@ const STATUS_ACTIONS: Record<string, StatusAction> = {
     linkTo: "/postuler",
     accent: "warning"
   },
+  incomplete: {
+    title: "Documents manquants",
+    description: "Des documents supplémentaires ont été demandés pour compléter votre dossier de candidature.",
+    icon: <FileUp className="h-6 w-6" />,
+    buttonLabel: "Voir les documents requis",
+    buttonVariant: "default",
+    linkTo: "/suivi-candidature",
+    accent: "warning"
+  },
   info_requested: {
     title: "Informations demandées",
     description: "Un évaluateur vous a posé une question. Répondez pour débloquer l'examen de votre dossier.",
