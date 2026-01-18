@@ -14,6 +14,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import GovTopBar from "@/components/gov/GovTopBar";
+import { BrandToggle } from "@/components/BrandSwitcher";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -99,7 +100,8 @@ const Navbar = () => {
           </div>
 
           {/* Auth Buttons */}
-          <div className="hidden md:flex items-center space-x-2">
+          <div className="hidden md:flex items-center space-x-3">
+            <BrandToggle />
             {loading ? (
               <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
             ) : user ? (
@@ -234,6 +236,9 @@ const Navbar = () => {
               </Link>
 
               <div className="pt-2 border-t border-border">
+                <div className="flex justify-center mb-4">
+                  <BrandToggle />
+                </div>
                 {user ? (
                   <div className="flex flex-col space-y-2">
                     <div className="flex items-center space-x-3 py-2">
