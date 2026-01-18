@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBrand } from "@/hooks/useBrand";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,11 +13,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import GovTopBar from "@/components/gov/GovTopBar";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, profile, userRole, signOut, loading } = useAuth();
   const navigate = useNavigate();
+  const { brand } = useBrand();
+  const isInstitutional = brand === "ansut";
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -49,8 +53,10 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-background border-b border-border sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-2">
+    <>
+      {isInstitutional && <GovTopBar />}
+      <nav className="bg-background border-b border-border sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-2">
         <div className="flex justify-between items-center">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
@@ -269,9 +275,10 @@ const Navbar = () => {
               </div>
             </div>
           </div>
-        )}
-      </div>
-    </nav>
+          )}
+        </div>
+      </nav>
+    </>
   );
 };
 

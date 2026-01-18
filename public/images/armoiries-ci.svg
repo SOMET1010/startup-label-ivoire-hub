@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120" fill="none">
+  <!-- Simplified Coat of Arms of Côte d'Ivoire -->
+  <!-- Shield background -->
+  <path d="M10 20 L50 5 L90 20 L90 70 Q90 95 50 115 Q10 95 10 70 Z" fill="#009639"/>
+  
+  <!-- Shield center stripe (orange) -->
+  <path d="M35 20 L50 14 L65 20 L65 70 Q65 88 50 102 Q35 88 35 70 Z" fill="#F57C00"/>
+  
+  <!-- Elephant head (simplified) -->
+  <g fill="#FFFFFF">
+    <!-- Body -->
+    <ellipse cx="50" cy="55" rx="18" ry="22"/>
+    <!-- Head -->
+    <circle cx="50" cy="38" r="12"/>
+    <!-- Ears -->
+    <ellipse cx="35" cy="40" rx="8" ry="10"/>
+    <ellipse cx="65" cy="40" rx="8" ry="10"/>
+    <!-- Trunk -->
+    <path d="M46 48 Q44 65 48 75 L52 75 Q56 65 54 48 Z"/>
+    <!-- Tusks -->
+    <path d="M42 50 Q38 58 40 68" stroke="#FFB400" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M58 50 Q62 58 60 68" stroke="#FFB400" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <!-- Eyes -->
+    <circle cx="45" cy="36" r="2" fill="#009639"/>
+    <circle cx="55" cy="36" r="2" fill="#009639"/>
+  </g>
+  
+  <!-- Sun rays at top -->
+  <g fill="#FFB400">
+    <circle cx="50" cy="8" r="3"/>
+    <path d="M50 0 L48 5 L52 5 Z"/>
+    <path d="M42 3 L44 7 L47 5 Z"/>
+    <path d="M58 3 L56 7 L53 5 Z"/>
+  </g>
+</svg>

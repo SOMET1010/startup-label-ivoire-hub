@@ -1,20 +1,74 @@
-
 import { Link } from "react-router-dom";
+import { ExternalLink, Facebook, Twitter, Linkedin } from "lucide-react";
+import { useBrand } from "@/hooks/useBrand";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  
+  const { brand } = useBrand();
+  const isInstitutional = brand === "ansut";
+
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className={isInstitutional ? "footer-institutional text-white" : "bg-gray-900 text-white"}>
+      {/* Institutional header band */}
+      {isInstitutional && (
+        <div className="bg-primary py-4">
+          <div className="container mx-auto px-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <img 
+                src="/images/armoiries-ci.svg" 
+                alt="Armoiries de la Côte d'Ivoire" 
+                className="h-10 w-auto"
+              />
+              <div>
+                <p className="font-semibold text-white">République de Côte d'Ivoire</p>
+                <p className="text-sm text-white/80">Union - Discipline - Travail</p>
+              </div>
+            </div>
+            <div className="hidden md:flex items-center gap-4">
+              <a 
+                href="https://www.gouv.ci" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-sm text-white/90 hover:text-white transition-colors"
+              >
+                Portail du Gouvernement
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+              <a 
+                href="https://www.cicg.gouv.ci" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-sm text-white/90 hover:text-white transition-colors"
+              >
+                CICG
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-r from-ivoire-orange to-ivoire-green rounded-lg"></div>
-              <span className="text-xl font-heading font-bold">Ivoire Hub</span>
+              {isInstitutional ? (
+                <>
+                  <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-lg"></div>
+                  <span className="text-xl font-semibold">ANSUT</span>
+                </>
+              ) : (
+                <>
+                  <div className="w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-lg"></div>
+                  <span className="text-xl font-heading font-bold">Ivoire Hub</span>
+                </>
+              )}
             </div>
             <p className="text-gray-300 mt-2">
-              Plateforme officielle de labellisation et d'accompagnement des startups numériques en Côte d'Ivoire.
+              {isInstitutional 
+                ? "Agence Nationale du Service Universel des Télécommunications. Service public de labellisation des startups numériques."
+                : "Plateforme officielle de labellisation et d'accompagnement des startups numériques en Côte d'Ivoire."
+              }
             </p>
             <div className="flex mt-4 space-x-4">
               <a 
@@ -22,24 +76,27 @@ const Footer = () => {
                 className="text-gray-300 hover:text-white transition-colors"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Facebook"
               >
-                Facebook
+                <Facebook className="h-5 w-5" />
               </a>
               <a 
                 href="https://twitter.com" 
                 className="text-gray-300 hover:text-white transition-colors"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Twitter"
               >
-                Twitter
+                <Twitter className="h-5 w-5" />
               </a>
               <a 
                 href="https://linkedin.com" 
                 className="text-gray-300 hover:text-white transition-colors"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="LinkedIn"
               >
-                LinkedIn
+                <Linkedin className="h-5 w-5" />
               </a>
             </div>
           </div>
@@ -98,40 +155,65 @@ const Footer = () => {
                   Politique de confidentialité
                 </Link>
               </li>
+              {isInstitutional && (
+                <li>
+                  <Link to="/accessibilite" className="text-gray-300 hover:text-white transition-colors">
+                    Accessibilité
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
           
           <div>
             <h3 className="text-lg font-bold mb-4">Contact</h3>
             <address className="not-italic text-gray-300">
-              <p>Ministère de la Communication et de l'Économie Numérique</p>
-              <p>Abidjan, Côte d'Ivoire</p>
+              {isInstitutional ? (
+                <>
+                  <p>Agence Nationale du Service Universel des Télécommunications (ANSUT)</p>
+                  <p>Abidjan - Plateau</p>
+                  <p>Côte d'Ivoire</p>
+                </>
+              ) : (
+                <>
+                  <p>Ministère de la Communication et de l'Économie Numérique</p>
+                  <p>Abidjan, Côte d'Ivoire</p>
+                </>
+              )}
               <p className="mt-2">
                 <a href="tel:+22520216300" className="hover:text-white transition-colors">
                   +225 20 21 63 00
                 </a>
               </p>
               <p>
-                <a href="mailto:contact@ivoirehub.ci" className="hover:text-white transition-colors">
-                  contact@ivoirehub.ci
+                <a href={`mailto:${isInstitutional ? 'contact@ansut.ci' : 'contact@ivoirehub.ci'}`} className="hover:text-white transition-colors">
+                  {isInstitutional ? 'contact@ansut.ci' : 'contact@ivoirehub.ci'}
                 </a>
               </p>
             </address>
           </div>
         </div>
         
-        <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p>© {currentYear} Ivoire Hub. Tous droits réservés.</p>
+        <div className={`${isInstitutional ? 'footer-institutional-divider' : 'border-t border-gray-800'} mt-8 pt-8 flex flex-col md:flex-row justify-between items-center`}>
+          <p>© {currentYear} {isInstitutional ? 'ANSUT - République de Côte d\'Ivoire' : 'Ivoire Hub'}. Tous droits réservés.</p>
           <p className="mt-4 md:mt-0">
-            Développé par{" "}
-            <a 
-              href="https://etudesk.org" 
-              className="text-ivoire-orange hover:underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Etudesk
-            </a>
+            {isInstitutional ? (
+              <span className="text-gray-400 text-sm">
+                Site officiel du Gouvernement de Côte d'Ivoire
+              </span>
+            ) : (
+              <>
+                Développé par{" "}
+                <a 
+                  href="https://etudesk.org" 
+                  className="text-accent hover:underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Etudesk
+                </a>
+              </>
+            )}
           </p>
         </div>
       </div>
