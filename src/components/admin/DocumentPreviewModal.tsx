@@ -25,7 +25,9 @@ import {
   Maximize2,
   Minimize2,
   Scan,
-  Move
+  Move,
+  Hand,
+  Fingerprint
 } from "lucide-react";
 
 // Zoom constants
@@ -70,6 +72,8 @@ const DocumentPreviewModal = ({
   const [initialPinchDistance, setInitialPinchDistance] = useState<number | null>(null);
   const [initialPinchZoom, setInitialPinchZoom] = useState(100);
   const [lastTapTime, setLastTapTime] = useState(0);
+  const [showTouchHints, setShowTouchHints] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const imageContainerRef = useRef<HTMLDivElement>(null);
 
@@ -83,8 +87,28 @@ const DocumentPreviewModal = ({
       setFlipV(false);
       setImageDimensions(null);
       setDragOffset({ x: 0, y: 0 });
+      setShowTouchHints(false);
     }
   }, [isOpen, documentUrl]);
+
+  // Detect touch device
+  useEffect(() => {
+    const checkTouchDevice = () => {
+      setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+    };
+    checkTouchDevice();
+  }, []);
+
+  // Show touch hints when image loads on touch devices
+  useEffect(() => {
+    if (!isLoading && !hasError && documentType === "image" && isTouchDevice) {
+      setShowTouchHints(true);
+      const timer = setTimeout(() => {
+        setShowTouchHints(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, hasError, documentType, isTouchDevice]);
 
   // Handle fullscreen state changes
   useEffect(() => {
@@ -474,6 +498,49 @@ const DocumentPreviewModal = ({
               draggable={false}
             />
           </div>
+          
+          {/* Touch gesture hints for mobile */}
+          {showTouchHints && isTouchDevice && (
+            <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none animate-fade-in">
+              <div className="bg-background/95 backdrop-blur-sm border rounded-xl shadow-2xl p-6 max-w-xs mx-4">
+                <h4 className="text-sm font-semibold text-center mb-4 text-foreground">
+                  Gestes tactiles disponibles
+                </h4>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Fingerprint className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Double-tap</p>
+                      <p className="text-xs text-muted-foreground">Zoomer / Dézoomer</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <ZoomIn className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Pincer</p>
+                      <p className="text-xs text-muted-foreground">Zoom précis avec 2 doigts</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Hand className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Glisser</p>
+                      <p className="text-xs text-muted-foreground">Déplacer l'image zoomée</p>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-xs text-center text-muted-foreground mt-4">
+                  Disparaît automatiquement...
+                </p>
+              </div>
+            </div>
+          )}
           
           {/* Zoom and rotation controls */}
           {!isLoading && !hasError && (
