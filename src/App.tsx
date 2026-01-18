@@ -5,8 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
-import RoleGate from "./components/auth/RoleGate";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { RoleGate } from "./components/auth/RoleGate";
 import { LabelGate } from "./components/auth/LabelGate";
 import CloudStatusBanner from "./components/CloudStatusBanner";
 import LabelCoach from "./components/LabelCoach";
@@ -34,9 +34,6 @@ import Opportunities from "./pages/startup/Opportunities";
 import Events from "./pages/startup/Events";
 import Network from "./pages/startup/Network";
 import Renewal from "./pages/startup/Renewal";
-
-// Admin pages
-import AdminDashboard from "./pages/admin/Dashboard";
 
 const queryClient = new QueryClient();
 
