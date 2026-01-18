@@ -12,7 +12,7 @@ const CTA = () => {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link to="/postuler">
-            <Button size="lg" variant="secondary" className="w-full sm:w-auto bg-white text-ivoire-orange hover:bg-gray-100">
+            <Button size="lg" variant="secondary" className="w-full sm:w-auto bg-background text-ivoire-orange hover:bg-accent">
               Postuler maintenant
             </Button>
           </Link>

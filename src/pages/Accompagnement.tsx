@@ -148,20 +148,20 @@ const Accompagnement = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-grow py-12 bg-gray-50">
+      <main className="flex-grow py-12 bg-muted/50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold mb-2">Structures d'Accompagnement</h1>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-muted-foreground">
               Découvrez les incubateurs, accélérateurs et studios qui soutiennent les startups ivoiriennes
             </p>
           </div>
           
           {/* Search and Filters */}
-          <div className="mb-8 bg-white p-6 rounded-xl shadow-sm">
+          <div className="mb-8 bg-card p-6 rounded-xl shadow-sm">
             <div className="flex flex-col md:flex-row gap-4 mb-4">
               <div className="relative flex-grow">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground/70" />
                 <Input 
                   placeholder="Rechercher une structure d'accompagnement..." 
                   value={searchTerm}
@@ -194,7 +194,7 @@ const Accompagnement = () => {
             </div>
             
             <div className="flex justify-between items-center">
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-muted-foreground">
                 {filteredStructures.length} structure{filteredStructures.length !== 1 ? "s" : ""} trouvée{filteredStructures.length !== 1 ? "s" : ""}
               </div>
               
@@ -216,7 +216,7 @@ const Accompagnement = () => {
                   <div className="flex flex-col h-full">
                     <div className="p-6">
                       <div className="flex items-center mb-4">
-                        <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-100 mr-4">
+                        <div className="w-16 h-16 rounded-full overflow-hidden bg-muted mr-4">
                           <img 
                             src={structure.logo} 
                             alt={`${structure.name} logo`} 
@@ -227,12 +227,12 @@ const Accompagnement = () => {
                           <h3 className="font-bold text-xl">{structure.name}</h3>
                           <div className="flex items-center mt-1">
                             <Badge className="mr-2" variant="secondary">{structure.type}</Badge>
-                            <span className="text-sm text-gray-500">{structure.location}</span>
+                            <span className="text-sm text-muted-foreground">{structure.location}</span>
                           </div>
                         </div>
                       </div>
                       
-                      <p className="text-gray-600 mb-4">
+                      <p className="text-muted-foreground mb-4">
                         {structure.description}
                       </p>
                       
@@ -246,19 +246,19 @@ const Accompagnement = () => {
                         <h4 className="font-semibold mb-2">Programmes proposés</h4>
                         <div className="space-y-2">
                           {structure.programs.map((program, index) => (
-                            <div key={index} className="bg-gray-50 p-3 rounded">
+                            <div key={index} className="bg-muted/50 p-3 rounded">
                               <div className="flex justify-between">
                                 <span className="font-medium">{program.name}</span>
-                                <span className="text-sm text-gray-500">{program.duration}</span>
+                                <span className="text-sm text-muted-foreground">{program.duration}</span>
                               </div>
-                              <p className="text-sm text-gray-600 mt-1">{program.description}</p>
+                              <p className="text-sm text-muted-foreground mt-1">{program.description}</p>
                             </div>
                           ))}
                         </div>
                       </div>
                     </div>
                     
-                    <div className="mt-auto border-t border-gray-100 p-4 flex justify-between items-center">
+                    <div className="mt-auto border-t border-border p-4 flex justify-between items-center">
                       <a 
                         href={structure.website} 
                         target="_blank" 
@@ -278,8 +278,8 @@ const Accompagnement = () => {
           
           {filteredStructures.length === 0 && (
             <div className="text-center py-12">
-              <div className="text-2xl font-bold text-gray-400 mb-2">Aucune structure trouvée</div>
-              <p className="text-gray-500">Essayez de modifier vos critères de recherche</p>
+              <div className="text-2xl font-bold text-muted-foreground/70 mb-2">Aucune structure trouvée</div>
+              <p className="text-muted-foreground">Essayez de modifier vos critères de recherche</p>
             </div>
           )}
         </div>

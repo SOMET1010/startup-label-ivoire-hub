@@ -37,11 +37,11 @@ const benefits = [
 
 const Benefits = () => {
   return (
-    <section className="py-16 bg-gray-50" id="avantages">
+    <section className="py-16 bg-muted/50" id="avantages">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Avantages du Label Startup</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Découvrez les nombreux avantages offerts aux startups labellisées pour accélérer leur croissance
           </p>
         </div>
@@ -50,7 +50,7 @@ const Benefits = () => {
           {benefits.map((benefit, index) => (
             <Card 
               key={index}
-              className="hover:shadow-lg transition-shadow duration-300 bg-white"
+              className="hover:shadow-lg transition-shadow duration-300 bg-card"
             >
               <CardHeader className="space-y-1">
                 <div className="w-12 h-12 bg-gradient-to-br from-ivoire-orange to-ivoire-green rounded-lg flex items-center justify-center mb-4">
@@ -59,7 +59,7 @@ const Benefits = () => {
                 <CardTitle className="text-xl">{benefit.title}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">{benefit.description}</p>
+                <p className="text-muted-foreground">{benefit.description}</p>
               </CardContent>
             </Card>
           ))}
@@ -70,4 +70,3 @@ const Benefits = () => {
 };
 
 export default Benefits;
-

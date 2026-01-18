@@ -22,22 +22,22 @@ const Testimonials = () => {
   ];
 
   return (
-    <section className="py-16 bg-white">
+    <section className="py-16 bg-background">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4">Ils témoignent</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Découvrez l'expérience des startups ayant obtenu le label
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
-            <div key={index} className="bg-gray-50 rounded-xl p-6 shadow-sm card-hover">
+            <div key={index} className="bg-muted/50 rounded-xl p-6 shadow-sm card-hover">
               <div className="flex items-start mb-4">
                 <div className="text-4xl text-ivoire-orange">"</div>
               </div>
-              <p className="text-gray-600 mb-6 italic">{testimonial.quote}</p>
+              <p className="text-muted-foreground mb-6 italic">{testimonial.quote}</p>
               <div className="flex items-center">
                 <img 
                   src={testimonial.image} 
@@ -46,7 +46,7 @@ const Testimonials = () => {
                 />
                 <div>
                   <h4 className="font-bold">{testimonial.author}</h4>
-                  <p className="text-gray-500 text-sm">{testimonial.role}</p>
+                  <p className="text-muted-foreground text-sm">{testimonial.role}</p>
                 </div>
               </div>
             </div>

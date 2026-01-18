@@ -1,5 +1,6 @@
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { type NewsItem } from "@/types/news";
 import NewsCard from "./NewsCard";
 import { 
@@ -75,8 +76,8 @@ const NewsGrid = ({ news, onResetFilters }: NewsGridProps) => {
           </>
         ) : (
           <div className="text-center py-16">
-            <h3 className="text-xl font-medium text-gray-600">Aucune actualité trouvée</h3>
-            <p className="mt-2 text-gray-500">Essayez de modifier vos critères de recherche</p>
+            <h3 className="text-xl font-medium text-muted-foreground">Aucune actualité trouvée</h3>
+            <p className="mt-2 text-muted-foreground">Essayez de modifier vos critères de recherche</p>
             <Button 
               className="mt-4 bg-ivoire-orange hover:bg-ivoire-orange/90"
               onClick={onResetFilters}

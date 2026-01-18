@@ -25,7 +25,7 @@ const FaqCard = () => {
   ];
 
   return (
-    <Card className="bg-gray-50 border-ivoire-orange/20 shadow-sm hover:shadow transition-shadow">
+    <Card className="bg-muted/50 border-ivoire-orange/20 shadow-sm hover:shadow transition-shadow">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center text-xl gap-2">
           <HelpCircle className="h-5 w-5 text-ivoire-orange" />
@@ -37,15 +37,14 @@ const FaqCard = () => {
         <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mb-4">
           <div className="space-y-3">
             {quickFaqs.slice(0, isOpen ? 3 : 1).map((faq, index) => (
-              <div key={index} className="bg-white p-3 rounded-md border border-gray-100 shadow-sm">
-                <h4 className="font-medium text-gray-800">{faq.question}</h4>
-                <p className="text-gray-600 text-sm mt-1">{faq.answer}</p>
+              <div key={index} className="bg-card p-3 rounded-md border border-border shadow-sm">
+                <h4 className="font-medium text-foreground">{faq.question}</h4>
+                <p className="text-muted-foreground text-sm mt-1">{faq.answer}</p>
               </div>
             ))}
           </div>
           
           <CollapsibleContent className="space-y-3 mt-3">
-            {/* Le contenu supplémentaire est déjà affiché via le slice ci-dessus */}
           </CollapsibleContent>
           
           <CollapsibleTrigger asChild className="mt-3">
