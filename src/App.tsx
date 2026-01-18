@@ -34,6 +34,7 @@ import Opportunities from "./pages/startup/Opportunities";
 import Events from "./pages/startup/Events";
 import Network from "./pages/startup/Network";
 import Renewal from "./pages/startup/Renewal";
+import StartupProfile from "./pages/startup/Profile";
 
 const queryClient = new QueryClient();
 
@@ -72,6 +73,16 @@ const App = () => (
               <ProtectedRoute>
                 <RoleGate allowedRoles={['startup']}>
                   <StartupDashboard />
+                </RoleGate>
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/startup/profile" 
+            element={
+              <ProtectedRoute>
+                <RoleGate allowedRoles={['startup']}>
+                  <StartupProfile />
                 </RoleGate>
               </ProtectedRoute>
             } 
