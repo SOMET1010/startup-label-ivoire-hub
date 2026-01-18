@@ -20,6 +20,8 @@ import {
   ZoomOut,
   RotateCcw,
   RotateCw,
+  FlipHorizontal,
+  FlipVertical,
   Maximize2,
   Minimize2
 } from "lucide-react";
@@ -54,6 +56,8 @@ const DocumentPreviewModal = ({
   const [hasError, setHasError] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(100);
   const [rotation, setRotation] = useState(0);
+  const [flipH, setFlipH] = useState(false);
+  const [flipV, setFlipV] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -63,6 +67,8 @@ const DocumentPreviewModal = ({
       setHasError(false);
       setZoomLevel(100);
       setRotation(0);
+      setFlipH(false);
+      setFlipV(false);
     }
   }, [isOpen, documentUrl]);
 
@@ -122,9 +128,19 @@ const DocumentPreviewModal = ({
     setRotation((prev) => (prev - 90 + 360) % 360);
   }, []);
 
+  const handleFlipHorizontal = useCallback(() => {
+    setFlipH((prev) => !prev);
+  }, []);
+
+  const handleFlipVertical = useCallback(() => {
+    setFlipV((prev) => !prev);
+  }, []);
+
   const handleResetAll = useCallback(() => {
     setZoomLevel(100);
     setRotation(0);
+    setFlipH(false);
+    setFlipV(false);
   }, []);
 
   const handleOpenInNewTab = () => {
@@ -149,7 +165,7 @@ const DocumentPreviewModal = ({
         toggleFullscreen();
       }
       
-      // Zoom and rotation shortcuts for images only
+      // Zoom, rotation, and flip shortcuts for images only
       if (documentType === "image") {
         if (e.key === "+" || e.key === "=") {
           e.preventDefault();
@@ -166,13 +182,19 @@ const DocumentPreviewModal = ({
         } else if (e.key === "l" || e.key === "L") {
           e.preventDefault();
           handleRotateLeft();
+        } else if (e.key === "h" || e.key === "H") {
+          e.preventDefault();
+          handleFlipHorizontal();
+        } else if (e.key === "v" || e.key === "V") {
+          e.preventDefault();
+          handleFlipVertical();
         }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, handleClose, onDownload, isDownloading, documentType, handleZoomIn, handleZoomOut, handleResetAll, handleRotateRight, handleRotateLeft, toggleFullscreen]);
+  }, [isOpen, handleClose, onDownload, isDownloading, documentType, handleZoomIn, handleZoomOut, handleResetAll, handleRotateRight, handleRotateLeft, handleFlipHorizontal, handleFlipVertical, toggleFullscreen]);
 
   // Handle mouse wheel zoom for images
   useEffect(() => {
@@ -256,7 +278,7 @@ const DocumentPreviewModal = ({
               alt={documentName}
               className="object-contain rounded-lg shadow-lg transition-transform duration-200"
               style={{ 
-                transform: `scale(${zoomLevel / 100}) rotate(${rotation}deg)`,
+                transform: `scale(${zoomLevel / 100}) rotate(${rotation}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`,
                 transformOrigin: 'center center'
               }}
               onLoad={handleLoad}
@@ -295,6 +317,27 @@ const DocumentPreviewModal = ({
                 
                 <Separator orientation="vertical" className="h-5" />
                 
+                {/* Flip controls */}
+                <Button
+                  variant={flipH ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={handleFlipHorizontal}
+                  title="Retournement horizontal (H)"
+                >
+                  <FlipHorizontal className="h-4 w-4" />
+                </Button>
+                
+                <Button
+                  variant={flipV ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={handleFlipVertical}
+                  title="Retournement vertical (V)"
+                >
+                  <FlipVertical className="h-4 w-4" />
+                </Button>
+                
+                <Separator orientation="vertical" className="h-5" />
+                
                 {/* Zoom controls */}
                 <Button
                   variant="ghost"
@@ -327,7 +370,7 @@ const DocumentPreviewModal = ({
                   variant="ghost"
                   size="sm"
                   onClick={handleResetAll}
-                  disabled={zoomLevel === 100 && rotation === 0}
+                  disabled={zoomLevel === 100 && rotation === 0 && !flipH && !flipV}
                   title="Réinitialiser (0)"
                 >
                   <RotateCcw className="h-4 w-4" />
