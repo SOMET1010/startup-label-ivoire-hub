@@ -32,6 +32,8 @@ import {
 const ZOOM_MIN = 25;
 const ZOOM_MAX = 300;
 const ZOOM_STEP = 25;
+const DOUBLE_TAP_ZOOM = 200;
+const DOUBLE_TAP_DELAY = 300; // ms
 
 export type DocumentType = "pdf" | "image" | "other";
 
@@ -67,6 +69,7 @@ const DocumentPreviewModal = ({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [initialPinchDistance, setInitialPinchDistance] = useState<number | null>(null);
   const [initialPinchZoom, setInitialPinchZoom] = useState(100);
+  const [lastTapTime, setLastTapTime] = useState(0);
   const contentRef = useRef<HTMLDivElement>(null);
   const imageContainerRef = useRef<HTMLDivElement>(null);
 
@@ -232,13 +235,35 @@ const DocumentPreviewModal = ({
       const distance = getTouchDistance(e.touches);
       setInitialPinchDistance(distance);
       setInitialPinchZoom(zoomLevel);
-    } else if (e.touches.length === 1 && zoomLevel > 100) {
-      // Single touch drag start
-      const touch = e.touches[0];
-      setIsDragging(true);
-      setDragStart({ x: touch.clientX - dragOffset.x, y: touch.clientY - dragOffset.y });
+    } else if (e.touches.length === 1) {
+      // Check for double-tap
+      const now = Date.now();
+      const timeSinceLastTap = now - lastTapTime;
+      
+      if (timeSinceLastTap < DOUBLE_TAP_DELAY && timeSinceLastTap > 0) {
+        // Double-tap detected
+        e.preventDefault();
+        if (zoomLevel > 100) {
+          // Zoom out to 100%
+          setZoomLevel(100);
+          setDragOffset({ x: 0, y: 0 });
+        } else {
+          // Zoom in to DOUBLE_TAP_ZOOM
+          setZoomLevel(DOUBLE_TAP_ZOOM);
+        }
+        setLastTapTime(0); // Reset to prevent triple-tap
+      } else {
+        setLastTapTime(now);
+        
+        // Single touch drag start (only if zoomed in)
+        if (zoomLevel > 100) {
+          const touch = e.touches[0];
+          setIsDragging(true);
+          setDragStart({ x: touch.clientX - dragOffset.x, y: touch.clientY - dragOffset.y });
+        }
+      }
     }
-  }, [zoomLevel, dragOffset]);
+  }, [zoomLevel, dragOffset, lastTapTime]);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (e.touches.length === 2 && initialPinchDistance !== null) {
