@@ -3,6 +3,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, MessageCircle, Phone } from "lucide-react";
 
@@ -17,7 +19,6 @@ const Contact = () => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simuler l'envoi du message
     setTimeout(() => {
       toast({
         title: "Message envoyé",
@@ -31,11 +32,11 @@ const Contact = () => {
   };
 
   return (
-    <section className="py-16 bg-gray-50" id="contact">
+    <section className="py-16 bg-muted/50" id="contact">
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Nous contacter</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Vous avez des questions ou besoin d'assistance concernant le Label Startup ? 
             Notre équipe est à votre disposition.
           </p>
@@ -66,42 +67,39 @@ const Contact = () => {
                 <CardContent>
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1">
                         Nom complet
                       </label>
-                      <input
+                      <Input
                         type="text"
                         id="name"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-ivoire-orange focus:border-ivoire-orange"
                         placeholder="Votre nom"
                         required
                       />
                     </div>
                     <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
                         Email
                       </label>
-                      <input
+                      <Input
                         type="email"
                         id="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-ivoire-orange focus:border-ivoire-orange"
                         placeholder="votre@email.com"
                         required
                       />
                     </div>
                     <div>
-                      <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label htmlFor="message" className="block text-sm font-medium text-foreground mb-1">
                         Message
                       </label>
-                      <textarea
+                      <Textarea
                         id="message"
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-ivoire-orange focus:border-ivoire-orange"
                         rows={5}
                         placeholder="Votre message..."
                         required
@@ -176,7 +174,7 @@ const Contact = () => {
                       </div>
                     </div>
                     <div>
-                      <p className="mt-4 text-gray-600">
+                      <p className="mt-4 text-muted-foreground">
                         Disponible du lundi au vendredi de 8h à 17h
                       </p>
                     </div>
@@ -189,12 +187,11 @@ const Contact = () => {
         
         <div className="mt-16 text-center">
           <h3 className="text-xl font-bold mb-2">Rendez-nous visite</h3>
-          <p className="text-gray-600 mb-4">
+          <p className="text-muted-foreground mb-4">
             Deux Plateaux, Rue des Jardins<br />
             Abidjan, Côte d'Ivoire
           </p>
           <div className="aspect-video max-w-4xl mx-auto rounded-lg overflow-hidden shadow-lg">
-            {/* Cette iframe pourrait être remplacée par une carte interactive */}
             <iframe 
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31893.08418741484!2d-4.035666072617334!3d5.354925721910213!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfc1ea23de4c4afb%3A0x78a3978b571c0779!2sDeux%20Plateaux%2C%20Abidjan%2C%20C%C3%B4te%20d&#39;Ivoire!5e0!3m2!1sfr!2sus!4v1713496260584!5m2!1sfr!2sus" 
               width="100%" 

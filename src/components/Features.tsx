@@ -48,11 +48,11 @@ const Features = () => {
   ];
 
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="py-16 bg-muted/50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4">Avantages du Label Startup</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             La labellisation de votre startup numérique vous ouvre les portes à de nombreux avantages exclusifs
           </p>
         </div>
@@ -67,7 +67,7 @@ const Features = () => {
                 <div className="mr-2">{feature.icon}</div>
                 <h3 className="text-xl font-bold">{feature.title}</h3>
               </div>
-              <p className="text-gray-600">{feature.description}</p>
+              <p className="text-muted-foreground">{feature.description}</p>
             </div>
           ))}
         </div>

@@ -87,14 +87,14 @@ const Investisseurs = () => {
             <p className="text-xl mb-8 max-w-3xl mx-auto">
               Découvrez les investisseurs actifs dans l'écosystème startup en Côte d'Ivoire et entrez en relation avec eux
             </p>
-            <Button variant="secondary" size="lg" className="bg-white text-investor-DEFAULT hover:bg-gray-100">
+            <Button variant="secondary" size="lg" className="bg-background text-investor-DEFAULT hover:bg-accent">
               Proposer un pitch
             </Button>
           </div>
         </section>
 
         {/* Main content */}
-        <section className="py-12 bg-gray-50">
+        <section className="py-12 bg-muted/50">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {investors.map((investor) => (
@@ -102,7 +102,7 @@ const Investisseurs = () => {
                   <CardContent className="p-0">
                     <div className="p-6">
                       <div className="flex items-center mb-6">
-                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 mr-4 flex items-center justify-center">
+                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted mr-4 flex items-center justify-center">
                           <img 
                             src={investor.logo} 
                             alt={`${investor.name} logo`} 
@@ -114,13 +114,13 @@ const Investisseurs = () => {
                         </div>
                       </div>
                       
-                      <p className="text-gray-600 mb-6">
+                      <p className="text-muted-foreground mb-6">
                         {investor.description}
                       </p>
                       
                       <div className="space-y-4">
                         <div>
-                          <h4 className="text-sm font-semibold text-gray-500 mb-1">Stades d'investissement</h4>
+                          <h4 className="text-sm font-semibold text-muted-foreground mb-1">Stades d'investissement</h4>
                           <div className="flex flex-wrap gap-2">
                             {investor.investmentStages.map((stage, index) => (
                               <Badge key={index} variant="outline">{stage}</Badge>
@@ -129,12 +129,12 @@ const Investisseurs = () => {
                         </div>
                         
                         <div>
-                          <h4 className="text-sm font-semibold text-gray-500 mb-1">Ticket moyen</h4>
-                          <p className="text-gray-800 font-medium">{investor.ticketSize}</p>
+                          <h4 className="text-sm font-semibold text-muted-foreground mb-1">Ticket moyen</h4>
+                          <p className="text-foreground font-medium">{investor.ticketSize}</p>
                         </div>
                         
                         <div>
-                          <h4 className="text-sm font-semibold text-gray-500 mb-1">Secteurs ciblés</h4>
+                          <h4 className="text-sm font-semibold text-muted-foreground mb-1">Secteurs ciblés</h4>
                           <div className="flex flex-wrap gap-2">
                             {investor.sectors.map((sector, index) => (
                               <Badge key={index} variant="secondary">{sector}</Badge>
@@ -143,15 +143,15 @@ const Investisseurs = () => {
                         </div>
                         
                         <div>
-                          <h4 className="text-sm font-semibold text-gray-500 mb-1">Portfolio (sélection)</h4>
-                          <p className="text-gray-700">
+                          <h4 className="text-sm font-semibold text-muted-foreground mb-1">Portfolio (sélection)</h4>
+                          <p className="text-foreground">
                             {investor.portfolio.join(", ")}
                           </p>
                         </div>
                       </div>
                     </div>
                     
-                    <div className="border-t border-gray-100 p-4 bg-gray-50 flex justify-between items-center">
+                    <div className="border-t border-border p-4 bg-muted/50 flex justify-between items-center">
                       <a 
                         href={investor.website} 
                         target="_blank" 
@@ -173,36 +173,36 @@ const Investisseurs = () => {
         </section>
         
         {/* Process section */}
-        <section className="py-16 bg-white">
+        <section className="py-16 bg-background">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold mb-4">Comment obtenir un financement ?</h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
                 Suivez ces étapes pour maximiser vos chances d'obtenir un investissement
               </p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="bg-gray-50 rounded-xl p-6 text-center">
+              <div className="bg-muted/50 rounded-xl p-6 text-center">
                 <div className="w-16 h-16 bg-investor-light rounded-full flex items-center justify-center text-investor-DEFAULT text-2xl font-bold mx-auto mb-4">1</div>
                 <h3 className="text-xl font-bold mb-2">Préparez votre pitch</h3>
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                   Élaborez un pitch deck convaincant présentant votre solution, votre marché et votre équipe.
                 </p>
               </div>
               
-              <div className="bg-gray-50 rounded-xl p-6 text-center">
+              <div className="bg-muted/50 rounded-xl p-6 text-center">
                 <div className="w-16 h-16 bg-investor-light rounded-full flex items-center justify-center text-investor-DEFAULT text-2xl font-bold mx-auto mb-4">2</div>
                 <h3 className="text-xl font-bold mb-2">Identifiez les investisseurs adaptés</h3>
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                   Recherchez des investisseurs correspondant à votre secteur, stade de développement et ticket d'investissement.
                 </p>
               </div>
               
-              <div className="bg-gray-50 rounded-xl p-6 text-center">
+              <div className="bg-muted/50 rounded-xl p-6 text-center">
                 <div className="w-16 h-16 bg-investor-light rounded-full flex items-center justify-center text-investor-DEFAULT text-2xl font-bold mx-auto mb-4">3</div>
                 <h3 className="text-xl font-bold mb-2">Entrez en contact</h3>
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                   Utilisez la plateforme pour soumettre votre pitch aux investisseurs sélectionnés et suivre vos candidatures.
                 </p>
               </div>

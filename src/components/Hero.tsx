@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 const Hero = () => {
   return (
-    <div className="relative overflow-hidden bg-white">
+    <div className="relative overflow-hidden bg-background">
       {/* Decorative elements */}
       <div className="absolute inset-0 z-0">
         <div className="absolute right-0 top-0 h-72 w-72 rounded-full bg-gradient-to-br from-ivoire-orange/20 to-ivoire-green/20 blur-3xl"></div>
@@ -20,7 +20,7 @@ const Hero = () => {
             <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
               Labellisation des <span className="gradient-text">Startups Numériques</span> en Côte d'Ivoire
             </h1>
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="text-lg text-muted-foreground mb-8">
               Bénéficiez d'avantages fiscaux, accédez aux marchés publics et rejoignez un réseau d'innovateurs grâce au label Startup numérique ivoirien.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
@@ -38,15 +38,15 @@ const Hero = () => {
             <div className="mt-8 grid grid-cols-3 gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-ivoire-orange">500+</div>
-                <div className="text-sm text-gray-500">Startups éligibles</div>
+                <div className="text-sm text-muted-foreground">Startups éligibles</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-ivoire-green">50+</div>
-                <div className="text-sm text-gray-500">Startups labellisées</div>
+                <div className="text-sm text-muted-foreground">Startups labellisées</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-primary">30+</div>
-                <div className="text-sm text-gray-500">Structures d'accompagnement</div>
+                <div className="text-sm text-muted-foreground">Structures d'accompagnement</div>
               </div>
             </div>
           </div>
@@ -54,7 +54,7 @@ const Hero = () => {
           <div className="md:w-1/2 mt-8 md:mt-0 animate-slide-in">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-tr from-ivoire-orange to-ivoire-green rounded-xl transform rotate-3 scale-105"></div>
-              <div className="relative bg-white rounded-xl shadow-lg p-8">
+              <div className="relative bg-card rounded-xl shadow-lg p-8">
                 <h3 className="text-xl font-bold mb-4">Comment obtenir le label ?</h3>
                 <ul className="space-y-4">
                   <li className="flex items-start">
@@ -63,7 +63,7 @@ const Hero = () => {
                     </div>
                     <div>
                       <h4 className="font-bold">Créez un compte</h4>
-                      <p className="text-gray-600 text-sm">Inscrivez-vous sur la plateforme Ivoire Hub</p>
+                      <p className="text-muted-foreground text-sm">Inscrivez-vous sur la plateforme Ivoire Hub</p>
                     </div>
                   </li>
                   <li className="flex items-start">
@@ -72,7 +72,7 @@ const Hero = () => {
                     </div>
                     <div>
                       <h4 className="font-bold">Complétez votre dossier</h4>
-                      <p className="text-gray-600 text-sm">Renseignez les informations sur votre startup et soumettez les documents requis</p>
+                      <p className="text-muted-foreground text-sm">Renseignez les informations sur votre startup et soumettez les documents requis</p>
                     </div>
                   </li>
                   <li className="flex items-start">
@@ -81,7 +81,7 @@ const Hero = () => {
                     </div>
                     <div>
                       <h4 className="font-bold">Évaluation du comité</h4>
-                      <p className="text-gray-600 text-sm">Votre dossier est examiné par le Comité de Labellisation</p>
+                      <p className="text-muted-foreground text-sm">Votre dossier est examiné par le Comité de Labellisation</p>
                     </div>
                   </li>
                   <li className="flex items-start">
@@ -90,7 +90,7 @@ const Hero = () => {
                     </div>
                     <div>
                       <h4 className="font-bold">Obtention du label</h4>
-                      <p className="text-gray-600 text-sm">Recevez votre certification officielle et profitez des avantages</p>
+                      <p className="text-muted-foreground text-sm">Recevez votre certification officielle et profitez des avantages</p>
                     </div>
                   </li>
                 </ul>

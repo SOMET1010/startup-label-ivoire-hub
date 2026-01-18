@@ -140,20 +140,20 @@ const Annuaire = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-grow py-12 bg-gray-50">
+      <main className="flex-grow py-12 bg-muted/50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold mb-2">Annuaire des Startups</h1>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-muted-foreground">
               Découvrez les startups innovantes de l'écosystème numérique ivoirien
             </p>
           </div>
           
           {/* Search and Filters */}
-          <div className="mb-8 bg-white p-6 rounded-xl shadow-sm">
+          <div className="mb-8 bg-card p-6 rounded-xl shadow-sm">
             <div className="flex flex-col md:flex-row gap-4 mb-4">
               <div className="relative flex-grow">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground/70" />
                 <Input 
                   placeholder="Rechercher une startup..." 
                   value={searchTerm}
@@ -201,7 +201,7 @@ const Annuaire = () => {
             </div>
             
             <div className="flex justify-between items-center">
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-muted-foreground">
                 {filteredStartups.length} startup{filteredStartups.length !== 1 ? "s" : ""} trouvée{filteredStartups.length !== 1 ? "s" : ""}
               </div>
               
@@ -223,7 +223,7 @@ const Annuaire = () => {
                 <CardContent className="p-0">
                   <div className="p-4">
                     <div className="flex items-center mb-4">
-                      <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-100 mr-4">
+                      <div className="w-16 h-16 rounded-full overflow-hidden bg-muted mr-4">
                         <img 
                           src={startup.logo} 
                           alt={`${startup.name} logo`} 
@@ -241,16 +241,16 @@ const Annuaire = () => {
                       </div>
                     </div>
                     
-                    <p className="text-gray-600 mb-4 line-clamp-3">
+                    <p className="text-muted-foreground mb-4 line-clamp-3">
                       {startup.description}
                     </p>
                     
-                    <div className="flex justify-between text-sm text-gray-500">
+                    <div className="flex justify-between text-sm text-muted-foreground">
                       <div>Fondée en {startup.founded}</div>
                       <div>{startup.location}</div>
                     </div>
                     
-                    <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between">
+                    <div className="mt-4 pt-4 border-t border-border flex justify-between">
                       <a 
                         href={startup.website} 
                         target="_blank" 
@@ -270,8 +270,8 @@ const Annuaire = () => {
           
           {filteredStartups.length === 0 && (
             <div className="text-center py-12">
-              <div className="text-2xl font-bold text-gray-400 mb-2">Aucune startup trouvée</div>
-              <p className="text-gray-500">Essayez de modifier vos critères de recherche</p>
+              <div className="text-2xl font-bold text-muted-foreground/70 mb-2">Aucune startup trouvée</div>
+              <p className="text-muted-foreground">Essayez de modifier vos critères de recherche</p>
             </div>
           )}
         </div>

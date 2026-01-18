@@ -140,13 +140,13 @@ const FAQ = () => {
         <div className="container mx-auto px-4 py-12">
           {filteredFaqs.length === 0 ? (
             <div className="text-center py-12">
-              <h3 className="text-xl font-medium text-gray-700">Aucun résultat trouvé</h3>
-              <p className="text-gray-500 mt-2">Essayez de modifier votre recherche</p>
+              <h3 className="text-xl font-medium text-foreground">Aucun résultat trouvé</h3>
+              <p className="text-muted-foreground mt-2">Essayez de modifier votre recherche</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-1">
-                <Card className={`sticky ${isMobile ? "" : "top-10"} p-4 bg-gray-50`}>
+                <Card className={`sticky ${isMobile ? "" : "top-10"} p-4 bg-muted/50`}>
                   <h2 className="text-xl font-bold mb-4">Catégories</h2>
                   <nav>
                     <ul className="space-y-2">
@@ -154,7 +154,7 @@ const FAQ = () => {
                         <li key={i}>
                           <a 
                             href={`#${category.category.toLowerCase().replace(/\s+/g, '-')}`}
-                            className="block p-2 hover:bg-gray-100 rounded-md transition-colors text-ivoire-green"
+                            className="block p-2 hover:bg-accent rounded-md transition-colors text-ivoire-green"
                           >
                             {category.category} ({category.questions.length})
                           </a>
@@ -171,11 +171,11 @@ const FAQ = () => {
                     <h2 className="text-2xl font-bold mb-6 pb-2 border-b">{category.category}</h2>
                     <Accordion type="single" collapsible className="space-y-4">
                       {category.questions.map((item, j) => (
-                        <AccordionItem key={j} value={`item-${i}-${j}`} className="bg-white rounded-lg shadow-sm">
-                          <AccordionTrigger className="px-4 py-4 hover:bg-gray-50 font-medium">
+                        <AccordionItem key={j} value={`item-${i}-${j}`} className="bg-card rounded-lg shadow-sm">
+                          <AccordionTrigger className="px-4 py-4 hover:bg-accent font-medium">
                             {item.question}
                           </AccordionTrigger>
-                          <AccordionContent className="px-4 py-2 text-gray-600">
+                          <AccordionContent className="px-4 py-2 text-muted-foreground">
                             {item.answer}
                           </AccordionContent>
                         </AccordionItem>
