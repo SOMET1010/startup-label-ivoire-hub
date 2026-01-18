@@ -429,4 +429,29 @@
     @apply w-full rounded-sm border border-border bg-card px-3 py-2 text-sm
            placeholder:text-muted-foreground focus:outline-none token-focus;
   }
+
+  /* Leaflet custom styles */
+  .custom-leaflet-marker {
+    background: transparent !important;
+    border: none !important;
+  }
+
+  .leaflet-popup-content-wrapper {
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    padding: 0;
+  }
+
+  .leaflet-popup-content {
+    margin: 12px;
+    min-width: 260px;
+  }
+
+  .leaflet-popup-tip {
+    background: white;
+  }
+
+  .leaflet-container {
+    font-family: var(--font-sans);
+  }
 }
