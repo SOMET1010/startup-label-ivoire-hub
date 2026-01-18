@@ -74,6 +74,7 @@ interface ApplicationWithStartup {
   notes: string | null;
   created_at: string;
   averageScore: number | null;
+  pendingDocsCount: number;
   startup: {
     id: string;
     name: string;
@@ -228,6 +229,19 @@ export default function AdminDashboard() {
         }
       });
 
+      // Fetch pending document requests per application
+      const { data: pendingDocRequestsData } = await supabase
+        .from('document_requests')
+        .select('application_id')
+        .in('application_id', appIds)
+        .is('fulfilled_at', null);
+
+      // Count pending requests per application
+      const pendingDocsByApp: Record<string, number> = {};
+      pendingDocRequestsData?.forEach((req) => {
+        pendingDocsByApp[req.application_id] = (pendingDocsByApp[req.application_id] || 0) + 1;
+      });
+
       // Combine data
       const applicationsWithDetails: ApplicationWithStartup[] = (appsData || []).map(app => {
         const startup = startupsData?.find(s => s.id === app.startup_id);
@@ -243,7 +257,8 @@ export default function AdminDashboard() {
           notes: app.notes,
           created_at: app.created_at,
           averageScore,
-          startup: startup || { 
+          pendingDocsCount: pendingDocsByApp[app.id] || 0,
+          startup: startup || {
             id: "", 
             name: "Startup inconnue", 
             sector: null, 
@@ -722,9 +737,21 @@ export default function AdminDashboard() {
                                 : "-"}
                             </TableCell>
                             <TableCell>
-                              <Badge variant={STATUS_LABELS[app.status]?.variant || "secondary"}>
-                                {STATUS_LABELS[app.status]?.label || app.status}
-                              </Badge>
+                              <div className="flex items-center gap-2">
+                                <Badge variant={STATUS_LABELS[app.status]?.variant || "secondary"}>
+                                  {STATUS_LABELS[app.status]?.label || app.status}
+                                </Badge>
+                                {app.pendingDocsCount > 0 && (
+                                  <Badge 
+                                    variant="outline"
+                                    className="bg-orange-100 text-orange-700 border-orange-300 flex items-center gap-1"
+                                    title={`${app.pendingDocsCount} document(s) en attente`}
+                                  >
+                                    <FileQuestion className="h-3 w-3" />
+                                    {app.pendingDocsCount}
+                                  </Badge>
+                                )}
+                              </div>
                             </TableCell>
                             <TableCell>
                               {getScoreBadge(app.averageScore)}
