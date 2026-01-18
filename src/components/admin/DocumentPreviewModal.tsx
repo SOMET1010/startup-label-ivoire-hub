@@ -7,6 +7,12 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { 
   Download, 
@@ -37,6 +43,7 @@ const ZOOM_MAX = 300;
 const ZOOM_STEP = 25;
 const DOUBLE_TAP_ZOOM = 200;
 const DOUBLE_TAP_DELAY = 300; // ms
+const ZOOM_PRESETS = [25, 50, 75, 100, 125, 150, 200, 250, 300];
 
 export type DocumentType = "pdf" | "image" | "other";
 
@@ -75,6 +82,8 @@ const DocumentPreviewModal = ({
   const [lastTapTime, setLastTapTime] = useState(0);
   const [showTouchHints, setShowTouchHints] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [isZoomInputOpen, setIsZoomInputOpen] = useState(false);
+  const [customZoomValue, setCustomZoomValue] = useState("");
   const contentRef = useRef<HTMLDivElement>(null);
   const imageContainerRef = useRef<HTMLDivElement>(null);
 
@@ -89,6 +98,8 @@ const DocumentPreviewModal = ({
       setImageDimensions(null);
       setDragOffset({ x: 0, y: 0 });
       setShowTouchHints(false);
+      setIsZoomInputOpen(false);
+      setCustomZoomValue("");
     }
   }, [isOpen, documentUrl]);
 
@@ -163,6 +174,20 @@ const DocumentPreviewModal = ({
 
   const handleResetZoom = useCallback(() => {
     setZoomLevel(100);
+  }, []);
+
+  const handleCustomZoomSubmit = useCallback(() => {
+    const parsed = parseInt(customZoomValue, 10);
+    if (!isNaN(parsed) && parsed >= ZOOM_MIN && parsed <= ZOOM_MAX) {
+      setZoomLevel(parsed);
+      setIsZoomInputOpen(false);
+      setCustomZoomValue("");
+    }
+  }, [customZoomValue]);
+
+  const handleZoomPreset = useCallback((preset: number) => {
+    setZoomLevel(preset);
+    setIsZoomInputOpen(false);
   }, []);
 
   const handleRotateRight = useCallback(() => {
@@ -622,9 +647,62 @@ const DocumentPreviewModal = ({
                   <ZoomOut className="h-4 w-4" />
                 </Button>
                 
-                <span className="text-sm font-medium w-12 text-center tabular-nums">
-                  {zoomLevel}%
-                </span>
+                <Popover open={isZoomInputOpen} onOpenChange={setIsZoomInputOpen}>
+                  <PopoverTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="min-w-14 tabular-nums font-medium text-sm"
+                    >
+                      {zoomLevel}%
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-52 p-3" align="center">
+                    {/* Custom zoom input */}
+                    <div className="flex gap-2 mb-3">
+                      <Input
+                        type="number"
+                        min={ZOOM_MIN}
+                        max={ZOOM_MAX}
+                        value={customZoomValue}
+                        onChange={(e) => setCustomZoomValue(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleCustomZoomSubmit()}
+                        placeholder={`${zoomLevel}`}
+                        className="h-8 text-sm"
+                      />
+                      <Button 
+                        size="sm" 
+                        onClick={handleCustomZoomSubmit}
+                        disabled={!customZoomValue}
+                        className="h-8 px-3"
+                      >
+                        OK
+                      </Button>
+                    </div>
+                    
+                    <Separator className="my-2" />
+                    
+                    {/* Preset grid */}
+                    <div className="grid grid-cols-3 gap-1">
+                      {ZOOM_PRESETS.map((preset) => (
+                        <Button
+                          key={preset}
+                          variant={zoomLevel === preset ? "secondary" : "ghost"}
+                          size="sm"
+                          onClick={() => handleZoomPreset(preset)}
+                          className="h-7 text-xs"
+                        >
+                          {preset}%
+                        </Button>
+                      ))}
+                    </div>
+                    
+                    {/* Valid range info */}
+                    <p className="text-xs text-muted-foreground text-center mt-3">
+                      Plage valide : {ZOOM_MIN}% - {ZOOM_MAX}%
+                    </p>
+                  </PopoverContent>
+                </Popover>
                 
                 <Button
                   variant="ghost"
