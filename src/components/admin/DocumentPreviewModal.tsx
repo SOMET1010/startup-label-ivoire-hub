@@ -23,7 +23,8 @@ import {
   FlipHorizontal,
   FlipVertical,
   Maximize2,
-  Minimize2
+  Minimize2,
+  Scan
 } from "lucide-react";
 
 // Zoom constants
@@ -59,7 +60,9 @@ const DocumentPreviewModal = ({
   const [flipH, setFlipH] = useState(false);
   const [flipV, setFlipV] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const imageContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -69,6 +72,7 @@ const DocumentPreviewModal = ({
       setRotation(0);
       setFlipH(false);
       setFlipV(false);
+      setImageDimensions(null);
     }
   }, [isOpen, documentUrl]);
 
@@ -98,6 +102,12 @@ const DocumentPreviewModal = ({
     }
     onClose();
   }, [onClose]);
+
+  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    setImageDimensions({ width: img.naturalWidth, height: img.naturalHeight });
+    setIsLoading(false);
+  };
 
   const handleLoad = () => {
     setIsLoading(false);
@@ -136,6 +146,29 @@ const DocumentPreviewModal = ({
     setFlipV((prev) => !prev);
   }, []);
 
+  const handleFitToWindow = useCallback(() => {
+    if (!imageDimensions || !imageContainerRef.current) return;
+    
+    const container = imageContainerRef.current;
+    const containerWidth = container.clientWidth - 32; // padding
+    const containerHeight = container.clientHeight - 32; // padding
+    
+    const { width: imgWidth, height: imgHeight } = imageDimensions;
+    
+    // Check if image is rotated 90 or 270 degrees (swap dimensions)
+    const isRotated = rotation === 90 || rotation === 270;
+    const effectiveWidth = isRotated ? imgHeight : imgWidth;
+    const effectiveHeight = isRotated ? imgWidth : imgHeight;
+    
+    const scaleX = containerWidth / effectiveWidth;
+    const scaleY = containerHeight / effectiveHeight;
+    const fitScale = Math.min(scaleX, scaleY) * 100;
+    
+    // Clamp to min/max zoom levels
+    const clampedZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, Math.round(fitScale)));
+    setZoomLevel(clampedZoom);
+  }, [imageDimensions, rotation]);
+
   const handleResetAll = useCallback(() => {
     setZoomLevel(100);
     setRotation(0);
@@ -165,7 +198,7 @@ const DocumentPreviewModal = ({
         toggleFullscreen();
       }
       
-      // Zoom, rotation, and flip shortcuts for images only
+      // Zoom, rotation, flip and fit shortcuts for images only
       if (documentType === "image") {
         if (e.key === "+" || e.key === "=") {
           e.preventDefault();
@@ -188,13 +221,16 @@ const DocumentPreviewModal = ({
         } else if (e.key === "v" || e.key === "V") {
           e.preventDefault();
           handleFlipVertical();
+        } else if (e.key === "f" || e.key === "F") {
+          e.preventDefault();
+          handleFitToWindow();
         }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, handleClose, onDownload, isDownloading, documentType, handleZoomIn, handleZoomOut, handleResetAll, handleRotateRight, handleRotateLeft, handleFlipHorizontal, handleFlipVertical, toggleFullscreen]);
+  }, [isOpen, handleClose, onDownload, isDownloading, documentType, handleZoomIn, handleZoomOut, handleResetAll, handleRotateRight, handleRotateLeft, handleFlipHorizontal, handleFlipVertical, handleFitToWindow, toggleFullscreen]);
 
   // Handle mouse wheel zoom for images
   useEffect(() => {
@@ -271,7 +307,7 @@ const DocumentPreviewModal = ({
 
     if (documentType === "image" && documentUrl) {
       return (
-        <div className="relative flex items-center justify-center h-full overflow-auto bg-muted/30">
+        <div ref={imageContainerRef} className="relative flex items-center justify-center h-full overflow-auto bg-muted/30">
           <div className="flex items-center justify-center min-h-full p-4">
             <img
               src={documentUrl}
@@ -281,7 +317,7 @@ const DocumentPreviewModal = ({
                 transform: `scale(${zoomLevel / 100}) rotate(${rotation}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`,
                 transformOrigin: 'center center'
               }}
-              onLoad={handleLoad}
+              onLoad={handleImageLoad}
               onError={handleError}
             />
           </div>
@@ -361,6 +397,19 @@ const DocumentPreviewModal = ({
                   title="Zoom avant (+)"
                 >
                   <ZoomIn className="h-4 w-4" />
+                </Button>
+                
+                <Separator orientation="vertical" className="h-5" />
+                
+                {/* Fit to window */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleFitToWindow}
+                  disabled={!imageDimensions}
+                  title="Ajuster à la fenêtre (F)"
+                >
+                  <Scan className="h-4 w-4" />
                 </Button>
                 
                 <Separator orientation="vertical" className="h-5" />
