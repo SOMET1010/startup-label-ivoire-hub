@@ -5,8 +5,49 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =========================
+   BASE TOKENS
+   ========================= */
+:root {
+  /* Typography */
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  --font-heading: Montserrat, ui-sans-serif, system-ui, sans-serif;
+
+  /* Radius */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius: 0.75rem;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md: 0 6px 18px rgba(0,0,0,0.08);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.12);
+
+  /* Motion */
+  --ease-out: cubic-bezier(.16,1,.3,1);
+  --dur-fast: 120ms;
+  --dur-normal: 180ms;
+  --dur-slow: 300ms;
+}
+
+/* =========================
+   THEME: IVOIRE HUB (default)
+   Startup friendly, warm (Green + Gold)
+   ========================= */
 @layer base {
-  :root {
+  :root,
+  :root[data-brand="ivoirehub"] {
     --background: 48 33% 98%; /* Blanc cassé premium */
     --foreground: 152 74% 15%; /* Vert profond */
 
@@ -16,7 +57,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 152 74% 15%;
 
-    --primary: 152 74% 24%; /* Vert profond premium #0E6B3D */
+    --primary: 152 74% 24%; /* Vert Ivoire #0E6B3D */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 43 67% 46%; /* Or doux #C9A227 */
@@ -25,17 +66,15 @@
     --muted: 48 20% 94%;
     --muted-foreground: 152 30% 40%;
 
-    --accent: 43 67% 46%; /* Or doux pour accents */
-    --accent-foreground: 152 74% 15%;
+    --accent: 25 100% 48%; /* Orange action #F57C00 */
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 48 20% 88%;
     --input: 48 20% 88%;
-    --ring: 152 74% 24%;
-
-    --radius: 0.75rem;
+    --ring: 25 100% 48%; /* Focus orange */
 
     /* Couleurs additionnelles premium */
     --premium-green: 152 74% 24%;
@@ -51,6 +90,8 @@
     --warning-foreground: 0 0% 100%;
     --info: 210 100% 50%;
     --info-foreground: 0 0% 100%;
+    --danger: 0 84% 60%;
+    --danger-foreground: 0 0% 100%;
 
     /* Sidebar */
     --sidebar-background: 48 33% 98%;
@@ -63,7 +104,72 @@
     --sidebar-ring: 152 74% 24%;
   }
 
-  .dark {
+  /* =========================
+     THEME: ANSUT / ÉTAT
+     Institutional, formal (Blue + Orange)
+     ========================= */
+  :root[data-brand="ansut"] {
+    --background: 210 20% 98%;
+    --foreground: 209 88% 20%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 209 88% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 209 88% 20%;
+
+    --primary: 209 88% 35%; /* Bleu institutionnel #0B5FA6 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 209 88% 35%; /* Bleu comme secondaire */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 210 20% 94%;
+    --muted-foreground: 209 40% 40%;
+
+    --accent: 25 100% 48%; /* Orange ANSUT action #F57C00 */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 20% 88%;
+    --input: 210 20% 88%;
+    --ring: 209 88% 35%; /* Focus bleu */
+
+    /* Couleurs additionnelles institutionnelles */
+    --premium-green: 209 88% 35%;
+    --premium-green-light: 209 50% 95%;
+    --premium-gold: 25 100% 48%;
+    --premium-gold-light: 25 80% 92%;
+    --premium-cream: 210 20% 98%;
+
+    /* Couleurs fonctionnelles */
+    --success: 152 74% 24%;
+    --success-foreground: 0 0% 100%;
+    --warning: 25 100% 50%;
+    --warning-foreground: 0 0% 100%;
+    --info: 209 88% 35%;
+    --info-foreground: 0 0% 100%;
+    --danger: 0 84% 60%;
+    --danger-foreground: 0 0% 100%;
+
+    /* Sidebar */
+    --sidebar-background: 209 30% 98%;
+    --sidebar-foreground: 209 88% 20%;
+    --sidebar-primary: 209 88% 35%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 20% 94%;
+    --sidebar-accent-foreground: 209 88% 20%;
+    --sidebar-border: 210 20% 88%;
+    --sidebar-ring: 209 88% 35%;
+  }
+
+  /* =========================
+     DARK MODE: IVOIRE HUB
+     ========================= */
+  .dark,
+  :root[data-brand="ivoirehub"].dark {
     --background: 152 50% 5%;
     --foreground: 48 33% 98%;
 
@@ -82,15 +188,15 @@
     --muted: 152 30% 15%;
     --muted-foreground: 48 20% 70%;
 
-    --accent: 43 67% 50%;
-    --accent-foreground: 152 74% 10%;
+    --accent: 25 100% 55%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 40%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 152 30% 18%;
     --input: 152 30% 18%;
-    --ring: 152 60% 35%;
+    --ring: 25 100% 55%;
 
     /* Couleurs additionnelles premium - dark mode */
     --premium-green: 152 60% 35%;
@@ -106,6 +212,8 @@
     --warning-foreground: 0 0% 100%;
     --info: 210 100% 55%;
     --info-foreground: 0 0% 100%;
+    --danger: 0 62% 50%;
+    --danger-foreground: 0 0% 100%;
     
     /* Sidebar */
     --sidebar-background: 152 40% 6%;
@@ -116,6 +224,66 @@
     --sidebar-accent-foreground: 48 33% 98%;
     --sidebar-border: 152 30% 18%;
     --sidebar-ring: 152 60% 35%;
+  }
+
+  /* =========================
+     DARK MODE: ANSUT
+     ========================= */
+  :root[data-brand="ansut"].dark {
+    --background: 209 50% 5%;
+    --foreground: 210 20% 98%;
+
+    --card: 209 40% 8%;
+    --card-foreground: 210 20% 98%;
+
+    --popover: 209 40% 8%;
+    --popover-foreground: 210 20% 98%;
+
+    --primary: 209 80% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 209 80% 45%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 209 30% 15%;
+    --muted-foreground: 210 20% 70%;
+
+    --accent: 25 100% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62.8% 40%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 209 30% 18%;
+    --input: 209 30% 18%;
+    --ring: 209 80% 45%;
+
+    /* Couleurs additionnelles */
+    --premium-green: 209 80% 45%;
+    --premium-green-light: 209 40% 15%;
+    --premium-gold: 25 100% 55%;
+    --premium-gold-light: 25 40% 20%;
+    --premium-cream: 210 20% 10%;
+
+    /* Couleurs fonctionnelles */
+    --success: 152 60% 35%;
+    --success-foreground: 0 0% 100%;
+    --warning: 25 100% 55%;
+    --warning-foreground: 0 0% 100%;
+    --info: 209 80% 45%;
+    --info-foreground: 0 0% 100%;
+    --danger: 0 62% 50%;
+    --danger-foreground: 0 0% 100%;
+
+    /* Sidebar */
+    --sidebar-background: 209 40% 6%;
+    --sidebar-foreground: 210 20% 98%;
+    --sidebar-primary: 209 80% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 209 30% 12%;
+    --sidebar-accent-foreground: 210 20% 98%;
+    --sidebar-border: 209 30% 18%;
+    --sidebar-ring: 209 80% 45%;
   }
 }
 
@@ -158,6 +326,7 @@
 }
 
 @layer components {
+  /* Existing utility classes */
   .card-hover {
     @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
   }
@@ -193,5 +362,71 @@
     @apply inline-flex items-center gap-2 px-4 py-2 rounded-full
            bg-secondary/10 text-secondary font-medium text-sm
            border border-secondary/20;
+  }
+
+  /* New button utility classes */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-sm px-4 py-2 text-sm font-medium
+           transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+    transition-duration: var(--dur-normal);
+    transition-timing-function: var(--ease-out);
+  }
+
+  .btn-accent {
+    @apply btn bg-accent text-accent-foreground hover:opacity-95 active:opacity-90;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary text-primary-foreground hover:opacity-95 active:opacity-90;
+  }
+
+  .btn-secondary {
+    @apply btn bg-card text-foreground border border-border hover:bg-muted;
+  }
+
+  .btn-outline {
+    @apply btn bg-transparent text-primary border border-primary hover:bg-muted;
+  }
+
+  .btn-outline-primary {
+    @apply btn bg-transparent text-primary border border-primary hover:bg-primary/10;
+  }
+
+  /* Card utility */
+  .token-card {
+    @apply rounded-md bg-card border border-border;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Focus utility */
+  .token-focus:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* Semantic badges */
+  .badge-success { 
+    @apply inline-flex items-center gap-1 rounded-full px-3 py-1 
+           text-xs font-medium border border-success text-success bg-success/10; 
+  }
+  
+  .badge-info { 
+    @apply inline-flex items-center gap-1 rounded-full px-3 py-1 
+           text-xs font-medium border border-info text-info bg-info/10; 
+  }
+  
+  .badge-warning { 
+    @apply inline-flex items-center gap-1 rounded-full px-3 py-1 
+           text-xs font-medium border border-warning text-warning bg-warning/10; 
+  }
+  
+  .badge-danger { 
+    @apply inline-flex items-center gap-1 rounded-full px-3 py-1 
+           text-xs font-medium border border-destructive text-destructive bg-destructive/10; 
+  }
+
+  /* Input utility */
+  .token-input {
+    @apply w-full rounded-sm border border-border bg-card px-3 py-2 text-sm
+           placeholder:text-muted-foreground focus:outline-none token-focus;
   }
 }

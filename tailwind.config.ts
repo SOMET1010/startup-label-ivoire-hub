@@ -65,9 +65,9 @@ export default {
 				},
 				// Couleurs premium du label
 				premium: {
-					green: 'hsl(152 74% 24%)',
+					green: 'hsl(var(--premium-green))',
 					'green-light': 'hsl(var(--premium-green-light))',
-					gold: 'hsl(43 67% 46%)',
+					gold: 'hsl(var(--premium-gold))',
 					'gold-light': 'hsl(var(--premium-gold-light))',
 					cream: 'hsl(var(--premium-cream))',
 				},
@@ -84,6 +84,10 @@ export default {
 					DEFAULT: 'hsl(var(--info))',
 					foreground: 'hsl(var(--info-foreground))',
 				},
+				danger: {
+					DEFAULT: 'hsl(var(--danger))',
+					foreground: 'hsl(var(--danger-foreground))',
+				},
 				// Couleurs de la Côte d'Ivoire (conservées pour compatibilité)
 				ivoire: {
 					orange: 'hsl(25 100% 50%)',
@@ -92,9 +96,33 @@ export default {
 				},
 			},
 			borderRadius: {
-				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				xs: 'var(--radius-xs)',
+				sm: 'var(--radius-sm)',
+				md: 'var(--radius-md)',
+				lg: 'var(--radius-lg)',
+				xl: 'calc(var(--radius-lg) + 4px)',
+			},
+			boxShadow: {
+				sm: 'var(--shadow-sm)',
+				md: 'var(--shadow-md)',
+				lg: 'var(--shadow-lg)',
+			},
+			transitionTimingFunction: {
+				'ease-out-custom': 'var(--ease-out)',
+			},
+			transitionDuration: {
+				'fast': 'var(--dur-fast)',
+				'normal': 'var(--dur-normal)',
+				'slow': 'var(--dur-slow)',
+			},
+			spacing: {
+				'1': 'var(--space-1)',
+				'2': 'var(--space-2)',
+				'3': 'var(--space-3)',
+				'4': 'var(--space-4)',
+				'5': 'var(--space-5)',
+				'6': 'var(--space-6)',
+				'8': 'var(--space-8)',
 			},
 			keyframes: {
 				'accordion-down': {
@@ -129,8 +157,8 @@ export default {
 				'slide-in': 'slide-in 0.5s ease-out',
 			},
 			fontFamily: {
-				sans: ['Inter', 'sans-serif'],
-				heading: ['Montserrat', 'sans-serif'],
+				sans: ['var(--font-sans)'],
+				heading: ['var(--font-heading)'],
 			}
 		}
 	},
