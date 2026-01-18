@@ -27,7 +27,8 @@ import {
   Scan,
   Move,
   Hand,
-  Fingerprint
+  Fingerprint,
+  HelpCircle
 } from "lucide-react";
 
 // Zoom constants
@@ -501,11 +502,27 @@ const DocumentPreviewModal = ({
           
           {/* Touch gesture hints for mobile */}
           {showTouchHints && isTouchDevice && (
-            <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none animate-fade-in">
-              <div className="bg-background/95 backdrop-blur-sm border rounded-xl shadow-2xl p-6 max-w-xs mx-4">
-                <h4 className="text-sm font-semibold text-center mb-4 text-foreground">
-                  Gestes tactiles disponibles
-                </h4>
+            <div 
+              className="absolute inset-0 flex items-center justify-center z-30 cursor-pointer animate-fade-in"
+              onClick={() => setShowTouchHints(false)}
+            >
+              <div 
+                className="bg-background/95 backdrop-blur-sm border rounded-xl shadow-2xl p-6 max-w-xs mx-4"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-sm font-semibold text-foreground">
+                    Gestes tactiles disponibles
+                  </h4>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0"
+                    onClick={() => setShowTouchHints(false)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -536,7 +553,7 @@ const DocumentPreviewModal = ({
                   </div>
                 </div>
                 <p className="text-xs text-center text-muted-foreground mt-4">
-                  Disparaît automatiquement...
+                  Tapez n'importe où pour fermer
                 </p>
               </div>
             </div>
@@ -642,6 +659,19 @@ const DocumentPreviewModal = ({
                 )}
                 
                 <Separator orientation="vertical" className="h-5" />
+                
+                {/* Touch help button - only on touch devices */}
+                {isTouchDevice && (
+                  <Button
+                    variant={showTouchHints ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => setShowTouchHints(!showTouchHints)}
+                    title="Afficher l'aide tactile"
+                  >
+                    <HelpCircle className="h-4 w-4" />
+                  </Button>
+                )}
+                
                 <Button
                   variant="ghost"
                   size="sm"
