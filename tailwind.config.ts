@@ -63,27 +63,32 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Couleurs de la Côte d'Ivoire
+				// Couleurs premium du label
+				premium: {
+					green: 'hsl(152 74% 24%)',
+					'green-light': 'hsl(var(--premium-green-light))',
+					gold: 'hsl(43 67% 46%)',
+					'gold-light': 'hsl(var(--premium-gold-light))',
+					cream: 'hsl(var(--premium-cream))',
+				},
+				// Couleurs fonctionnelles
+				success: {
+					DEFAULT: 'hsl(var(--success))',
+					foreground: 'hsl(var(--success-foreground))',
+				},
+				warning: {
+					DEFAULT: 'hsl(var(--warning))',
+					foreground: 'hsl(var(--warning-foreground))',
+				},
+				info: {
+					DEFAULT: 'hsl(var(--info))',
+					foreground: 'hsl(var(--info-foreground))',
+				},
+				// Couleurs de la Côte d'Ivoire (conservées pour compatibilité)
 				ivoire: {
-					orange: '#FF8C00',
-					white: '#FFFFFF',
-					green: '#00A86B',
-				},
-				// Couleurs thématiques de la plateforme
-				startup: {
-					light: '#f0f9ff',
-					DEFAULT: '#0ea5e9',
-					dark: '#0369a1',
-				},
-				incubator: {
-					light: '#fef9c3',
-					DEFAULT: '#facc15',
-					dark: '#ca8a04',
-				},
-				investor: {
-					light: '#dcfce7',
-					DEFAULT: '#22c55e',
-					dark: '#15803d',
+					orange: 'hsl(25 100% 50%)',
+					white: 'hsl(0 0% 100%)',
+					green: 'hsl(152 74% 24%)',
 				},
 			},
 			borderRadius: {

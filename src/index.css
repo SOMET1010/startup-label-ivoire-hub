@@ -7,83 +7,115 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 48 33% 98%; /* Blanc cassé premium */
+    --foreground: 152 74% 15%; /* Vert profond */
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 152 74% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 152 74% 15%;
 
-    --primary: 25 100% 50%; /* Orange ivoirien */
+    --primary: 152 74% 24%; /* Vert profond premium #0E6B3D */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 150 100% 33%; /* Vert ivoirien */
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 43 67% 46%; /* Or doux #C9A227 */
+    --secondary-foreground: 152 74% 15%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 48 20% 94%;
+    --muted-foreground: 152 30% 40%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 43 67% 46%; /* Or doux pour accents */
+    --accent-foreground: 152 74% 15%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 25 100% 50%; /* Orange ivoirien */
+    --border: 48 20% 88%;
+    --input: 48 20% 88%;
+    --ring: 152 74% 24%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 25 100% 50%; /* Orange ivoirien */
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 25 100% 50%; /* Orange ivoirien */
+    /* Couleurs additionnelles premium */
+    --premium-green: 152 74% 24%;
+    --premium-green-light: 152 50% 95%;
+    --premium-gold: 43 67% 46%;
+    --premium-gold-light: 43 67% 92%;
+    --premium-cream: 48 33% 98%;
+
+    /* Couleurs fonctionnelles */
+    --success: 152 74% 24%;
+    --success-foreground: 0 0% 100%;
+    --warning: 25 100% 50%;
+    --warning-foreground: 0 0% 100%;
+    --info: 210 100% 50%;
+    --info-foreground: 0 0% 100%;
+
+    /* Sidebar */
+    --sidebar-background: 48 33% 98%;
+    --sidebar-foreground: 152 74% 15%;
+    --sidebar-primary: 152 74% 24%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 48 20% 94%;
+    --sidebar-accent-foreground: 152 74% 15%;
+    --sidebar-border: 48 20% 88%;
+    --sidebar-ring: 152 74% 24%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 152 50% 5%;
+    --foreground: 48 33% 98%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 152 40% 8%;
+    --card-foreground: 48 33% 98%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 152 40% 8%;
+    --popover-foreground: 48 33% 98%;
 
-    --primary: 25 100% 45%; /* Orange ivoirien - plus foncé en mode sombre */
+    --primary: 152 60% 35%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 150 100% 28%; /* Vert ivoirien - plus foncé en mode sombre */
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 43 67% 55%;
+    --secondary-foreground: 152 74% 10%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 152 30% 15%;
+    --muted-foreground: 48 20% 70%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 43 67% 50%;
+    --accent-foreground: 152 74% 10%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 40%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 25 100% 45%; /* Orange ivoirien */
+    --border: 152 30% 18%;
+    --input: 152 30% 18%;
+    --ring: 152 60% 35%;
+
+    /* Couleurs additionnelles premium - dark mode */
+    --premium-green: 152 60% 35%;
+    --premium-green-light: 152 40% 15%;
+    --premium-gold: 43 67% 55%;
+    --premium-gold-light: 43 40% 20%;
+    --premium-cream: 48 20% 10%;
+
+    /* Couleurs fonctionnelles */
+    --success: 152 60% 35%;
+    --success-foreground: 0 0% 100%;
+    --warning: 25 100% 55%;
+    --warning-foreground: 0 0% 100%;
+    --info: 210 100% 55%;
+    --info-foreground: 0 0% 100%;
     
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 25 100% 45%; /* Orange ivoirien */
+    /* Sidebar */
+    --sidebar-background: 152 40% 6%;
+    --sidebar-foreground: 48 33% 98%;
+    --sidebar-primary: 152 60% 35%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 25 100% 45%; /* Orange ivoirien */
+    --sidebar-accent: 152 30% 12%;
+    --sidebar-accent-foreground: 48 33% 98%;
+    --sidebar-border: 152 30% 18%;
+    --sidebar-ring: 152 60% 35%;
   }
 }
 
@@ -131,6 +163,35 @@
   }
   
   .gradient-text {
-    @apply text-transparent bg-clip-text bg-gradient-to-r from-ivoire-orange to-ivoire-green;
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary;
+  }
+
+  .gradient-premium {
+    @apply bg-gradient-to-br from-primary via-primary/90 to-primary/80;
+  }
+
+  .gradient-gold {
+    @apply bg-gradient-to-r from-secondary to-secondary/80;
+  }
+
+  .premium-shadow {
+    box-shadow: 0 10px 40px -10px hsl(var(--primary) / 0.25),
+                0 4px 20px -5px hsl(var(--secondary) / 0.15);
+  }
+
+  .premium-glow {
+    box-shadow: 0 0 60px -10px hsl(var(--secondary) / 0.3);
+  }
+
+  .badge-premium {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-full 
+           bg-primary/10 text-primary font-medium text-sm
+           border border-primary/20;
+  }
+
+  .badge-gold {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-full
+           bg-secondary/10 text-secondary font-medium text-sm
+           border border-secondary/20;
   }
 }
