@@ -9,6 +9,7 @@ import { RoleGate } from "./components/auth/RoleGate";
 
 // Components
 import CloudStatusBanner from "./components/CloudStatusBanner";
+import LabelCoach from "./components/LabelCoach";
 
 // Public pages
 import Index from "./pages/Index";
@@ -42,6 +43,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <CloudStatusBanner />
+        <LabelCoach />
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Index />} />
