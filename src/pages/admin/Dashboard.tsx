@@ -98,6 +98,14 @@ interface UserWithRole {
   roles: string[];
 }
 
+interface DocumentRequest {
+  id: string;
+  document_type: string;
+  message: string | null;
+  requested_at: string | null;
+  fulfilled_at: string | null;
+}
+
 interface Stats {
   total: number;
   pending: number;
@@ -156,6 +164,8 @@ export default function AdminDashboard() {
 
   // Document request
   const [showDocumentRequestDialog, setShowDocumentRequestDialog] = useState(false);
+  const [documentRequests, setDocumentRequests] = useState<DocumentRequest[]>([]);
+  const [loadingDocRequests, setLoadingDocRequests] = useState(false);
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");
@@ -528,9 +538,29 @@ export default function AdminDashboard() {
     setShowActionDialog(true);
   };
 
+  const fetchDocumentRequests = async (applicationId: string) => {
+    setLoadingDocRequests(true);
+    try {
+      const { data, error } = await supabase
+        .from('document_requests')
+        .select('id, document_type, message, requested_at, fulfilled_at')
+        .eq('application_id', applicationId)
+        .order('requested_at', { ascending: false });
+      
+      if (error) throw error;
+      setDocumentRequests(data || []);
+    } catch (error) {
+      console.error('Error fetching document requests:', error);
+      setDocumentRequests([]);
+    } finally {
+      setLoadingDocRequests(false);
+    }
+  };
+
   const openDetailsDialog = (app: ApplicationWithStartup) => {
     setSelectedApplication(app);
     setShowDetailsDialog(true);
+    fetchDocumentRequests(app.id);
   };
 
   const openRoleDialog = (user: UserWithRole) => {
@@ -933,6 +963,73 @@ export default function AdminDashboard() {
                     <div>
                       <Label className="text-muted-foreground">Notes de l'évaluateur</Label>
                       <p className="text-sm mt-1">{selectedApplication.notes}</p>
+                    </div>
+                  )}
+                </div>
+
+                <Separator />
+
+                {/* Document Requests Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <FileQuestion className="h-5 w-5" />
+                    Demandes de documents
+                  </h3>
+                  
+                  {loadingDocRequests ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : documentRequests.length === 0 ? (
+                    <p className="text-muted-foreground text-sm">
+                      Aucune demande de document pour cette candidature.
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {documentRequests.map((req) => {
+                        const isFulfilled = !!req.fulfilled_at;
+                        const docLabel = DOCUMENT_TYPES.find(d => d.value === req.document_type)?.label || req.document_type;
+                        
+                        return (
+                          <div 
+                            key={req.id} 
+                            className={`p-3 rounded-lg border ${
+                              isFulfilled 
+                                ? "bg-green-50 border-green-200" 
+                                : "bg-orange-50 border-orange-200"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="flex items-center gap-2">
+                                {isFulfilled ? (
+                                  <FileCheck className="h-4 w-4 text-green-600" />
+                                ) : (
+                                  <Clock className="h-4 w-4 text-orange-600" />
+                                )}
+                                <span className="font-medium">{docLabel}</span>
+                              </div>
+                              <Badge variant={isFulfilled ? "default" : "outline"}>
+                                {isFulfilled ? "Fourni" : "En attente"}
+                              </Badge>
+                            </div>
+                            
+                            {req.message && (
+                              <p className="text-sm text-muted-foreground mt-1 ml-6">
+                                {req.message}
+                              </p>
+                            )}
+                            
+                            <div className="text-xs text-muted-foreground mt-2 ml-6">
+                              {req.requested_at && (
+                                <>Demandé le {format(new Date(req.requested_at), "dd MMM yyyy", { locale: fr })}</>
+                              )}
+                              {isFulfilled && req.fulfilled_at && (
+                                <> • Fourni le {format(new Date(req.fulfilled_at), "dd MMM yyyy", { locale: fr })}</>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
