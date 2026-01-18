@@ -129,6 +129,47 @@ export type Database = {
         }
         Relationships: []
       }
+      document_requests: {
+        Row: {
+          application_id: string
+          created_at: string | null
+          document_type: string
+          fulfilled_at: string | null
+          id: string
+          message: string | null
+          requested_at: string | null
+          requested_by: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string | null
+          document_type: string
+          fulfilled_at?: string | null
+          id?: string
+          message?: string | null
+          requested_at?: string | null
+          requested_by: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string | null
+          document_type?: string
+          fulfilled_at?: string | null
+          id?: string
+          message?: string | null
+          requested_at?: string | null
+          requested_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_requests_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       evaluations: {
         Row: {
           application_id: string
@@ -428,6 +469,42 @@ export type Database = {
           full_name?: string | null
           id?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      startup_notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          link: string | null
+          message: string
+          metadata: Json | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          link?: string | null
+          message: string
+          metadata?: Json | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          link?: string | null
+          message?: string
+          metadata?: Json | null
+          title?: string
+          type?: string
           user_id?: string
         }
         Relationships: []
