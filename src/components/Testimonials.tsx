@@ -1,52 +1,102 @@
+import { Quote, TrendingUp, Award, Target } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const testimonials = [
+  {
+    quote: "Grâce au label, nous avons remporté notre premier marché public de 50M FCFA avec le Ministère de la Santé.",
+    author: "Marie Konan",
+    role: "CEO, TechInnov",
+    company: "HealthTech",
+    image: "https://randomuser.me/api/portraits/women/32.jpg",
+    impact: "50M FCFA",
+    impactLabel: "Marché remporté",
+    icon: Target,
+  },
+  {
+    quote: "Les exonérations fiscales nous ont permis d'économiser 30% et de recruter 5 développeurs supplémentaires.",
+    author: "Karim Diallo",
+    role: "Fondateur, FinTech CI",
+    company: "FinTech",
+    image: "https://randomuser.me/api/portraits/men/46.jpg",
+    impact: "30%",
+    impactLabel: "Économies fiscales",
+    icon: TrendingUp,
+  },
+  {
+    quote: "Notre crédibilité auprès des investisseurs a été multipliée par 3. Nous avons levé notre premier tour en 6 mois.",
+    author: "Esther Bamba",
+    role: "CTO, EduSolutions",
+    company: "EdTech",
+    image: "https://randomuser.me/api/portraits/women/65.jpg",
+    impact: "x3",
+    impactLabel: "Crédibilité investisseurs",
+    icon: Award,
+  }
+];
 
 const Testimonials = () => {
-  const testimonials = [
-    {
-      quote: "Le Label Startup nous a permis d'économiser des ressources précieuses grâce aux exonérations fiscales, nous permettant d'investir davantage dans notre R&D.",
-      author: "Marie Konan",
-      role: "CEO, TechInnov",
-      image: "https://randomuser.me/api/portraits/women/32.jpg"
-    },
-    {
-      quote: "Depuis l'obtention du label, notre visibilité a considérablement augmenté. Nous avons été contactés par plusieurs investisseurs internationaux.",
-      author: "Karim Diallo",
-      role: "Fondateur, FinTech CI",
-      image: "https://randomuser.me/api/portraits/men/46.jpg"
-    },
-    {
-      quote: "L'accompagnement personnalisé dont nous avons bénéficié a été déterminant dans notre phase de croissance. Une vraie valeur ajoutée !",
-      author: "Esther Bamba",
-      role: "CTO, EduSolutions",
-      image: "https://randomuser.me/api/portraits/women/65.jpg"
-    }
-  ];
-
   return (
-    <section className="py-16 bg-background">
+    <section className="py-20 bg-background">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">Ils témoignent</h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Découvrez l'expérience des startups ayant obtenu le label
+        {/* Header */}
+        <div className="text-center mb-16">
+          <span className="badge-gold mb-4">Témoignages</span>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            L'impact concret du label
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Découvrez comment le label a transformé la trajectoire de ces startups ivoiriennes
           </p>
         </div>
 
+        {/* Testimonials grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
-            <div key={index} className="bg-muted/50 rounded-xl p-6 shadow-sm card-hover">
-              <div className="flex items-start mb-4">
-                <div className="text-4xl text-ivoire-orange">"</div>
+            <div 
+              key={index} 
+              className={cn(
+                "relative bg-card rounded-2xl p-8 shadow-sm border border-border",
+                "card-hover group"
+              )}
+            >
+              {/* Impact badge */}
+              <div className="absolute -top-4 right-6">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary text-secondary-foreground font-bold text-sm shadow-lg">
+                  <testimonial.icon className="w-4 h-4" />
+                  <span>{testimonial.impact}</span>
+                </div>
               </div>
-              <p className="text-muted-foreground mb-6 italic">{testimonial.quote}</p>
-              <div className="flex items-center">
+
+              {/* Quote icon */}
+              <div className="mb-6">
+                <Quote className="w-10 h-10 text-primary/20" />
+              </div>
+
+              {/* Quote text */}
+              <p className="text-foreground mb-6 leading-relaxed text-lg">
+                "{testimonial.quote}"
+              </p>
+
+              {/* Impact label */}
+              <div className="mb-6 pb-6 border-b border-border">
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  {testimonial.impactLabel}
+                </span>
+              </div>
+
+              {/* Author */}
+              <div className="flex items-center gap-4">
                 <img 
                   src={testimonial.image} 
                   alt={testimonial.author} 
-                  className="w-12 h-12 rounded-full mr-4 object-cover"
+                  className="w-14 h-14 rounded-full object-cover border-2 border-primary/20"
                 />
                 <div>
-                  <h4 className="font-bold">{testimonial.author}</h4>
-                  <p className="text-muted-foreground text-sm">{testimonial.role}</p>
+                  <h4 className="font-bold text-foreground">{testimonial.author}</h4>
+                  <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                  <span className="inline-block mt-1 px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary">
+                    {testimonial.company}
+                  </span>
                 </div>
               </div>
             </div>
