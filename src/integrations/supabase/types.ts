@@ -473,6 +473,44 @@ export type Database = {
         }
         Relationships: []
       }
+      renewal_reminders_sent: {
+        Row: {
+          email_sent: boolean | null
+          expiration_date: string
+          id: string
+          notification_sent: boolean | null
+          reminder_type: string
+          sent_at: string
+          startup_id: string
+        }
+        Insert: {
+          email_sent?: boolean | null
+          expiration_date: string
+          id?: string
+          notification_sent?: boolean | null
+          reminder_type: string
+          sent_at?: string
+          startup_id: string
+        }
+        Update: {
+          email_sent?: boolean | null
+          expiration_date?: string
+          id?: string
+          notification_sent?: boolean | null
+          reminder_type?: string
+          sent_at?: string
+          startup_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "renewal_reminders_sent_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       startup_notifications: {
         Row: {
           created_at: string | null

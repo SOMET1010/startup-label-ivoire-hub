@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.startup-news]
 verify_jwt = false
+
+[functions.renewal-reminders]
+verify_jwt = false
