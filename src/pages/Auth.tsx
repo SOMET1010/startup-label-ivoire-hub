@@ -4,21 +4,20 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/contexts/AuthContext";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Mail, Lock, User, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Loader2, Lock, AlertCircle, CheckCircle2, ArrowLeft, Rocket } from "lucide-react";
+import { motion } from "framer-motion";
 
 // Validation schemas
 const loginSchema = z.object({
   email: z.string().email("Adresse email invalide").min(1, "L'email est requis"),
   password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+  rememberMe: z.boolean().optional(),
 });
 
 const signupSchema = z.object({
@@ -40,10 +39,10 @@ type LoginFormData = z.infer<typeof loginSchema>;
 type SignupFormData = z.infer<typeof signupSchema>;
 
 export default function Auth() {
-  const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [showSignup, setShowSignup] = useState(false);
   const { user, signIn, signUp } = useAuth();
   const navigate = useNavigate();
 
@@ -59,6 +58,7 @@ export default function Auth() {
     defaultValues: {
       email: "",
       password: "",
+      rememberMe: false,
     },
   });
 
@@ -99,7 +99,7 @@ export default function Auth() {
         lastName: data.lastName,
       });
       setSuccess("Compte créé avec succès ! Vous pouvez maintenant vous connecter.");
-      setActiveTab("login");
+      setShowSignup(false);
       signupForm.reset();
     } catch (err: any) {
       const errorMessage = getErrorMessage(err);
@@ -131,28 +131,37 @@ export default function Auth() {
     return err?.message || "Une erreur est survenue. Veuillez réessayer.";
   };
 
-  const clearMessages = () => {
-    setError(null);
-    setSuccess(null);
-  };
-
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-muted/30 via-background to-muted/50">
-      <Navbar />
-      
-      <main className="flex-grow flex items-center justify-center py-12 px-4">
-        <div className="w-full max-w-md">
-          {/* Logo/Brand */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-              <span className="text-2xl font-bold text-primary">S</span>
-            </div>
-            <h1 className="text-2xl font-bold text-foreground">Startup Label Ivoire</h1>
-            <p className="text-muted-foreground mt-2">
-              L'écosystème des startups numériques en Côte d'Ivoire
-            </p>
+    <div className="min-h-screen flex flex-col bg-muted/30">
+      {/* Header */}
+      <header className="w-full py-4 px-6 flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-2">
+          <div className="relative">
+            <Rocket className="w-8 h-8 text-primary transform -rotate-45" />
+            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-accent rounded-full" />
           </div>
-
+          <span className="text-lg font-heading">
+            <span className="font-bold text-primary">Startup Label</span>
+            <span className="text-muted-foreground"> – Ivoire Hub</span>
+          </span>
+        </Link>
+        
+        <Link 
+          to="/" 
+          className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Retour à l'accueil
+        </Link>
+      </header>
+      
+      <main className="flex-grow flex items-center justify-center py-8 px-4">
+        <motion.div 
+          className="w-full max-w-md"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
           {/* Alerts */}
           {error && (
             <Alert variant="destructive" className="mb-4 animate-in slide-in-from-top-2">
@@ -162,30 +171,27 @@ export default function Auth() {
           )}
 
           {success && (
-            <Alert className="mb-4 border-green-500 bg-green-50 text-green-800 animate-in slide-in-from-top-2">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
+            <Alert className="mb-4 border-success bg-success/10 text-success animate-in slide-in-from-top-2">
+              <CheckCircle2 className="h-4 w-4" />
               <AlertDescription>{success}</AlertDescription>
             </Alert>
           )}
 
-          <Card className="border-0 shadow-xl bg-card/80 backdrop-blur-sm">
-            <CardHeader className="space-y-1 pb-4">
-              <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v as "login" | "signup"); clearMessages(); }}>
-                <TabsList className="grid w-full grid-cols-2 h-12">
-                  <TabsTrigger value="login" className="text-sm font-medium">
-                    Connexion
-                  </TabsTrigger>
-                  <TabsTrigger value="signup" className="text-sm font-medium">
-                    Inscription
-                  </TabsTrigger>
-                </TabsList>
+          {/* Main Login Card */}
+          <Card className="border shadow-lg bg-card">
+            <CardContent className="pt-8 pb-6 px-8">
+              <div className="text-center mb-6">
+                <h1 className="text-2xl font-bold text-foreground mb-2">
+                  Connexion à la plateforme
+                </h1>
+                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                  <Lock className="w-4 h-4" />
+                  <span>Plateforme officielle – données sécurisées</span>
+                </div>
+              </div>
 
-                <TabsContent value="login" className="mt-6 space-y-4">
-                  <CardTitle className="text-xl">Bon retour !</CardTitle>
-                  <CardDescription>
-                    Connectez-vous pour accéder à votre espace
-                  </CardDescription>
-                  
+              {!showSignup ? (
+                <>
                   <Form {...loginForm}>
                     <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
                       <FormField
@@ -193,18 +199,14 @@ export default function Auth() {
                         name="email"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Email</FormLabel>
                             <FormControl>
-                              <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input 
-                                  {...field} 
-                                  type="email" 
-                                  placeholder="votre@email.com"
-                                  className="pl-10"
-                                  disabled={isLoading}
-                                />
-                              </div>
+                              <Input 
+                                {...field} 
+                                type="email" 
+                                placeholder="Adresse email"
+                                className="h-12 bg-background border-border"
+                                disabled={isLoading}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -216,27 +218,51 @@ export default function Auth() {
                         name="password"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Mot de passe</FormLabel>
                             <FormControl>
-                              <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input 
-                                  {...field} 
-                                  type="password" 
-                                  placeholder="••••••••"
-                                  className="pl-10"
-                                  disabled={isLoading}
-                                />
-                              </div>
+                              <Input 
+                                {...field} 
+                                type="password" 
+                                placeholder="Mot de passe"
+                                className="h-12 bg-background border-border"
+                                disabled={isLoading}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
 
+                      <div className="flex items-center justify-between">
+                        <FormField
+                          control={loginForm.control}
+                          name="rememberMe"
+                          render={({ field }) => (
+                            <FormItem className="flex items-center gap-2 space-y-0">
+                              <FormControl>
+                                <Checkbox 
+                                  checked={field.value} 
+                                  onCheckedChange={field.onChange}
+                                  disabled={isLoading}
+                                />
+                              </FormControl>
+                              <label className="text-sm text-muted-foreground cursor-pointer">
+                                Se souvenir de moi
+                              </label>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <Link 
+                          to="/mot-de-passe-oublie" 
+                          className="text-sm text-primary hover:underline"
+                        >
+                          Mot de passe oublié ?
+                        </Link>
+                      </div>
+
                       <Button 
                         type="submit" 
-                        className="w-full h-11 font-medium"
+                        className="w-full h-12 font-medium bg-primary hover:bg-primary/90"
                         disabled={isLoading}
                       >
                         {isLoading ? (
@@ -250,33 +276,32 @@ export default function Auth() {
                       </Button>
                     </form>
                   </Form>
-                </TabsContent>
 
-                <TabsContent value="signup" className="mt-6 space-y-4">
-                  <CardTitle className="text-xl">Créer un compte</CardTitle>
-                  <CardDescription>
-                    Rejoignez l'écosystème startup ivoirien
-                  </CardDescription>
-                  
+                  <Button 
+                    variant="outline" 
+                    className="w-full h-12 mt-3 font-medium border-border"
+                    onClick={() => { setShowSignup(true); setError(null); }}
+                  >
+                    Créer un compte startup
+                  </Button>
+                </>
+              ) : (
+                <>
                   <Form {...signupForm}>
                     <form onSubmit={signupForm.handleSubmit(handleSignup)} className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-2 gap-3">
                         <FormField
                           control={signupForm.control}
                           name="firstName"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Prénom</FormLabel>
                               <FormControl>
-                                <div className="relative">
-                                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                  <Input 
-                                    {...field} 
-                                    placeholder="Jean"
-                                    className="pl-10"
-                                    disabled={isLoading}
-                                  />
-                                </div>
+                                <Input 
+                                  {...field} 
+                                  placeholder="Prénom"
+                                  className="h-12 bg-background border-border"
+                                  disabled={isLoading}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -288,11 +313,11 @@ export default function Auth() {
                           name="lastName"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Nom</FormLabel>
                               <FormControl>
                                 <Input 
                                   {...field} 
-                                  placeholder="Dupont"
+                                  placeholder="Nom"
+                                  className="h-12 bg-background border-border"
                                   disabled={isLoading}
                                 />
                               </FormControl>
@@ -307,18 +332,14 @@ export default function Auth() {
                         name="email"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Email</FormLabel>
                             <FormControl>
-                              <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input 
-                                  {...field} 
-                                  type="email" 
-                                  placeholder="votre@email.com"
-                                  className="pl-10"
-                                  disabled={isLoading}
-                                />
-                              </div>
+                              <Input 
+                                {...field} 
+                                type="email" 
+                                placeholder="Adresse email"
+                                className="h-12 bg-background border-border"
+                                disabled={isLoading}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -330,18 +351,14 @@ export default function Auth() {
                         name="password"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Mot de passe</FormLabel>
                             <FormControl>
-                              <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input 
-                                  {...field} 
-                                  type="password" 
-                                  placeholder="••••••••"
-                                  className="pl-10"
-                                  disabled={isLoading}
-                                />
-                              </div>
+                              <Input 
+                                {...field} 
+                                type="password" 
+                                placeholder="Mot de passe"
+                                className="h-12 bg-background border-border"
+                                disabled={isLoading}
+                              />
                             </FormControl>
                             <FormMessage />
                             <p className="text-xs text-muted-foreground">
@@ -356,18 +373,14 @@ export default function Auth() {
                         name="confirmPassword"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Confirmer le mot de passe</FormLabel>
                             <FormControl>
-                              <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input 
-                                  {...field} 
-                                  type="password" 
-                                  placeholder="••••••••"
-                                  className="pl-10"
-                                  disabled={isLoading}
-                                />
-                              </div>
+                              <Input 
+                                {...field} 
+                                type="password" 
+                                placeholder="Confirmer le mot de passe"
+                                className="h-12 bg-background border-border"
+                                disabled={isLoading}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -376,7 +389,7 @@ export default function Auth() {
 
                       <Button 
                         type="submit" 
-                        className="w-full h-11 font-medium"
+                        className="w-full h-12 font-medium bg-primary hover:bg-primary/90"
                         disabled={isLoading}
                       >
                         {isLoading ? (
@@ -388,34 +401,51 @@ export default function Auth() {
                           "Créer mon compte"
                         )}
                       </Button>
-                      
-                      <p className="text-xs text-center text-muted-foreground">
-                        En créant un compte, vous acceptez nos{" "}
-                        <Link to="/mentions-legales" className="text-primary hover:underline">
-                          CGU
-                        </Link>{" "}
-                        et notre{" "}
-                        <Link to="/confidentialite" className="text-primary hover:underline">
-                          politique de confidentialité
-                        </Link>
-                      </p>
                     </form>
                   </Form>
-                </TabsContent>
-              </Tabs>
-            </CardHeader>
+
+                  <Button 
+                    variant="outline" 
+                    className="w-full h-12 mt-3 font-medium border-border"
+                    onClick={() => { setShowSignup(false); setError(null); }}
+                  >
+                    J'ai déjà un compte
+                  </Button>
+                </>
+              )}
+            </CardContent>
           </Card>
 
-          {/* Back to home */}
-          <div className="text-center mt-6">
-            <Link to="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-              ← Retour à l'accueil
+          {/* Startup CTA Card */}
+          <Card className="mt-4 border shadow-lg bg-card">
+            <CardContent className="py-6 px-8 text-center">
+              <h2 className="text-lg font-semibold text-foreground mb-2">
+                Vous êtes une startup ?
+              </h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                Créez un compte pour déposer votre dossier de labellisation.
+              </p>
+              <Button 
+                className="bg-accent hover:bg-accent/90 text-accent-foreground font-medium px-6"
+                onClick={() => { setShowSignup(true); setError(null); }}
+              >
+                Inscrire ma startup
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Footer Links */}
+          <div className="text-center mt-6 text-sm text-muted-foreground">
+            <Link to="/mentions-legales" className="hover:text-primary transition-colors">
+              Conditions d'utilisation
+            </Link>
+            <span className="mx-2">·</span>
+            <Link to="/confidentialite" className="hover:text-primary transition-colors">
+              Politique de confidentialité
             </Link>
           </div>
-        </div>
+        </motion.div>
       </main>
-      
-      <Footer />
     </div>
   );
 }
