@@ -1,8 +1,10 @@
-import { Building2, Users, Briefcase, TrendingUp, MapPin } from "lucide-react";
+import { Building2, Users, Briefcase, TrendingUp, MapPin, LucideIcon } from "lucide-react";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { usePlatformStats, PlatformStat } from "@/hooks/usePlatformStats";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Hook for animated counter
 const useAnimatedCounter = (endValue: number, duration: number = 2) => {
@@ -46,33 +48,58 @@ const AnimatedValue = ({ value, suffix = "" }: { value: string; suffix?: string 
   );
 };
 
-const stats = [
-  {
-    icon: Building2,
-    value: "500+",
-    label: "Startups actives",
-    description: "dans l'écosystème numérique",
-  },
-  {
-    icon: Users,
-    value: "25+",
-    label: "Incubateurs",
-    description: "partenaires du programme",
-  },
-  {
-    icon: Briefcase,
-    value: "5000+",
-    label: "Emplois créés",
-    description: "dans le secteur tech",
-  },
-  {
-    icon: TrendingUp,
-    value: "10 Mds",
-    unit: "FCFA",
-    label: "Investissements",
-    description: "levés par les startups",
-  },
-];
+// Icon mapping for dynamic stats
+const iconMap: Record<string, LucideIcon> = {
+  "building2": Building2,
+  "users": Users,
+  "briefcase": Briefcase,
+  "trending-up": TrendingUp,
+};
+
+// Get icon component from string name
+const getIconComponent = (iconName: string): LucideIcon => {
+  return iconMap[iconName.toLowerCase()] || Building2;
+};
+
+// Format stat value for display
+const formatStatValue = (stat: PlatformStat): string => {
+  if (stat.unit) {
+    // If unit is something like "Mds FCFA", split it
+    const unitParts = stat.unit.split(" ");
+    if (unitParts.length > 1) {
+      return `${stat.value} ${unitParts[0]}`;
+    }
+  }
+  return `${stat.value}+`;
+};
+
+// Get unit suffix if applicable
+const getUnitSuffix = (stat: PlatformStat): string | undefined => {
+  if (stat.unit) {
+    const unitParts = stat.unit.split(" ");
+    if (unitParts.length > 1) {
+      return unitParts.slice(1).join(" ");
+    }
+  }
+  return undefined;
+};
+
+// Skeleton loader for stats
+const StatsSkeleton = () => (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+    {[1, 2, 3, 4].map((i) => (
+      <div
+        key={i}
+        className="bg-primary-foreground/10 backdrop-blur-sm rounded-2xl p-6 text-center border border-primary-foreground/10"
+      >
+        <Skeleton className="w-14 h-14 mx-auto mb-4 rounded-xl bg-primary-foreground/20" />
+        <Skeleton className="h-12 w-24 mx-auto mb-2 bg-primary-foreground/20" />
+        <Skeleton className="h-6 w-32 mx-auto mb-1 bg-primary-foreground/20" />
+        <Skeleton className="h-4 w-40 mx-auto bg-primary-foreground/20" />
+      </div>
+    ))}
+  </div>
+);
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -98,6 +125,8 @@ const itemVariants = {
 } as const;
 
 const Stats = () => {
+  const { stats, loading } = usePlatformStats();
+
   return (
     <section className="py-20 bg-gradient-to-br from-primary via-primary/95 to-primary/90 text-primary-foreground relative overflow-hidden">
       {/* Background decorations */}
@@ -148,43 +177,53 @@ const Stats = () => {
         </motion.div>
 
         {/* Stats grid */}
-        <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12"
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
-        >
-          {stats.map((stat, index) => (
-            <motion.div 
-              key={index} 
-              className="bg-primary-foreground/10 backdrop-blur-sm rounded-2xl p-6 text-center border border-primary-foreground/10 hover:bg-primary-foreground/15 transition-all duration-300 group"
-              variants={itemVariants}
-              whileHover={{ y: -5, transition: { duration: 0.2 } }}
-            >
-              <motion.div 
-                className="w-14 h-14 mx-auto mb-4 rounded-xl bg-secondary/20 flex items-center justify-center group-hover:scale-110 transition-transform"
-                whileHover={{ rotate: 5 }}
-              >
-                <stat.icon className="w-7 h-7 text-secondary" />
-              </motion.div>
-              <div className="text-4xl md:text-5xl font-bold text-primary-foreground mb-1">
-                <AnimatedValue value={stat.value} />
-              </div>
-              {stat.unit && (
-                <div className="text-sm font-medium text-primary-foreground/70 mb-1">
-                  {stat.unit}
-                </div>
-              )}
-              <div className="text-lg font-semibold text-primary-foreground/90 mb-1">
-                {stat.label}
-              </div>
-              <p className="text-sm text-primary-foreground/60">
-                {stat.description}
-              </p>
-            </motion.div>
-          ))}
-        </motion.div>
+        {loading ? (
+          <StatsSkeleton />
+        ) : (
+          <motion.div 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+          >
+            {stats.map((stat) => {
+              const IconComponent = getIconComponent(stat.icon);
+              const displayValue = formatStatValue(stat);
+              const unitSuffix = getUnitSuffix(stat);
+              
+              return (
+                <motion.div 
+                  key={stat.key} 
+                  className="bg-primary-foreground/10 backdrop-blur-sm rounded-2xl p-6 text-center border border-primary-foreground/10 hover:bg-primary-foreground/15 transition-all duration-300 group"
+                  variants={itemVariants}
+                  whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                >
+                  <motion.div 
+                    className="w-14 h-14 mx-auto mb-4 rounded-xl bg-secondary/20 flex items-center justify-center group-hover:scale-110 transition-transform"
+                    whileHover={{ rotate: 5 }}
+                  >
+                    <IconComponent className="w-7 h-7 text-secondary" />
+                  </motion.div>
+                  <div className="text-4xl md:text-5xl font-bold text-primary-foreground mb-1">
+                    <AnimatedValue value={displayValue} />
+                  </div>
+                  {unitSuffix && (
+                    <div className="text-sm font-medium text-primary-foreground/70 mb-1">
+                      {unitSuffix}
+                    </div>
+                  )}
+                  <div className="text-lg font-semibold text-primary-foreground/90 mb-1">
+                    {stat.label}
+                  </div>
+                  <p className="text-sm text-primary-foreground/60">
+                    {stat.description}
+                  </p>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        )}
 
         {/* CTA */}
         <motion.div 
