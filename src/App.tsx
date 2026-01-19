@@ -55,6 +55,9 @@ const Network = lazy(() => import("./pages/startup/Network"));
 const Renewal = lazy(() => import("./pages/startup/Renewal"));
 const StartupProfile = lazy(() => import("./pages/startup/Profile"));
 
+// Page de test - à supprimer en production
+const TestPush = lazy(() => import("./pages/TestPush"));
+
 const queryClient = new QueryClient();
 
 // Startup routes wrapper component
@@ -128,6 +131,7 @@ const App = () => (
             <Route path="/entreprises-ia/:id" element={<EntrepriseIADetail />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/actualites" element={<Actualites />} />
+            <Route path="/test-push" element={<AuthProvider><TestPush /></AuthProvider>} />
             
             {/* Auth routes */}
             <Route path="/auth" element={<Auth />} />
