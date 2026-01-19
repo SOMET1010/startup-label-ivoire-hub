@@ -112,11 +112,33 @@ export default function RequestDocumentDialog({
             document_type: documentType,
           },
         });
+
+        // 5. Send email notification
+        const documentLabel = DOCUMENT_TYPES.find(d => d.value === documentType)?.label || documentType;
+        try {
+          const { error: emailError } = await supabase.functions.invoke('notify-document-request', {
+            body: {
+              application_id: application.id,
+              document_type: documentType,
+              document_label: documentLabel,
+              message: message || null,
+            }
+          });
+          
+          if (emailError) {
+            console.error("Error sending email notification:", emailError);
+          } else {
+            console.log("Email notification sent successfully");
+          }
+        } catch (emailError) {
+          // Log error but don't block the flow
+          console.error("Error invoking email function:", emailError);
+        }
       }
 
       toast({
         title: "Demande envoyée",
-        description: `La demande de document a été envoyée à ${application.startup.name}.`,
+        description: `La startup a été notifiée par email et dans l'application.`,
       });
 
       // Reset form
