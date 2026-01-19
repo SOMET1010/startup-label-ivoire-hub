@@ -1,5 +1,8 @@
 import { Quote, TrendingUp, Award, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
+import marieKonanImg from "@/assets/testimonials/marie-konan.jpg";
+import karimDialloImg from "@/assets/testimonials/karim-diallo.jpg";
+import estherBambaImg from "@/assets/testimonials/esther-bamba.jpg";
 
 const testimonials = [
   {
@@ -7,7 +10,7 @@ const testimonials = [
     author: "Marie Konan",
     role: "CEO, TechInnov",
     company: "HealthTech",
-    image: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=200&h=200&fit=crop&crop=face",
+    image: marieKonanImg,
     impact: "50M FCFA",
     impactLabel: "Marché remporté",
     icon: Target,
@@ -17,7 +20,7 @@ const testimonials = [
     author: "Karim Diallo",
     role: "Fondateur, FinTech CI",
     company: "FinTech",
-    image: "https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?w=200&h=200&fit=crop&crop=face",
+    image: karimDialloImg,
     impact: "30%",
     impactLabel: "Économies fiscales",
     icon: TrendingUp,
@@ -27,7 +30,7 @@ const testimonials = [
     author: "Esther Bamba",
     role: "CTO, EduSolutions",
     company: "EdTech",
-    image: "https://images.unsplash.com/photo-1589156280159-27698a70f29e?w=200&h=200&fit=crop&crop=face",
+    image: estherBambaImg,
     impact: "x3",
     impactLabel: "Crédibilité investisseurs",
     icon: Award,
