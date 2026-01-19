@@ -175,6 +175,7 @@ export default function AdminDashboard() {
   const [sectorFilter, setSectorFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
   const [minScoreFilter, setMinScoreFilter] = useState("all");
+  const [pendingDocsOnly, setPendingDocsOnly] = useState(false);
 
   const fetchData = async () => {
     if (!supabase) return;
@@ -384,9 +385,12 @@ export default function AdminDashboard() {
         if (app.averageScore === null || app.averageScore < minScore) return false;
       }
 
+      // Pending docs filter
+      if (pendingDocsOnly && app.pendingDocsCount === 0) return false;
+
       return true;
     });
-  }, [applications, searchQuery, statusFilter, sectorFilter, dateFilter, minScoreFilter]);
+  }, [applications, searchQuery, statusFilter, sectorFilter, dateFilter, minScoreFilter, pendingDocsOnly]);
 
   const resetFilters = () => {
     setSearchQuery("");
@@ -394,6 +398,7 @@ export default function AdminDashboard() {
     setSectorFilter("all");
     setDateFilter("all");
     setMinScoreFilter("all");
+    setPendingDocsOnly(false);
   };
 
   const getScoreBadge = (score: number | null) => {
@@ -731,6 +736,8 @@ export default function AdminDashboard() {
                     onDateChange={setDateFilter}
                     minScoreFilter={minScoreFilter}
                     onMinScoreChange={setMinScoreFilter}
+                    pendingDocsOnly={pendingDocsOnly}
+                    onPendingDocsChange={setPendingDocsOnly}
                     onReset={resetFilters}
                     filteredCount={filteredApplications.length}
                     totalCount={applications.length}
