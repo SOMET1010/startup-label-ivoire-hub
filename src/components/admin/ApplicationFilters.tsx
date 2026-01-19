@@ -7,7 +7,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, X, Filter } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Search, X, Filter, FileQuestion } from "lucide-react";
 
 interface ApplicationFiltersProps {
   searchQuery: string;
@@ -20,6 +22,8 @@ interface ApplicationFiltersProps {
   onDateChange: (value: string) => void;
   minScoreFilter: string;
   onMinScoreChange: (value: string) => void;
+  pendingDocsOnly: boolean;
+  onPendingDocsChange: (value: boolean) => void;
   onReset: () => void;
   filteredCount: number;
   totalCount: number;
@@ -74,6 +78,8 @@ export default function ApplicationFilters({
   onDateChange,
   minScoreFilter,
   onMinScoreChange,
+  pendingDocsOnly,
+  onPendingDocsChange,
   onReset,
   filteredCount,
   totalCount,
@@ -83,7 +89,8 @@ export default function ApplicationFilters({
     statusFilter !== "all" ||
     sectorFilter !== "all" ||
     dateFilter !== "all" ||
-    minScoreFilter !== "all";
+    minScoreFilter !== "all" ||
+    pendingDocsOnly;
 
   return (
     <div className="space-y-4 mb-6">
@@ -150,6 +157,18 @@ export default function ApplicationFilters({
             ))}
           </SelectContent>
         </Select>
+
+        <div className="flex items-center gap-2 px-3 py-2 border rounded-md bg-background">
+          <FileQuestion className="h-4 w-4 text-orange-500" />
+          <Label htmlFor="pending-docs" className="text-sm cursor-pointer whitespace-nowrap">
+            Docs en attente
+          </Label>
+          <Switch
+            id="pending-docs"
+            checked={pendingDocsOnly}
+            onCheckedChange={onPendingDocsChange}
+          />
+        </div>
       </div>
 
       {/* Second Row: Results count + Reset button */}
