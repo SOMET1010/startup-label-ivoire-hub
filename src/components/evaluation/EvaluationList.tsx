@@ -16,12 +16,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Loader2, Star, Eye, Edit, Users } from "lucide-react";
+import { Loader2, Star, Eye, Edit, Users, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import EvaluationForm from "./EvaluationForm";
 import EvaluationSummary from "./EvaluationSummary";
+import { EvaluationChat } from "./EvaluationChat";
 
 interface ApplicationForEvaluation {
   id: string;
@@ -273,6 +274,15 @@ export default function EvaluationList({ currentUserId, currentUserName }: Evalu
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openEvaluationForm(app)}
+                            title="Discussion"
+                            className="text-blue-600 hover:text-blue-700"
+                          >
+                            <MessageCircle className="h-4 w-4" />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -284,19 +294,32 @@ export default function EvaluationList({ currentUserId, currentUserName }: Evalu
         </CardContent>
       </Card>
 
-      {/* Evaluation Form Dialog */}
+      {/* Evaluation Form Dialog with Chat */}
       <Dialog open={showEvaluationForm} onOpenChange={setShowEvaluationForm}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden p-0">
           {selectedApp && (
-            <EvaluationForm
-              applicationId={selectedApp.id}
-              startup={selectedApp.startup}
-              evaluatorId={currentUserId}
-              evaluatorName={currentUserName}
-              existingEvaluation={existingEvaluation}
-              onSaved={handleEvaluationSaved}
-              onClose={() => setShowEvaluationForm(false)}
-            />
+            <div className="grid grid-cols-1 lg:grid-cols-5 h-[85vh]">
+              {/* Evaluation Form - 3 columns */}
+              <div className="lg:col-span-3 overflow-y-auto p-6 border-r">
+                <EvaluationForm
+                  applicationId={selectedApp.id}
+                  startup={selectedApp.startup}
+                  evaluatorId={currentUserId}
+                  evaluatorName={currentUserName}
+                  existingEvaluation={existingEvaluation}
+                  onSaved={handleEvaluationSaved}
+                  onClose={() => setShowEvaluationForm(false)}
+                />
+              </div>
+              
+              {/* Chat Panel - 2 columns */}
+              <div className="lg:col-span-2 hidden lg:flex flex-col h-full">
+                <EvaluationChat 
+                  applicationId={selectedApp.id} 
+                  className="border-0 rounded-none h-full"
+                />
+              </div>
+            </div>
           )}
         </DialogContent>
       </Dialog>
