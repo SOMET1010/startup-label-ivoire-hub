@@ -65,6 +65,8 @@ import { fr } from "date-fns/locale";
 import { useAuth } from "@/contexts/AuthContext";
 import EvaluationList from "@/components/evaluation/EvaluationList";
 import { EvaluationChat } from "@/components/evaluation/EvaluationChat";
+import VotingPanel from "@/components/evaluation/VotingPanel";
+import VoteStatusBadge from "@/components/evaluation/VoteStatusBadge";
 import ApplicationFilters from "@/components/admin/ApplicationFilters";
 import DocumentViewer from "@/components/admin/DocumentViewer";
 import RequestDocumentDialog, { DOCUMENT_TYPES } from "@/components/admin/RequestDocumentDialog";
@@ -87,6 +89,14 @@ interface ApplicationWithStartup {
   created_at: string;
   averageScore: number | null;
   pendingDocsCount: number;
+  // Voting data
+  votingData?: {
+    totalVotes: number;
+    quorumRequired: number;
+    quorumReached: boolean;
+    calculatedDecision: "approve" | "reject" | "pending" | "tie" | null;
+    finalDecision: "approved" | "rejected" | "pending" | null;
+  };
   startup: {
     id: string;
     name: string;
@@ -233,7 +243,7 @@ export default function AdminDashboard() {
       const appIds = appsData?.map(a => a.id) || [];
       const { data: evaluationsData } = await supabase
         .from("evaluations")
-        .select("application_id, total_score, is_submitted")
+        .select("application_id, total_score, is_submitted, recommendation")
         .in("application_id", appIds)
         .eq("is_submitted", true);
 
@@ -261,6 +271,33 @@ export default function AdminDashboard() {
         pendingDocsByApp[req.application_id] = (pendingDocsByApp[req.application_id] || 0) + 1;
       });
 
+      // Fetch voting decisions
+      const { data: votingDecisionsData } = await supabase
+        .from('voting_decisions')
+        .select('application_id, total_votes, quorum_required, quorum_reached, calculated_decision, final_decision')
+        .in('application_id', appIds);
+
+      // Map voting decisions by application
+      const votingByApp: Record<string, typeof votingDecisionsData[0]> = {};
+      votingDecisionsData?.forEach((vd) => {
+        votingByApp[vd.application_id] = vd;
+      });
+
+      // Calculate voting data from evaluations for apps without voting_decisions
+      const voteCountsByApp: Record<string, { approve: number; reject: number; pending: number }> = {};
+      evaluationsData?.forEach((ev) => {
+        if (!voteCountsByApp[ev.application_id]) {
+          voteCountsByApp[ev.application_id] = { approve: 0, reject: 0, pending: 0 };
+        }
+        if (ev.recommendation === 'approve') {
+          voteCountsByApp[ev.application_id].approve++;
+        } else if (ev.recommendation === 'reject') {
+          voteCountsByApp[ev.application_id].reject++;
+        } else {
+          voteCountsByApp[ev.application_id].pending++;
+        }
+      });
+
       // Combine data
       const applicationsWithDetails: ApplicationWithStartup[] = (appsData || []).map(app => {
         const startup = startupsData?.find(s => s.id === app.startup_id);
@@ -269,6 +306,27 @@ export default function AdminDashboard() {
         const averageScore = scores.length > 0 
           ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) 
           : null;
+        
+        // Build voting data
+        const vd = votingByApp[app.id];
+        const vc = voteCountsByApp[app.id] || { approve: 0, reject: 0, pending: 0 };
+        const totalVotes = vc.approve + vc.reject + vc.pending;
+        const quorumRequired = vd?.quorum_required ?? 3;
+        const quorumReached = vd?.quorum_reached ?? (totalVotes >= quorumRequired);
+        
+        let calculatedDecision: "approve" | "reject" | "pending" | "tie" | null = null;
+        if (quorumReached && totalVotes > 0) {
+          if (vc.approve > vc.reject && vc.approve > vc.pending) {
+            calculatedDecision = "approve";
+          } else if (vc.reject > vc.approve && vc.reject > vc.pending) {
+            calculatedDecision = "reject";
+          } else if (vc.approve === vc.reject && vc.approve > 0) {
+            calculatedDecision = "tie";
+          } else {
+            calculatedDecision = "pending";
+          }
+        }
+        
         return {
           id: app.id,
           status: app.status || "pending",
@@ -277,6 +335,13 @@ export default function AdminDashboard() {
           created_at: app.created_at,
           averageScore,
           pendingDocsCount: pendingDocsByApp[app.id] || 0,
+          votingData: {
+            totalVotes,
+            quorumRequired,
+            quorumReached,
+            calculatedDecision: vd?.calculated_decision as typeof calculatedDecision ?? calculatedDecision,
+            finalDecision: vd?.final_decision as "approved" | "rejected" | "pending" | null ?? null,
+          },
           startup: startup || {
             id: "", 
             name: "Startup inconnue", 
@@ -842,6 +907,7 @@ export default function AdminDashboard() {
                           <TableHead>Date</TableHead>
                           <TableHead>Statut</TableHead>
                           <TableHead>Score</TableHead>
+                          <TableHead>Vote</TableHead>
                           <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -881,6 +947,17 @@ export default function AdminDashboard() {
                             </TableCell>
                             <TableCell>
                               {getScoreBadge(app.averageScore)}
+                            </TableCell>
+                            <TableCell>
+                              {app.votingData && (
+                                <VoteStatusBadge
+                                  totalVotes={app.votingData.totalVotes}
+                                  quorumRequired={app.votingData.quorumRequired}
+                                  quorumReached={app.votingData.quorumReached}
+                                  calculatedDecision={app.votingData.calculatedDecision}
+                                  finalDecision={app.votingData.finalDecision}
+                                />
+                              )}
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex items-center justify-end gap-2">
@@ -1226,6 +1303,18 @@ export default function AdminDashboard() {
                     </div>
                   )}
                 </div>
+
+                <Separator />
+
+                {/* Voting Panel */}
+                <VotingPanel
+                  applicationId={selectedApplication.id}
+                  startupName={selectedApplication.startup.name}
+                  onDecisionApplied={() => {
+                    fetchData();
+                    setShowDetailsDialog(false);
+                  }}
+                />
 
                 <Separator />
 
