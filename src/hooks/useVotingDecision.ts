@@ -305,6 +305,22 @@ export function useVotingDecision(applicationId: string, config: Partial<VotingC
         }
       }
 
+      // Envoyer les notifications
+      try {
+        await supabase.functions.invoke('notify-voting-decision', {
+          body: {
+            event_type: 'decision_applied',
+            application_id: applicationId,
+            decision,
+            decision_source: source,
+            notes,
+          },
+        });
+      } catch (notifError) {
+        console.error("Error sending decision notification:", notifError);
+        // Ne pas bloquer en cas d'erreur de notification
+      }
+
       toast({
         title: decision === "approved" ? "Candidature approuvée" : "Candidature rejetée",
         description: `La décision a été appliquée ${source === "automatic" ? "automatiquement" : "manuellement"}.`,
