@@ -25,6 +25,7 @@ const stats = [
   {
     icon: TrendingUp,
     value: "10 Mds",
+    unit: "FCFA",
     label: "Investissements",
     description: "levés par les startups",
   },
@@ -124,9 +125,14 @@ const Stats = () => {
               >
                 <stat.icon className="w-7 h-7 text-secondary" />
               </motion.div>
-              <div className="text-4xl md:text-5xl font-bold text-primary-foreground mb-2">
+              <div className="text-4xl md:text-5xl font-bold text-primary-foreground mb-1">
                 {stat.value}
               </div>
+              {stat.unit && (
+                <div className="text-sm font-medium text-primary-foreground/70 mb-1">
+                  {stat.unit}
+                </div>
+              )}
               <div className="text-lg font-semibold text-primary-foreground/90 mb-1">
                 {stat.label}
               </div>
