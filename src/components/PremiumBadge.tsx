@@ -68,10 +68,10 @@ const PremiumBadge = ({
       {/* Badge text */}
       <div className="flex flex-col">
         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-          République de Côte d'Ivoire
+          Label Officiel
         </span>
         <span className="text-sm font-bold text-primary">
-          Startup Numérique Labellisée
+          Startup Numérique Ivoirienne
         </span>
       </div>
       
