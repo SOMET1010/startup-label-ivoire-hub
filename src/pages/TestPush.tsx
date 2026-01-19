@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 export default function TestPush() {
   const { user } = useAuth();
-  const { isSupported, permission, isSubscribed, loading, subscribe, unsubscribe } = usePushNotifications();
+  const { isSupported, permission, isSubscribed, loading, vapidKeyStatus, subscribe, unsubscribe } = usePushNotifications();
   const [sending, setSending] = useState(false);
   const [subscriptionDetails, setSubscriptionDetails] = useState<string | null>(null);
 
@@ -102,9 +102,15 @@ export default function TestPush() {
               details={user ? user.email || user.id : "Non connecté"}
             />
             <StatusRow
-              label="VAPID Key configurée"
-              status={!!import.meta.env.VITE_VAPID_PUBLIC_KEY}
-              details={import.meta.env.VITE_VAPID_PUBLIC_KEY ? "✓ Présente" : "✗ Manquante"}
+              label="VAPID Key"
+              status={vapidKeyStatus === "available"}
+              details={
+                vapidKeyStatus === "loading"
+                  ? "Chargement..."
+                  : vapidKeyStatus === "available"
+                  ? "✓ Disponible via edge function"
+                  : "✗ Manquante"
+              }
             />
           </CardContent>
         </Card>
