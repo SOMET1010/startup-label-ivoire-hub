@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, RefreshCw, TrendingUp, Clock, Target, BarChart3, PieChart as PieIcon } from "lucide-react";
+import { Loader2, RefreshCw, TrendingUp, Clock, BarChart3, PieChart as PieIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useVotingStats } from "@/hooks/useVotingStats";
+import { PeriodSelector, TimePeriod, TIME_PERIOD_OPTIONS } from "./PeriodSelector";
 import VotingKPICards from "./VotingKPICards";
 import VotesEvolutionChart from "./charts/VotesEvolutionChart";
 import DecisionDistributionChart from "./charts/DecisionDistributionChart";
@@ -9,7 +11,10 @@ import DecisionTimeChart from "./charts/DecisionTimeChart";
 import EvaluatorPerformanceChart from "./charts/EvaluatorPerformanceChart";
 
 export default function VotingStatsDashboard() {
-  const stats = useVotingStats();
+  const [period, setPeriod] = useState<TimePeriod>('90d');
+  const stats = useVotingStats(period);
+
+  const periodLabel = TIME_PERIOD_OPTIONS.find(o => o.value === period)?.label || '';
 
   if (stats.isLoading) {
     return (
@@ -37,18 +42,21 @@ export default function VotingStatsDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Header with refresh */}
-      <div className="flex items-center justify-between">
+      {/* Header with period filter and refresh */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold">Statistiques de Vote</h2>
           <p className="text-muted-foreground">
-            Analyse des évaluations et décisions de labellisation
+            Analyse des évaluations et décisions — <span className="font-medium text-foreground">{periodLabel}</span>
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={stats.refetch}>
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Actualiser
-        </Button>
+        <div className="flex items-center gap-3">
+          <PeriodSelector value={period} onChange={setPeriod} />
+          <Button variant="outline" size="sm" onClick={stats.refetch}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Actualiser
+          </Button>
+        </div>
       </div>
 
       {/* KPI Cards */}

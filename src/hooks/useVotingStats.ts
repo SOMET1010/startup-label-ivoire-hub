@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { TimePeriod, getStartDate, getMonthsToShow } from "@/components/admin/PeriodSelector";
 
 export interface MonthlyVoteData {
   month: string;
@@ -49,7 +50,18 @@ export interface VotingStats {
   error: string | null;
 }
 
-export function useVotingStats() {
+// Helper to filter data by date
+function filterByDate<T>(items: T[], dateField: keyof T, startDate: Date | null): T[] {
+  if (!startDate) return items;
+  return items.filter(item => {
+    const dateValue = item[dateField];
+    if (!dateValue) return false;
+    const date = new Date(dateValue as string);
+    return date >= startDate;
+  });
+}
+
+export function useVotingStats(period: TimePeriod = '90d') {
   const [stats, setStats] = useState<VotingStats>({
     totalEvaluations: 0,
     submittedEvaluations: 0,
@@ -66,9 +78,12 @@ export function useVotingStats() {
     error: null,
   });
 
+  const startDate = getStartDate(period);
+  const monthsToShow = getMonthsToShow(period);
+
   useEffect(() => {
     fetchStats();
-  }, []);
+  }, [period]);
 
   const fetchStats = async () => {
     if (!supabase) {
@@ -78,25 +93,30 @@ export function useVotingStats() {
 
     try {
       // Fetch all evaluations
-      const { data: evaluations, error: evalError } = await supabase
+      const { data: allEvaluations, error: evalError } = await supabase
         .from("evaluations")
         .select("*");
       
       if (evalError) throw evalError;
 
       // Fetch voting decisions
-      const { data: votingDecisions, error: vdError } = await supabase
+      const { data: allVotingDecisions, error: vdError } = await supabase
         .from("voting_decisions")
         .select("*");
       
       if (vdError) throw vdError;
 
       // Fetch applications for decision time calculation
-      const { data: applications, error: appsError } = await supabase
+      const { data: allApplications, error: appsError } = await supabase
         .from("applications")
         .select("id, submitted_at, status");
       
       if (appsError) throw appsError;
+
+      // Filter data by period
+      const evaluations = filterByDate(allEvaluations || [], 'created_at', startDate);
+      const votingDecisions = filterByDate(allVotingDecisions || [], 'created_at', startDate);
+      const applications = filterByDate(allApplications || [], 'submitted_at', startDate);
 
       // Fetch evaluator profiles
       const evaluatorIds = [...new Set(evaluations?.map(e => e.evaluator_id) || [])];
@@ -143,8 +163,8 @@ export function useVotingStats() {
         }
       }
 
-      // Monthly votes data (last 12 months)
-      const monthlyVotes = calculateMonthlyVotes(submittedEvals, votingDecisions || []);
+      // Monthly votes data
+      const monthlyVotes = calculateMonthlyVotes(submittedEvals, votingDecisions || [], monthsToShow);
 
       // Decision distribution
       const approvedApps = applications?.filter(a => a.status === "approved").length || 0;
@@ -158,7 +178,7 @@ export function useVotingStats() {
       ].filter(d => d.value > 0);
 
       // Decision time trend (monthly)
-      const decisionTimeTrend = calculateDecisionTimeTrend(votingDecisions || [], applications || []);
+      const decisionTimeTrend = calculateDecisionTimeTrend(votingDecisions || [], applications || [], monthsToShow);
 
       // Evaluator performance
       const evaluatorPerformance = calculateEvaluatorPerformance(submittedEvals, profiles || []);
@@ -193,13 +213,14 @@ export function useVotingStats() {
 
 function calculateMonthlyVotes(
   evaluations: any[], 
-  votingDecisions: any[]
+  votingDecisions: any[],
+  monthsToShow: number
 ): MonthlyVoteData[] {
   const months: Record<string, MonthlyVoteData> = {};
   const now = new Date();
   
-  // Initialize last 6 months
-  for (let i = 5; i >= 0; i--) {
+  // Initialize months based on period
+  for (let i = monthsToShow - 1; i >= 0; i--) {
     const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     const monthName = date.toLocaleDateString('fr-FR', { month: 'short' });
@@ -241,16 +262,16 @@ function calculateMonthlyVotes(
 
 function calculateDecisionTimeTrend(
   votingDecisions: any[],
-  applications: any[]
+  applications: any[],
+  monthsToShow: number
 ): DecisionTimeTrend[] {
   const months: Record<string, { total: number; count: number }> = {};
   const now = new Date();
   
-  // Initialize last 6 months
-  for (let i = 5; i >= 0; i--) {
+  // Initialize months based on period
+  for (let i = monthsToShow - 1; i >= 0; i--) {
     const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    const monthName = date.toLocaleDateString('fr-FR', { month: 'short' });
     months[key] = { total: 0, count: 0 };
   }
 
@@ -271,7 +292,6 @@ function calculateDecisionTimeTrend(
     }
   });
 
-  const now2 = new Date();
   return Object.entries(months).map(([key, data]) => {
     const [year, month] = key.split('-');
     const date = new Date(parseInt(year), parseInt(month) - 1, 1);
