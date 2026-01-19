@@ -35,6 +35,7 @@ const SuiviCandidature = lazy(() => import("./pages/SuiviCandidature"));
 
 // Pages admin - lazy loading
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
+const AuditLogs = lazy(() => import("./pages/admin/AuditLogs"));
 
 // Pages startup - lazy loading
 const StartupDashboard = lazy(() => import("./pages/startup/Dashboard"));
@@ -108,6 +109,16 @@ const App = () => (
                 <ProtectedRoute>
                   <RoleGate allowedRoles={['admin', 'evaluator']}>
                     <AdminDashboard />
+                  </RoleGate>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/audit-logs" 
+              element={
+                <ProtectedRoute>
+                  <RoleGate allowedRoles={['admin']}>
+                    <AuditLogs />
                   </RoleGate>
                 </ProtectedRoute>
               } 
