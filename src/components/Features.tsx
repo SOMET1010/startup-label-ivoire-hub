@@ -1,5 +1,5 @@
-
 import { Check } from "lucide-react";
+import { motion } from "framer-motion";
 
 const Features = () => {
   const features = [
@@ -47,30 +47,75 @@ const Features = () => {
     },
   ];
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  } as const;
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        duration: 0.5,
+        ease: [0.25, 0.46, 0.45, 0.94],
+      },
+    },
+  } as const;
+
   return (
     <section className="py-16 bg-muted/50">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
+        <motion.div 
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.6 }}
+        >
           <h2 className="text-3xl font-bold mb-4">Avantages du Label Startup</h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             La labellisation de votre startup numérique vous ouvre les portes à de nombreux avantages exclusifs
           </p>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+        >
           {features.map((feature, index) => (
-            <div 
+            <motion.div 
               key={index}
-              className={`${feature.color} border ${feature.borderColor} rounded-xl p-6 card-hover`}
+              className={`${feature.color} border ${feature.borderColor} rounded-xl p-6`}
+              variants={itemVariants}
+              whileHover={{ y: -5, scale: 1.02, transition: { duration: 0.2 } }}
             >
               <div className="flex items-center mb-4">
-                <div className="mr-2">{feature.icon}</div>
+                <motion.div 
+                  className="mr-2"
+                  initial={{ scale: 0 }}
+                  whileInView={{ scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: 0.2 + index * 0.05, type: "spring", stiffness: 200 }}
+                >
+                  {feature.icon}
+                </motion.div>
                 <h3 className="text-xl font-bold">{feature.title}</h3>
               </div>
               <p className="text-muted-foreground">{feature.description}</p>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

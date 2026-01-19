@@ -1,4 +1,5 @@
 import { FileText, FolderOpen, Users, Trophy, Rocket, ChevronRight } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -41,12 +42,41 @@ const steps = [
   },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.2,
+    },
+  },
+} as const;
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.25, 0.46, 0.45, 0.94],
+    },
+  },
+} as const;
+
 const StartupJourney = () => {
   return (
     <section className="py-20 bg-gradient-to-b from-background to-muted/30">
       <div className="container mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-16">
+        <motion.div 
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.6 }}
+        >
           <span className="badge-gold mb-4">Processus simplifié</span>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Votre parcours vers le label
@@ -54,33 +84,67 @@ const StartupJourney = () => {
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Un processus 100% en ligne, transparent et rapide pour obtenir votre certification officielle
           </p>
-        </div>
+        </motion.div>
 
         {/* Timeline - Desktop */}
         <div className="hidden lg:block relative mb-12">
           {/* Progress line */}
-          <div className="absolute top-16 left-0 right-0 h-1 bg-border">
-            <div className="h-full w-full bg-gradient-to-r from-primary via-secondary to-primary/50 rounded-full" />
-          </div>
+          <motion.div 
+            className="absolute top-16 left-0 right-0 h-1 bg-border overflow-hidden"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+          >
+            <motion.div 
+              className="h-full bg-gradient-to-r from-primary via-secondary to-primary/50 rounded-full"
+              initial={{ scaleX: 0, transformOrigin: "left" }}
+              whileInView={{ scaleX: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
+            />
+          </motion.div>
 
           {/* Steps */}
-          <div className="relative grid grid-cols-5 gap-4">
+          <motion.div 
+            className="relative grid grid-cols-5 gap-4"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+          >
             {steps.map((step, index) => (
-              <div key={index} className="flex flex-col items-center text-center group">
+              <motion.div 
+                key={index} 
+                className="flex flex-col items-center text-center group"
+                variants={itemVariants}
+              >
                 {/* Icon circle */}
-                <div className={cn(
-                  "relative z-10 w-14 h-14 rounded-full flex items-center justify-center",
-                  "transition-all duration-300 group-hover:scale-110",
-                  step.bgColor,
-                  "border-4 border-background shadow-lg"
-                )}>
+                <motion.div 
+                  className={cn(
+                    "relative z-10 w-14 h-14 rounded-full flex items-center justify-center",
+                    "transition-all duration-300",
+                    step.bgColor,
+                    "border-4 border-background shadow-lg"
+                  )}
+                  whileHover={{ scale: 1.15 }}
+                  initial={{ scale: 0, rotate: -180 }}
+                  whileInView={{ scale: 1, rotate: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.3 + index * 0.1, type: "spring", stiffness: 200 }}
+                >
                   <step.icon className={cn("w-6 h-6", step.color)} />
-                </div>
+                </motion.div>
                 
                 {/* Step number */}
-                <div className="mt-4 w-8 h-8 rounded-full bg-card border-2 border-primary/20 flex items-center justify-center">
+                <motion.div 
+                  className="mt-4 w-8 h-8 rounded-full bg-card border-2 border-primary/20 flex items-center justify-center"
+                  initial={{ opacity: 0, scale: 0 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3, delay: 0.5 + index * 0.1 }}
+                >
                   <span className="text-sm font-bold text-primary">{index + 1}</span>
-                </div>
+                </motion.div>
 
                 {/* Content */}
                 <h3 className="mt-4 font-semibold text-foreground">{step.title}</h3>
@@ -92,26 +156,45 @@ const StartupJourney = () => {
                 {index < steps.length - 1 && (
                   <ChevronRight className="absolute top-16 right-0 transform translate-x-1/2 -translate-y-1/2 w-5 h-5 text-primary/50 hidden xl:block" />
                 )}
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
 
         {/* Timeline - Mobile */}
-        <div className="lg:hidden space-y-6 mb-12">
+        <motion.div 
+          className="lg:hidden space-y-6 mb-12"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+        >
           {steps.map((step, index) => (
-            <div key={index} className="flex gap-4">
+            <motion.div 
+              key={index} 
+              className="flex gap-4"
+              variants={itemVariants}
+            >
               {/* Left side - Icon and line */}
               <div className="flex flex-col items-center">
-                <div className={cn(
-                  "w-12 h-12 rounded-full flex items-center justify-center shrink-0",
-                  step.bgColor,
-                  "border-2 border-background shadow-md"
-                )}>
+                <motion.div 
+                  className={cn(
+                    "w-12 h-12 rounded-full flex items-center justify-center shrink-0",
+                    step.bgColor,
+                    "border-2 border-background shadow-md"
+                  )}
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                >
                   <step.icon className={cn("w-5 h-5", step.color)} />
-                </div>
+                </motion.div>
                 {index < steps.length - 1 && (
-                  <div className="w-0.5 h-full bg-gradient-to-b from-primary/30 to-secondary/30 mt-2" />
+                  <motion.div 
+                    className="w-0.5 h-full bg-gradient-to-b from-primary/30 to-secondary/30 mt-2"
+                    initial={{ scaleY: 0, transformOrigin: "top" }}
+                    whileInView={{ scaleY: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                  />
                 )}
               </div>
 
@@ -125,22 +208,30 @@ const StartupJourney = () => {
                   {step.description}
                 </p>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {/* CTA */}
-        <div className="text-center">
+        <motion.div 
+          className="text-center"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
           <Link to="/postuler">
-            <Button size="lg" className="gradient-premium text-primary-foreground px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all">
-              Commencer maintenant
-              <ChevronRight className="ml-2 w-5 h-5" />
-            </Button>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button size="lg" className="gradient-premium text-primary-foreground px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all">
+                Commencer maintenant
+                <ChevronRight className="ml-2 w-5 h-5" />
+              </Button>
+            </motion.div>
           </Link>
           <p className="mt-4 text-sm text-muted-foreground">
             Processus 100% en ligne • Réponse sous 30 jours
           </p>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
