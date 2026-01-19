@@ -22,10 +22,15 @@ interface CachedUrl {
   expiresAt: number;
 }
 
+interface AuditLogContext {
+  startupId?: string;
+  applicationId?: string;
+}
+
 interface UseSecureDocumentReturn {
-  getSignedUrl: (path: string, mode?: ExpirationMode) => Promise<string | null>;
-  downloadDocument: (path: string, fileName?: string) => Promise<void>;
-  previewDocument: (path: string) => Promise<string | null>;
+  getSignedUrl: (path: string, mode?: ExpirationMode, context?: AuditLogContext) => Promise<string | null>;
+  downloadDocument: (path: string, fileName?: string, context?: AuditLogContext) => Promise<void>;
+  previewDocument: (path: string, context?: AuditLogContext) => Promise<string | null>;
   isLoading: boolean;
   error: string | null;
   clearError: () => void;
@@ -40,12 +45,40 @@ const urlCache = new Map<string, CachedUrl>();
 const EXPIRATION_BUFFER_MS = 30 * 1000;
 
 /**
+ * Enregistre l'accès au document dans l'audit log
+ */
+async function logDocumentAccess(
+  documentPath: string,
+  accessType: ExpirationMode,
+  accessResult: 'success' | 'error' | 'denied',
+  context?: AuditLogContext,
+  errorMessage?: string
+): Promise<void> {
+  try {
+    await supabase.functions.invoke('log-document-access', {
+      body: {
+        document_path: documentPath,
+        access_type: accessType,
+        access_result: accessResult,
+        startup_id: context?.startupId,
+        application_id: context?.applicationId,
+        error_message: errorMessage,
+      },
+    });
+  } catch (e) {
+    // Log silencieux - ne pas bloquer l'accès si le logging échoue
+    console.warn('Audit log failed:', e);
+  }
+}
+
+/**
  * Hook centralisé pour l'accès sécurisé aux documents sensibles
  * 
  * Fonctionnalités:
  * - URLs signées avec expiration courte (5 min par défaut)
  * - Cache local pour éviter les appels redondants
  * - Gestion d'erreurs unifiée
+ * - Audit logging automatique
  * - Support aperçu, téléchargement et partage
  */
 export function useSecureDocument(): UseSecureDocumentReturn {
@@ -60,7 +93,8 @@ export function useSecureDocument(): UseSecureDocumentReturn {
    */
   const getSignedUrl = useCallback(async (
     path: string, 
-    mode: ExpirationMode = 'preview'
+    mode: ExpirationMode = 'preview',
+    context?: AuditLogContext
   ): Promise<string | null> => {
     if (!path) {
       setError('Chemin du document non spécifié');
@@ -71,6 +105,8 @@ export function useSecureDocument(): UseSecureDocumentReturn {
     const cacheKey = `${path}:${mode}`;
     const cached = urlCache.get(cacheKey);
     if (cached && cached.expiresAt > Date.now() + EXPIRATION_BUFFER_MS) {
+      // Log même pour les accès en cache
+      logDocumentAccess(path, mode, 'success', context);
       return cached.url;
     }
 
@@ -104,11 +140,19 @@ export function useSecureDocument(): UseSecureDocumentReturn {
         expiresAt: Date.now() + (expirationSeconds * 1000),
       });
 
+      // Log l'accès réussi
+      logDocumentAccess(path, mode, 'success', context);
+
       return data.signedUrl;
     } catch (err: any) {
       const errorMessage = getErrorMessage(err);
       setError(errorMessage);
       console.error('Erreur génération URL signée:', err);
+      
+      // Log l'erreur d'accès
+      const result = err?.message?.includes('permission') ? 'denied' : 'error';
+      logDocumentAccess(path, mode, result, context, errorMessage);
+      
       return null;
     } finally {
       loadingRef.current.delete(cacheKey);
@@ -121,7 +165,8 @@ export function useSecureDocument(): UseSecureDocumentReturn {
    */
   const downloadDocument = useCallback(async (
     path: string, 
-    fileName?: string
+    fileName?: string,
+    context?: AuditLogContext
   ): Promise<void> => {
     if (!path) {
       toast.error('Chemin du document non spécifié');
@@ -158,12 +203,19 @@ export function useSecureDocument(): UseSecureDocumentReturn {
       // Libérer l'URL après un court délai
       setTimeout(() => URL.revokeObjectURL(url), 1000);
       
+      // Log le téléchargement réussi
+      logDocumentAccess(path, 'download', 'success', context);
+      
       toast.success(`Document "${resolvedFileName}" téléchargé`);
     } catch (err: any) {
       const errorMessage = getErrorMessage(err);
       setError(errorMessage);
       toast.error(errorMessage);
       console.error('Erreur téléchargement document:', err);
+      
+      // Log l'erreur de téléchargement
+      const result = err?.message?.includes('permission') ? 'denied' : 'error';
+      logDocumentAccess(path, 'download', result, context, errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -172,8 +224,11 @@ export function useSecureDocument(): UseSecureDocumentReturn {
   /**
    * Génère une URL pour prévisualisation (5 min d'expiration)
    */
-  const previewDocument = useCallback(async (path: string): Promise<string | null> => {
-    return getSignedUrl(path, 'preview');
+  const previewDocument = useCallback(async (
+    path: string, 
+    context?: AuditLogContext
+  ): Promise<string | null> => {
+    return getSignedUrl(path, 'preview', context);
   }, [getSignedUrl]);
 
   return {

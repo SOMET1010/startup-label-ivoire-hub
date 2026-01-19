@@ -151,6 +151,69 @@ export type Database = {
         }
         Relationships: []
       }
+      document_access_logs: {
+        Row: {
+          access_result: string | null
+          access_type: string
+          application_id: string | null
+          created_at: string
+          document_path: string
+          document_type: string | null
+          error_message: string | null
+          id: string
+          ip_address: string | null
+          startup_id: string | null
+          user_agent: string | null
+          user_id: string
+          user_role: string | null
+        }
+        Insert: {
+          access_result?: string | null
+          access_type: string
+          application_id?: string | null
+          created_at?: string
+          document_path: string
+          document_type?: string | null
+          error_message?: string | null
+          id?: string
+          ip_address?: string | null
+          startup_id?: string | null
+          user_agent?: string | null
+          user_id: string
+          user_role?: string | null
+        }
+        Update: {
+          access_result?: string | null
+          access_type?: string
+          application_id?: string | null
+          created_at?: string
+          document_path?: string
+          document_type?: string | null
+          error_message?: string | null
+          id?: string
+          ip_address?: string | null
+          startup_id?: string | null
+          user_agent?: string | null
+          user_id?: string
+          user_role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_access_logs_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_access_logs_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_requests: {
         Row: {
           application_id: string
