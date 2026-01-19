@@ -1,4 +1,4 @@
-import { Bell, Check, CheckCheck, FileText, Calendar, Gift, BookOpen, MessageSquare, RefreshCw, TrendingUp } from 'lucide-react';
+import { Bell, Check, CheckCheck, FileText, Calendar, Gift, BookOpen, MessageSquare, RefreshCw, TrendingUp, Users, Gavel } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -23,6 +23,8 @@ const notificationIcons: Record<NotificationType, React.ComponentType<{ classNam
   new_resource: BookOpen,
   comment: MessageSquare,
   renewal_reminder: RefreshCw,
+  quorum_reached: Users,
+  decision_applied: Gavel,
 };
 
 const notificationColors: Record<NotificationType, string> = {
@@ -33,6 +35,8 @@ const notificationColors: Record<NotificationType, string> = {
   new_resource: 'text-purple-500',
   comment: 'text-yellow-600',
   renewal_reminder: 'text-red-500',
+  quorum_reached: 'text-blue-600',
+  decision_applied: 'text-purple-600',
 };
 
 export function NotificationBell() {
