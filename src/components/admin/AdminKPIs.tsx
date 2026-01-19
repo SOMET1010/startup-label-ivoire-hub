@@ -11,6 +11,7 @@ import {
   Target,
   Zap,
   RefreshCw,
+  FileWarning,
 } from 'lucide-react';
 import { useAdminMetrics } from '@/hooks/useAdminMetrics';
 import { 
@@ -34,8 +35,8 @@ export function AdminKPIs({ className }: AdminKPIsProps) {
 
   if (loading) {
     return (
-      <div className={cn('grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4', className)}>
-        {[...Array(4)].map((_, i) => (
+      <div className={cn('grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4', className)}>
+        {[...Array(5)].map((_, i) => (
           <Card key={i} className="animate-pulse">
             <CardHeader className="pb-2">
               <div className="h-4 bg-muted rounded w-24" />
@@ -63,7 +64,7 @@ export function AdminKPIs({ className }: AdminKPIsProps) {
   return (
     <div className={cn('space-y-6', className)}>
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         {/* Average Processing Time */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -123,20 +124,46 @@ export function AdminKPIs({ className }: AdminKPIsProps) {
           </CardContent>
         </Card>
 
-        {/* Document Requests */}
+        {/* Pending Documents - NEW KPI */}
+        <Card className={cn(
+          metrics.pendingDocumentRequests > 0 && "border-orange-300 bg-orange-50/50"
+        )}>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Documents en attente
+            </CardTitle>
+            <FileWarning className={cn(
+              "h-4 w-4",
+              metrics.pendingDocumentRequests > 0 ? "text-orange-500" : "text-muted-foreground"
+            )} />
+          </CardHeader>
+          <CardContent>
+            <div className={cn(
+              "text-2xl font-bold",
+              metrics.pendingDocumentRequests > 0 ? "text-orange-600" : "text-muted-foreground"
+            )}>
+              {metrics.pendingDocumentRequests}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {metrics.applicationsWithPendingDocs} candidature{metrics.applicationsWithPendingDocs !== 1 ? 's' : ''} concernée{metrics.applicationsWithPendingDocs !== 1 ? 's' : ''}
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Document Round Trips */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Allers-retours moyens
             </CardTitle>
-            <RefreshCw className="h-4 w-4 text-orange-500" />
+            <RefreshCw className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">
+            <div className="text-2xl font-bold text-purple-600">
               {metrics.averageRoundTrips}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {metrics.pendingDocumentRequests} demandes de documents en attente
+              demandes par candidature
             </p>
           </CardContent>
         </Card>
