@@ -1,5 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  ApplicationServerKeys,
+  PushSubscription as WebPushSubscription,
+  generatePushHTTPRequest,
+} from "https://esm.sh/@anthropic-ai/webpush@0.0.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -15,36 +20,51 @@ interface PushPayload {
   body?: string;
 }
 
-// Web Push encryption using native Deno crypto
+interface PushSubscriptionRecord {
+  id: string;
+  user_id: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+}
+
 async function sendWebPush(
-  endpoint: string,
-  p256dh: string,
-  auth: string,
+  subscription: PushSubscriptionRecord,
   payload: object,
-  vapidPublicKey: string,
-  vapidPrivateKey: string,
-  vapidSubject: string
+  applicationServerKeys: ApplicationServerKeys
 ): Promise<boolean> {
   try {
-    // For now, we'll use a simpler approach with the web-push library pattern
-    // In production, you'd want to implement full VAPID signing
-    
-    console.log(`Sending push to endpoint: ${endpoint}`);
-    console.log(`Payload:`, JSON.stringify(payload));
-    
-    // Note: Full Web Push implementation requires:
-    // 1. VAPID signing with the private key
-    // 2. Encrypting the payload with p256dh and auth keys
-    // For now, we log and return true - implement full crypto when VAPID keys are configured
-    
-    if (!vapidPublicKey || !vapidPrivateKey) {
-      console.warn("VAPID keys not configured, skipping push notification");
+    const webPushSubscription: WebPushSubscription = {
+      endpoint: subscription.endpoint,
+      keys: {
+        p256dh: subscription.p256dh,
+        auth: subscription.auth,
+      },
+    };
+
+    const payloadString = JSON.stringify(payload);
+
+    const { headers, body, endpoint } = await generatePushHTTPRequest({
+      applicationServerKeys,
+      payload: new TextEncoder().encode(payloadString),
+      target: webPushSubscription,
+      adminContact: Deno.env.get("VAPID_SUBJECT") || "mailto:contact@labelstartup.ci",
+      ttl: 60 * 60, // 1 hour
+    });
+
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers,
+      body,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Push failed for ${subscription.endpoint}: ${response.status} - ${errorText}`);
       return false;
     }
-    
-    // The actual push implementation would go here
-    // Using libraries like web-push or implementing the crypto manually
-    
+
+    console.log(`Push sent successfully to ${subscription.endpoint}`);
     return true;
   } catch (error) {
     console.error("Error sending web push:", error);
@@ -52,8 +72,29 @@ async function sendWebPush(
   }
 }
 
+async function getApplicationServerKeys(): Promise<ApplicationServerKeys | null> {
+  const vapidPublicKey = Deno.env.get("VAPID_PUBLIC_KEY");
+  const vapidPrivateKey = Deno.env.get("VAPID_PRIVATE_KEY");
+
+  if (!vapidPublicKey || !vapidPrivateKey) {
+    console.warn("VAPID keys not configured");
+    return null;
+  }
+
+  try {
+    // Import the VAPID keys
+    const applicationServerKeys = await ApplicationServerKeys.fromJSON({
+      publicKey: vapidPublicKey,
+      privateKey: vapidPrivateKey,
+    });
+    return applicationServerKeys;
+  } catch (error) {
+    console.error("Error importing VAPID keys:", error);
+    return null;
+  }
+}
+
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -61,16 +102,20 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const vapidPublicKey = Deno.env.get("VAPID_PUBLIC_KEY") || "";
-    const vapidPrivateKey = Deno.env.get("VAPID_PRIVATE_KEY") || "";
-    const vapidSubject = Deno.env.get("VAPID_SUBJECT") || "mailto:contact@labelstartup.ci";
-
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    const applicationServerKeys = await getApplicationServerKeys();
+    if (!applicationServerKeys) {
+      return new Response(
+        JSON.stringify({ error: "VAPID keys not configured" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const body: PushPayload = await req.json();
     const { comment_id, application_id, sender_id, user_id, title, body: messageBody } = body;
 
-    // If user_id is provided, send directly to that user
+    // Direct notification to a specific user
     if (user_id && title && messageBody) {
       const { data: subscriptions } = await supabase
         .from("push_subscriptions")
@@ -83,26 +128,16 @@ serve(async (req) => {
           body: messageBody,
           icon: "/favicon.ico",
           badge: "/favicon.ico",
-          data: {
-            url: "/startup/messages",
-          },
+          data: { url: "/startup/messages" },
         };
 
         const results = await Promise.all(
           subscriptions.map((sub) =>
-            sendWebPush(
-              sub.endpoint,
-              sub.p256dh,
-              sub.auth,
-              payload,
-              vapidPublicKey,
-              vapidPrivateKey,
-              vapidSubject
-            )
+            sendWebPush(sub as PushSubscriptionRecord, payload, applicationServerKeys)
           )
         );
 
-        console.log(`Sent ${results.filter(Boolean).length} push notifications`);
+        console.log(`Sent ${results.filter(Boolean).length}/${results.length} push notifications`);
       }
 
       return new Response(JSON.stringify({ success: true }), {
@@ -111,8 +146,8 @@ serve(async (req) => {
     }
 
     // Handle comment notification
-    if (!application_id || !sender_id) {
-      return new Response(JSON.stringify({ error: "Missing required fields" }), {
+    if (!application_id) {
+      return new Response(JSON.stringify({ error: "Missing application_id" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -134,7 +169,7 @@ serve(async (req) => {
     }
 
     // Don't notify if the sender is the startup owner
-    if (sender_id === application.user_id) {
+    if (sender_id && sender_id === application.user_id) {
       console.log("Sender is the startup owner, skipping notification");
       return new Response(JSON.stringify({ success: true, skipped: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -142,11 +177,15 @@ serve(async (req) => {
     }
 
     // Get sender profile for notification text
-    const { data: senderProfile } = await supabase
-      .from("profiles")
-      .select("full_name")
-      .eq("user_id", sender_id)
-      .single();
+    let senderName: string | null = null;
+    if (sender_id) {
+      const { data: senderProfile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("user_id", sender_id)
+        .single();
+      senderName = senderProfile?.full_name || null;
+    }
 
     // Get push subscriptions for the startup owner
     const { data: subscriptions } = await supabase
@@ -163,8 +202,8 @@ serve(async (req) => {
 
     const notificationPayload = {
       title: "Nouveau message",
-      body: senderProfile?.full_name
-        ? `${senderProfile.full_name} vous a envoyé un message`
+      body: senderName
+        ? `${senderName} vous a envoyé un message`
         : "L'équipe de labellisation vous a répondu",
       icon: "/favicon.ico",
       badge: "/favicon.ico",
@@ -178,23 +217,17 @@ serve(async (req) => {
     // Send push to all subscriptions
     const results = await Promise.all(
       subscriptions.map((sub) =>
-        sendWebPush(
-          sub.endpoint,
-          sub.p256dh,
-          sub.auth,
-          notificationPayload,
-          vapidPublicKey,
-          vapidPrivateKey,
-          vapidSubject
-        )
+        sendWebPush(sub as PushSubscriptionRecord, notificationPayload, applicationServerKeys)
       )
     );
 
-    console.log(`Sent ${results.filter(Boolean).length} push notifications`);
+    const successCount = results.filter(Boolean).length;
+    console.log(`Sent ${successCount}/${results.length} push notifications`);
 
-    return new Response(JSON.stringify({ success: true, sent: results.filter(Boolean).length }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ success: true, sent: successCount, total: results.length }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   } catch (error) {
     console.error("Error in send-push-notification:", error);
     return new Response(JSON.stringify({ error: "Internal server error" }), {
