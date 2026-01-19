@@ -44,10 +44,17 @@ import {
   EyeOff,
   CheckCircle,
   XCircle,
+  Download,
+  ExternalLink,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { 
+  useSecureDocument, 
+  isPreviewable, 
+  getDocumentType 
+} from '@/hooks/useSecureDocument';
 
 const profileFormSchema = z.object({
   name: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
@@ -122,6 +129,10 @@ export default function StartupProfile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [loadingDoc, setLoadingDoc] = useState<string | null>(null);
+  
+  // Hook pour accès sécurisé aux documents
+  const { getSignedUrl, downloadDocument } = useSecureDocument();
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileFormSchema),
@@ -232,6 +243,44 @@ export default function StartupProfile() {
     { key: 'doc_cv', value: startup.doc_cv },
     { key: 'doc_pitch', value: startup.doc_pitch },
   ] : [];
+
+  const handleDocumentPreview = async (path: string, docKey: string) => {
+    setLoadingDoc(docKey);
+    try {
+      const signedUrl = await getSignedUrl(path, 'preview');
+      if (signedUrl) {
+        if (isPreviewable(path)) {
+          window.open(signedUrl, '_blank');
+        } else {
+          window.open(signedUrl, '_blank');
+        }
+      }
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Erreur',
+        description: 'Impossible d\'ouvrir le document.',
+      });
+    } finally {
+      setLoadingDoc(null);
+    }
+  };
+
+  const handleDocumentDownload = async (path: string, docKey: string) => {
+    setLoadingDoc(docKey);
+    try {
+      const fileName = path.split('/').pop() || 'document';
+      await downloadDocument(path, fileName);
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Erreur',
+        description: 'Impossible de télécharger le document.',
+      });
+    } finally {
+      setLoadingDoc(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -569,7 +618,7 @@ export default function StartupProfile() {
                   <CardHeader>
                     <CardTitle>Documents</CardTitle>
                     <CardDescription>
-                      Documents téléversés lors de votre candidature
+                      Documents téléversés lors de votre candidature. Les liens sécurisés expirent après 5 minutes.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -585,17 +634,58 @@ export default function StartupProfile() {
                               {DOCUMENT_LABELS[key] || key}
                             </span>
                           </div>
-                          {value ? (
-                            <Badge variant="outline" className="text-green-600 border-green-300">
-                              <CheckCircle className="h-3 w-3 mr-1" />
-                              Fourni
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="text-muted-foreground">
-                              <XCircle className="h-3 w-3 mr-1" />
-                              Non fourni
-                            </Badge>
-                          )}
+                          <div className="flex items-center gap-2">
+                            {value ? (
+                              <>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleDocumentPreview(value, key)}
+                                  disabled={loadingDoc === key}
+                                  className="h-8"
+                                >
+                                  {loadingDoc === key ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : isPreviewable(value) ? (
+                                    <>
+                                      <Eye className="h-4 w-4 mr-1" />
+                                      Voir
+                                    </>
+                                  ) : (
+                                    <>
+                                      <ExternalLink className="h-4 w-4 mr-1" />
+                                      Ouvrir
+                                    </>
+                                  )}
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleDocumentDownload(value, key)}
+                                  disabled={loadingDoc === key}
+                                  className="h-8"
+                                >
+                                  {loadingDoc === key ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <>
+                                      <Download className="h-4 w-4 mr-1" />
+                                      Télécharger
+                                    </>
+                                  )}
+                                </Button>
+                                <Badge variant="outline" className="text-green-600 border-green-300">
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  Fourni
+                                </Badge>
+                              </>
+                            ) : (
+                              <Badge variant="outline" className="text-muted-foreground">
+                                <XCircle className="h-3 w-3 mr-1" />
+                                Non fourni
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>

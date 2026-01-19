@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,6 +16,15 @@ import {
   ImageIcon
 } from "lucide-react";
 import DocumentPreviewModal, { type DocumentType } from "./DocumentPreviewModal";
+import { 
+  useSecureDocument, 
+  isPreviewable, 
+  isPDF, 
+  isImage, 
+  getFileExtension,
+  getDocumentType,
+  EXPIRATION_TIMES 
+} from "@/hooks/useSecureDocument";
 
 interface DocumentViewerProps {
   documents: {
@@ -58,6 +66,9 @@ const DocumentViewer = ({ documents, startupName }: DocumentViewerProps) => {
     documentType: "other",
   });
 
+  // Utiliser le hook centralisé pour les URLs signées sécurisées
+  const { getSignedUrl, downloadDocument, isLoading } = useSecureDocument();
+
   const requiredDocs: DocumentItem[] = [
     { key: "doc_rccm", label: "Registre du Commerce (RCCM)", path: documents.doc_rccm, required: true },
     { key: "doc_tax", label: "Attestation fiscale (NIF)", path: documents.doc_tax, required: true },
@@ -73,30 +84,6 @@ const DocumentViewer = ({ documents, startupName }: DocumentViewerProps) => {
   const getFileName = (path: string): string => {
     const parts = path.split("/");
     return parts[parts.length - 1] || "document";
-  };
-
-  const getFileExtension = (path: string): string => {
-    const parts = path.split(".");
-    return parts[parts.length - 1]?.toLowerCase() || "";
-  };
-
-  const isPDF = (path: string): boolean => {
-    return getFileExtension(path) === "pdf";
-  };
-
-  const isImage = (path: string): boolean => {
-    const ext = getFileExtension(path);
-    return ["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(ext);
-  };
-
-  const isPreviewable = (path: string): boolean => {
-    return isPDF(path) || isImage(path);
-  };
-
-  const getDocumentType = (path: string): DocumentType => {
-    if (isPDF(path)) return "pdf";
-    if (isImage(path)) return "image";
-    return "other";
   };
 
   const getFileIcon = (path: string) => {
@@ -126,11 +113,6 @@ const DocumentViewer = ({ documents, startupName }: DocumentViewerProps) => {
   };
 
   const handlePreview = async (path: string, docKey: string, label: string) => {
-    if (!supabase) {
-      toast.error("Connexion au stockage non disponible");
-      return;
-    }
-
     const docType = getDocumentType(path);
 
     // Only PDF and images can be previewed in the modal
@@ -142,15 +124,16 @@ const DocumentViewer = ({ documents, startupName }: DocumentViewerProps) => {
 
     setLoadingDoc(docKey);
     try {
-      const { data, error } = await supabase.storage
-        .from("application-documents")
-        .createSignedUrl(path, 3600);
+      // Utiliser le hook avec expiration courte (5 min au lieu de 1h)
+      const signedUrl = await getSignedUrl(path, 'preview');
 
-      if (error) throw error;
+      if (!signedUrl) {
+        throw new Error("Impossible de générer l'URL");
+      }
 
       setPreviewModal({
         isOpen: true,
-        url: data?.signedUrl || null,
+        url: signedUrl,
         documentName: `${label} - ${getFileName(path)}`,
         documentPath: path,
         documentKey: docKey,
@@ -165,21 +148,13 @@ const DocumentViewer = ({ documents, startupName }: DocumentViewerProps) => {
   };
 
   const handleOpenInNewTab = async (path: string, docKey: string) => {
-    if (!supabase) {
-      toast.error("Connexion au stockage non disponible");
-      return;
-    }
-
     setLoadingDoc(docKey);
     try {
-      const { data, error } = await supabase.storage
-        .from("application-documents")
-        .createSignedUrl(path, 3600);
+      // Utiliser expiration courte pour ouverture dans nouvel onglet
+      const signedUrl = await getSignedUrl(path, 'preview');
 
-      if (error) throw error;
-
-      if (data?.signedUrl) {
-        window.open(data.signedUrl, "_blank");
+      if (signedUrl) {
+        window.open(signedUrl, "_blank");
       }
     } catch (error: any) {
       console.error("Error getting signed URL:", error);
@@ -190,34 +165,9 @@ const DocumentViewer = ({ documents, startupName }: DocumentViewerProps) => {
   };
 
   const handleDownload = async (path: string, docKey: string) => {
-    if (!supabase) {
-      toast.error("Connexion au stockage non disponible");
-      return;
-    }
-
     setLoadingDoc(docKey);
     try {
-      const { data, error } = await supabase.storage
-        .from("application-documents")
-        .download(path);
-
-      if (error) throw error;
-
-      if (data) {
-        const fileName = getFileName(path);
-        const url = URL.createObjectURL(data);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        toast.success(`Document "${fileName}" téléchargé`);
-      }
-    } catch (error: any) {
-      console.error("Error downloading document:", error);
-      toast.error("Erreur lors du téléchargement du document");
+      await downloadDocument(path, getFileName(path));
     } finally {
       setLoadingDoc(null);
     }
