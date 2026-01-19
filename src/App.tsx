@@ -11,6 +11,7 @@ import { LabelGate } from "./components/auth/LabelGate";
 import CloudStatusBanner from "./components/CloudStatusBanner";
 import LabelCoach from "./components/LabelCoach";
 import PageLoader from "./components/PageLoader";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 // Pages critiques - import statique pour chargement instantané
 import Index from "./pages/Index";
@@ -55,7 +56,8 @@ const App = () => (
       <BrowserRouter>
         <CloudStatusBanner />
         <LabelCoach />
-        <Suspense fallback={<PageLoader />}>
+        <ErrorBoundary>
+          <Suspense fallback={<PageLoader />}>
           <Routes>
             {/* Public routes */}
             <Route path="/" element={<Index />} />
@@ -114,7 +116,8 @@ const App = () => (
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </Suspense>
+          </Suspense>
+        </ErrorBoundary>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
