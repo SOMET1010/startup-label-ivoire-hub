@@ -55,6 +55,7 @@ import {
   Star,
   FileQuestion,
   Trash2,
+  BarChart3,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -70,6 +71,7 @@ import VoteStatusBadge from "@/components/evaluation/VoteStatusBadge";
 import ApplicationFilters from "@/components/admin/ApplicationFilters";
 import DocumentViewer from "@/components/admin/DocumentViewer";
 import RequestDocumentDialog, { DOCUMENT_TYPES } from "@/components/admin/RequestDocumentDialog";
+import VotingStatsDashboard from "@/components/admin/VotingStatsDashboard";
 
 interface StartupDocuments {
   doc_rccm: string | null;
@@ -857,6 +859,10 @@ export default function AdminDashboard() {
                 <Star className="h-4 w-4" />
                 Évaluations
               </TabsTrigger>
+              <TabsTrigger value="statistiques" className="flex items-center gap-1">
+                <BarChart3 className="h-4 w-4" />
+                Statistiques
+              </TabsTrigger>
               <TabsTrigger value="users">Utilisateurs & Rôles</TabsTrigger>
             </TabsList>
 
@@ -1031,6 +1037,11 @@ export default function AdminDashboard() {
                   currentUserName={profile?.full_name || profile?.email || undefined}
                 />
               )}
+            </TabsContent>
+
+            {/* Statistiques Tab */}
+            <TabsContent value="statistiques">
+              <VotingStatsDashboard />
             </TabsContent>
 
             {/* Users Tab */}
