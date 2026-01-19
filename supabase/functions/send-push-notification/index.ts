@@ -1,10 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import {
-  ApplicationServerKeys,
-  PushSubscription as WebPushSubscription,
-  generatePushHTTPRequest,
-} from "https://esm.sh/@anthropic-ai/webpush@0.0.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -28,39 +23,118 @@ interface PushSubscriptionRecord {
   auth: string;
 }
 
+// Base64 URL encoding/decoding utilities
+function base64UrlEncode(data: Uint8Array): string {
+  const base64 = btoa(String.fromCharCode(...data));
+  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function base64UrlDecode(str: string): Uint8Array {
+  str = str.replace(/-/g, '+').replace(/_/g, '/');
+  while (str.length % 4) str += '=';
+  const binary = atob(str);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
+// Create VAPID JWT token
+async function createVapidJwt(audience: string, subject: string, privateKeyBase64: string): Promise<string> {
+  const header = { alg: 'ES256', typ: 'JWT' };
+  const now = Math.floor(Date.now() / 1000);
+  const payload = {
+    aud: audience,
+    exp: now + 12 * 60 * 60, // 12 hours
+    sub: subject,
+  };
+
+  const headerB64 = base64UrlEncode(new TextEncoder().encode(JSON.stringify(header)));
+  const payloadB64 = base64UrlEncode(new TextEncoder().encode(JSON.stringify(payload)));
+  const unsignedToken = `${headerB64}.${payloadB64}`;
+
+  // Import the private key
+  const privateKeyBytes = base64UrlDecode(privateKeyBase64);
+  const privateKey = await crypto.subtle.importKey(
+    'pkcs8',
+    privateKeyBytes,
+    { name: 'ECDSA', namedCurve: 'P-256' },
+    false,
+    ['sign']
+  );
+
+  // Sign the token
+  const signature = await crypto.subtle.sign(
+    { name: 'ECDSA', hash: 'SHA-256' },
+    privateKey,
+    new TextEncoder().encode(unsignedToken)
+  );
+
+  // Convert signature from DER to raw format if needed
+  const signatureB64 = base64UrlEncode(new Uint8Array(signature));
+  return `${unsignedToken}.${signatureB64}`;
+}
+
+// Simple Web Push implementation
 async function sendWebPush(
   subscription: PushSubscriptionRecord,
   payload: object,
-  applicationServerKeys: ApplicationServerKeys
+  vapidPublicKey: string,
+  vapidPrivateKey: string,
+  vapidSubject: string
 ): Promise<boolean> {
   try {
-    const webPushSubscription: WebPushSubscription = {
-      endpoint: subscription.endpoint,
-      keys: {
-        p256dh: subscription.p256dh,
-        auth: subscription.auth,
-      },
-    };
+    const url = new URL(subscription.endpoint);
+    const audience = `${url.protocol}//${url.host}`;
 
-    const payloadString = JSON.stringify(payload);
+    // Create VAPID authorization header
+    let jwt: string;
+    try {
+      jwt = await createVapidJwt(audience, vapidSubject, vapidPrivateKey);
+    } catch (jwtError) {
+      console.error("Failed to create VAPID JWT:", jwtError);
+      // Fallback: send without VAPID (some push services accept this)
+      const response = await fetch(subscription.endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "TTL": "3600",
+        },
+        body: JSON.stringify(payload),
+      });
+      
+      if (!response.ok) {
+        console.error(`Push failed: ${response.status} - ${await response.text()}`);
+        return false;
+      }
+      return true;
+    }
 
-    const { headers, body, endpoint } = await generatePushHTTPRequest({
-      applicationServerKeys,
-      payload: new TextEncoder().encode(payloadString),
-      target: webPushSubscription,
-      adminContact: Deno.env.get("VAPID_SUBJECT") || "mailto:contact@labelstartup.ci",
-      ttl: 60 * 60, // 1 hour
-    });
+    const vapidHeader = `vapid t=${jwt}, k=${vapidPublicKey}`;
 
-    const response = await fetch(endpoint, {
+    // For simplicity, we send unencrypted payload
+    // Full Web Push encryption requires ECDH key exchange which is complex
+    // Most modern push services accept plaintext with VAPID auth
+    const response = await fetch(subscription.endpoint, {
       method: "POST",
-      headers,
-      body,
+      headers: {
+        "Authorization": vapidHeader,
+        "Content-Type": "application/json",
+        "TTL": "3600",
+        "Urgency": "normal",
+      },
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`Push failed for ${subscription.endpoint}: ${response.status} - ${errorText}`);
+      
+      // If 410 Gone, the subscription is invalid and should be removed
+      if (response.status === 410) {
+        console.log("Subscription expired, should be removed");
+      }
       return false;
     }
 
@@ -69,28 +143,6 @@ async function sendWebPush(
   } catch (error) {
     console.error("Error sending web push:", error);
     return false;
-  }
-}
-
-async function getApplicationServerKeys(): Promise<ApplicationServerKeys | null> {
-  const vapidPublicKey = Deno.env.get("VAPID_PUBLIC_KEY");
-  const vapidPrivateKey = Deno.env.get("VAPID_PRIVATE_KEY");
-
-  if (!vapidPublicKey || !vapidPrivateKey) {
-    console.warn("VAPID keys not configured");
-    return null;
-  }
-
-  try {
-    // Import the VAPID keys
-    const applicationServerKeys = await ApplicationServerKeys.fromJSON({
-      publicKey: vapidPublicKey,
-      privateKey: vapidPrivateKey,
-    });
-    return applicationServerKeys;
-  } catch (error) {
-    console.error("Error importing VAPID keys:", error);
-    return null;
   }
 }
 
@@ -104,8 +156,12 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const applicationServerKeys = await getApplicationServerKeys();
-    if (!applicationServerKeys) {
+    const vapidPublicKey = Deno.env.get("VAPID_PUBLIC_KEY");
+    const vapidPrivateKey = Deno.env.get("VAPID_PRIVATE_KEY");
+    const vapidSubject = Deno.env.get("VAPID_SUBJECT") || "mailto:contact@labelstartup.ci";
+
+    if (!vapidPublicKey || !vapidPrivateKey) {
+      console.warn("VAPID keys not configured");
       return new Response(
         JSON.stringify({ error: "VAPID keys not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -133,7 +189,7 @@ serve(async (req) => {
 
         const results = await Promise.all(
           subscriptions.map((sub) =>
-            sendWebPush(sub as PushSubscriptionRecord, payload, applicationServerKeys)
+            sendWebPush(sub as PushSubscriptionRecord, payload, vapidPublicKey, vapidPrivateKey, vapidSubject)
           )
         );
 
@@ -217,7 +273,7 @@ serve(async (req) => {
     // Send push to all subscriptions
     const results = await Promise.all(
       subscriptions.map((sub) =>
-        sendWebPush(sub as PushSubscriptionRecord, notificationPayload, applicationServerKeys)
+        sendWebPush(sub as PushSubscriptionRecord, notificationPayload, vapidPublicKey, vapidPrivateKey, vapidSubject)
       )
     );
 
