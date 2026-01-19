@@ -18,6 +18,10 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
+// Pages auth - lazy loading
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+
 // Pages publiques - lazy loading
 const Criteres = lazy(() => import("./pages/Criteres"));
 const Avantages = lazy(() => import("./pages/Avantages"));
@@ -74,10 +78,12 @@ const App = () => (
             <Route path="/faq" element={<FAQ />} />
             <Route path="/actualites" element={<Actualites />} />
             
-            {/* Auth route */}
+            {/* Auth routes */}
             <Route path="/auth" element={<Auth />} />
             <Route path="/connexion" element={<Auth />} />
             <Route path="/inscription" element={<Auth />} />
+            <Route path="/mot-de-passe-oublie" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             
             {/* Startup routes (protected) */}
             <Route 
