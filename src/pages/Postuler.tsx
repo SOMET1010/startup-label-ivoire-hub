@@ -21,6 +21,8 @@ import FileUploadField from "@/components/forms/FileUploadField";
 import DraftStatusIndicator from "@/components/forms/DraftStatusIndicator";
 import DraftResumeBanner from "@/components/forms/DraftResumeBanner";
 import useDraftApplication from "@/hooks/useDraftApplication";
+import { FormErrorSummary } from "@/components/forms/FormErrorSummary";
+import { DocumentsChecklist } from "@/components/forms/DocumentsChecklist";
 
 // File validation helper - returns undefined if valid file or no file for optional, or File
 const fileSchema = (required: boolean = false) => {
@@ -589,6 +591,11 @@ const Postuler = () => {
               </div>
             )}
 
+            {/* Résumé des erreurs en haut du formulaire */}
+            {Object.keys(form.formState.errors).length > 0 && form.formState.isSubmitted && (
+              <FormErrorSummary errors={form.formState.errors} />
+            )}
+
             {/* Progress bar */}
             <div className="mb-8">
               <div className="w-full bg-muted rounded-full h-2.5">
@@ -627,6 +634,9 @@ const Postuler = () => {
                         <Building2 className="h-5 w-5" />
                         Informations de l'entreprise
                       </h2>
+
+                      {/* Checklist documents - visible dès l'étape 1 */}
+                      <DocumentsChecklist className="mb-6" />
 
                       <div className="space-y-4">
                         <FormField

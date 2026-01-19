@@ -19,6 +19,7 @@ import { NextActionCard } from "@/components/dashboard/NextActionCard";
 import { ApplicationStatusWidget } from "@/components/dashboard/ApplicationStatusWidget";
 import { DocumentsStatusWidget } from "@/components/dashboard/DocumentsStatusWidget";
 import { DashboardTimeline } from "@/components/dashboard/DashboardTimeline";
+import { TrackingIdWidget } from "@/components/dashboard/TrackingIdWidget";
 import { normalizeStatus } from "@/components/shared/StatusBadge";
 
 interface StartupData {
@@ -186,6 +187,11 @@ export default function StartupDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Widget Tracking ID - Visible si application soumise */}
+      {application?.id && application.submitted_at && (
+        <TrackingIdWidget applicationId={application.id} className="mb-8" />
+      )}
 
       {/* Section Actions rapides */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
