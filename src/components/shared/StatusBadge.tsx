@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import {
   FileEdit,
@@ -26,6 +27,8 @@ interface StatusConfig {
   label: string;
   description: string;
   icon: LucideIcon;
+  variant: "muted" | "info" | "warning" | "default" | "success" | "destructive";
+  // Backward compatibility - used by other dashboard components
   colorClass: string;
   bgClass: string;
   borderClass: string;
@@ -38,6 +41,7 @@ export const STATUS_CONFIG: Record<ApplicationStatus, StatusConfig> = {
     label: "Brouillon",
     description: "Dossier en cours de rédaction",
     icon: FileEdit,
+    variant: "muted",
     colorClass: "text-muted-foreground",
     bgClass: "bg-muted/50",
     borderClass: "border-border",
@@ -48,6 +52,7 @@ export const STATUS_CONFIG: Record<ApplicationStatus, StatusConfig> = {
     label: "Soumis",
     description: "Dossier transmis pour examen",
     icon: Clock,
+    variant: "info",
     colorClass: "text-info",
     bgClass: "bg-info/10",
     borderClass: "border-info/30",
@@ -58,6 +63,7 @@ export const STATUS_CONFIG: Record<ApplicationStatus, StatusConfig> = {
     label: "En vérification",
     description: "Contrôle administratif en cours",
     icon: Search,
+    variant: "info",
     colorClass: "text-info",
     bgClass: "bg-info/10",
     borderClass: "border-info/30",
@@ -68,6 +74,7 @@ export const STATUS_CONFIG: Record<ApplicationStatus, StatusConfig> = {
     label: "À compléter",
     description: "Documents ou informations manquants",
     icon: AlertCircle,
+    variant: "warning",
     colorClass: "text-warning",
     bgClass: "bg-warning/10",
     borderClass: "border-warning/30",
@@ -78,6 +85,7 @@ export const STATUS_CONFIG: Record<ApplicationStatus, StatusConfig> = {
     label: "En évaluation",
     description: "Examen par le comité de labellisation",
     icon: Users,
+    variant: "default",
     colorClass: "text-primary",
     bgClass: "bg-primary/10",
     borderClass: "border-primary/30",
@@ -88,6 +96,7 @@ export const STATUS_CONFIG: Record<ApplicationStatus, StatusConfig> = {
     label: "Validé",
     description: "Label attribué",
     icon: CheckCircle,
+    variant: "success",
     colorClass: "text-success",
     bgClass: "bg-success/10",
     borderClass: "border-success/30",
@@ -98,6 +107,7 @@ export const STATUS_CONFIG: Record<ApplicationStatus, StatusConfig> = {
     label: "Rejeté",
     description: "Candidature non retenue",
     icon: XCircle,
+    variant: "destructive",
     colorClass: "text-destructive",
     bgClass: "bg-destructive/10",
     borderClass: "border-destructive/30",
@@ -108,6 +118,7 @@ export const STATUS_CONFIG: Record<ApplicationStatus, StatusConfig> = {
     label: "Expiré",
     description: "Label arrivé à terme",
     icon: CalendarX,
+    variant: "warning",
     colorClass: "text-warning",
     bgClass: "bg-warning/10",
     borderClass: "border-warning/30",
@@ -158,12 +169,6 @@ export function StatusBadge({
   const config = STATUS_CONFIG[normalizedStatus];
   const Icon = config.icon;
 
-  const sizeClasses = {
-    sm: "px-2 py-0.5 text-xs gap-1",
-    md: "px-3 py-1 text-sm gap-1.5",
-    lg: "px-4 py-2 text-base gap-2",
-  };
-
   const iconSizes = {
     sm: "h-3 w-3",
     md: "h-4 w-4",
@@ -172,18 +177,10 @@ export function StatusBadge({
 
   return (
     <div className={cn("flex flex-col", className)}>
-      <span
-        className={cn(
-          "inline-flex items-center rounded-full font-medium border",
-          sizeClasses[size],
-          config.bgClass,
-          config.colorClass,
-          config.borderClass
-        )}
-      >
+      <Badge variant={config.variant} size={size}>
         {showIcon && <Icon className={iconSizes[size]} />}
         {config.label}
-      </span>
+      </Badge>
       {showDescription && (
         <span className="text-xs text-muted-foreground mt-1">
           {config.description}
@@ -210,7 +207,7 @@ export function NextAction({ status, className }: NextActionProps) {
       <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
         Prochaine action
       </span>
-      <span className={cn("font-semibold", config.colorClass)}>
+      <span className="font-semibold text-primary">
         {config.actionLabel}
       </span>
     </div>

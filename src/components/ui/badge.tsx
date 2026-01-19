@@ -15,10 +15,30 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground",
+        // Semantic variants for StatusBadge
+        success: "border-success/30 bg-success/10 text-success",
+        warning: "border-warning/30 bg-warning/10 text-warning",
+        info: "border-info/30 bg-info/10 text-info",
+        muted: "border-border bg-muted/50 text-muted-foreground",
+        // Voting variants for VoteStatusBadge
+        approve: "border-green-200 bg-green-50 text-green-700 hover:bg-green-50",
+        reject: "border-red-200 bg-red-50 text-red-700 hover:bg-red-50",
+        tie: "border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-50",
+        "pending-vote": "border-yellow-200 bg-yellow-50 text-yellow-700 hover:bg-yellow-50",
+        // Final decision variants
+        "final-approve": "bg-green-100 text-green-800 border-transparent hover:bg-green-100",
+        "final-reject": "bg-red-100 text-red-800 border-transparent hover:bg-red-100",
+      },
+      size: {
+        sm: "px-2 py-0.5 text-xs gap-1",
+        default: "px-2.5 py-0.5 text-xs gap-1.5",
+        md: "px-3 py-1 text-sm gap-1.5",
+        lg: "px-4 py-2 text-base gap-2",
       },
     },
     defaultVariants: {
       variant: "default",
+      size: "default",
     },
   }
 )
