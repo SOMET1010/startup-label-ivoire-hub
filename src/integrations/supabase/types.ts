@@ -465,6 +465,51 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_stats: {
+        Row: {
+          description: string | null
+          display_order: number | null
+          icon: string | null
+          id: string
+          is_calculated: boolean | null
+          is_visible: boolean | null
+          key: string
+          label: string
+          unit: string | null
+          updated_at: string | null
+          updated_by: string | null
+          value: number
+        }
+        Insert: {
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_calculated?: boolean | null
+          is_visible?: boolean | null
+          key: string
+          label: string
+          unit?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          value?: number
+        }
+        Update: {
+          description?: string | null
+          display_order?: number | null
+          icon?: string | null
+          id?: string
+          is_calculated?: boolean | null
+          is_visible?: boolean | null
+          key?: string
+          label?: string
+          unit?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          value?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
