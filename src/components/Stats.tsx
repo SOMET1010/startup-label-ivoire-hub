@@ -1,7 +1,50 @@
 import { Building2, Users, Briefcase, TrendingUp, MapPin } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+
+// Hook for animated counter
+const useAnimatedCounter = (endValue: number, duration: number = 2) => {
+  const count = useMotionValue(0);
+  const rounded = useTransform(count, (latest) => Math.round(latest));
+  const [displayValue, setDisplayValue] = useState(0);
+
+  useEffect(() => {
+    const unsubscribe = rounded.on("change", (v) => setDisplayValue(v));
+    return unsubscribe;
+  }, [rounded]);
+
+  const startAnimation = () => {
+    animate(count, endValue, { duration, ease: "easeOut" });
+  };
+
+  return { displayValue, startAnimation };
+};
+
+// Component for animated stat value
+const AnimatedValue = ({ value, suffix = "" }: { value: string; suffix?: string }) => {
+  const numericMatch = value.match(/^(\d+)/);
+  const numericValue = numericMatch ? parseInt(numericMatch[1]) : 0;
+  const textSuffix = value.replace(/^\d+/, "");
+  
+  const { displayValue, startAnimation } = useAnimatedCounter(numericValue);
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  return (
+    <motion.span
+      onViewportEnter={() => {
+        if (!hasAnimated) {
+          startAnimation();
+          setHasAnimated(true);
+        }
+      }}
+      viewport={{ once: true, margin: "-50px" }}
+    >
+      {displayValue.toLocaleString("fr-FR")}{textSuffix}{suffix}
+    </motion.span>
+  );
+};
 
 const stats = [
   {
@@ -126,7 +169,7 @@ const Stats = () => {
                 <stat.icon className="w-7 h-7 text-secondary" />
               </motion.div>
               <div className="text-4xl md:text-5xl font-bold text-primary-foreground mb-1">
-                {stat.value}
+                <AnimatedValue value={stat.value} />
               </div>
               {stat.unit && (
                 <div className="text-sm font-medium text-primary-foreground/70 mb-1">
