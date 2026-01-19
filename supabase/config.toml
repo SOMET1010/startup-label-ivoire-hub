@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.notify-document-request]
 verify_jwt = false
+
+[functions.startup-news]
+verify_jwt = false
