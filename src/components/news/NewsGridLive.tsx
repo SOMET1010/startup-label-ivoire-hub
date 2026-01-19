@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { SearchX, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import NewsCardLive from "./NewsCardLive";
 import {
   Pagination,
@@ -12,6 +11,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { useState } from "react";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 interface NewsItem {
   id: string;
@@ -62,24 +62,16 @@ const NewsGridLive = ({ news, isLoading, onResetFilters }: NewsGridLiveProps) =>
   if (news.length === 0) {
     return (
       <section className="container mx-auto px-4 py-16">
-        <motion.div
-          className="text-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
-            <SearchX className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <h3 className="text-xl font-semibold mb-2">Aucun résultat trouvé</h3>
-          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            Nous n'avons pas trouvé d'actualités correspondant à votre recherche. 
-            Essayez d'autres termes ou réinitialisez les filtres.
-          </p>
-          <Button onClick={onResetFilters} variant="outline" className="gap-2">
-            <RefreshCw className="h-4 w-4" />
-            Réinitialiser les filtres
-          </Button>
-        </motion.div>
+        <EmptyState
+          illustration="search"
+          title="Aucun résultat trouvé"
+          description="Nous n'avons pas trouvé d'actualités correspondant à votre recherche. Essayez d'autres termes ou réinitialisez les filtres."
+          action={{
+            label: "Réinitialiser les filtres",
+            icon: RefreshCw,
+            onClick: onResetFilters
+          }}
+        />
       </section>
     );
   }

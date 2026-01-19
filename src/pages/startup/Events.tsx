@@ -7,6 +7,8 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { EventCard } from '@/components/label-space/EventCard';
 import { useEvents } from '@/hooks/useEvents';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { AlertBanner } from '@/components/shared/AlertBanner';
 
 export default function Events() {
   const [showPast, setShowPast] = useState(false);
@@ -79,19 +81,23 @@ export default function Events() {
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : error ? (
-            <div className="text-center py-12">
-              <p className="text-destructive">{error}</p>
-            </div>
+            <AlertBanner
+              variant="error"
+              title="Erreur de chargement"
+              description={error}
+            />
           ) : filteredEvents.length === 0 ? (
-            <div className="text-center py-12">
-              <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">Aucun événement trouvé</h3>
-              <p className="text-muted-foreground">
-                {showPast 
-                  ? "Aucun événement dans l'historique"
-                  : "De nouveaux événements seront bientôt programmés"}
-              </p>
-            </div>
+            <EmptyState
+              icon={Calendar}
+              title="Aucun événement trouvé"
+              description={showPast 
+                ? "Aucun événement dans l'historique"
+                : "De nouveaux événements seront bientôt programmés"}
+              action={!showPast ? {
+                label: "Voir les événements passés",
+                onClick: () => setShowPast(true)
+              } : undefined}
+            />
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredEvents.map((event) => (

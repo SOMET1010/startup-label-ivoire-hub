@@ -10,6 +10,8 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { NetworkStartupCard } from '@/components/label-space/NetworkStartupCard';
 import { useNetwork, NetworkStartup } from '@/hooks/useNetwork';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { AlertBanner } from '@/components/shared/AlertBanner';
 
 const sectors = [
   { value: 'all', label: 'Tous les secteurs' },
@@ -106,19 +108,24 @@ export default function Network() {
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : error ? (
-            <div className="text-center py-12">
-              <p className="text-destructive">{error}</p>
-            </div>
+            <AlertBanner
+              variant="error"
+              title="Erreur de chargement"
+              description={error}
+            />
           ) : filteredStartups.length === 0 ? (
-            <div className="text-center py-12">
-              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">Aucune startup trouvée</h3>
-              <p className="text-muted-foreground">
-                {searchQuery 
-                  ? "Essayez d'autres termes de recherche"
-                  : "Aucune startup labellisée pour le moment"}
-              </p>
-            </div>
+            <EmptyState
+              icon={Users}
+              illustration={searchQuery ? 'search' : 'empty'}
+              title="Aucune startup trouvée"
+              description={searchQuery 
+                ? "Essayez d'autres termes de recherche"
+                : "Aucune startup labellisée pour le moment"}
+              action={searchQuery ? {
+                label: "Réinitialiser la recherche",
+                onClick: () => setSearchQuery('')
+              } : undefined}
+            />
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredStartups.map((startup) => (

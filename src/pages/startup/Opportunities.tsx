@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Briefcase, Search, Calendar, ArrowUpDown, Loader2 } from 'lucide-react';
+import { Briefcase, Search, Calendar, ArrowUpDown, Loader2, RotateCcw } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -7,6 +7,8 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { OpportunityCard } from '@/components/label-space/OpportunityCard';
 import { useOpportunities } from '@/hooks/useOpportunities';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { AlertBanner } from '@/components/shared/AlertBanner';
 
 const types = [
   { value: 'all', label: 'Toutes' },
@@ -97,19 +99,28 @@ export default function Opportunities() {
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : error ? (
-            <div className="text-center py-12">
-              <p className="text-destructive">{error}</p>
-            </div>
+            <AlertBanner
+              variant="error"
+              title="Erreur de chargement"
+              description={error}
+            />
           ) : filteredOpportunities.length === 0 ? (
-            <div className="text-center py-12">
-              <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">Aucune opportunité trouvée</h3>
-              <p className="text-muted-foreground">
-                {searchQuery 
-                  ? "Essayez d'autres termes de recherche"
-                  : "De nouvelles opportunités seront bientôt disponibles"}
-              </p>
-            </div>
+            <EmptyState
+              icon={Briefcase}
+              illustration={searchQuery ? 'search' : 'empty'}
+              title="Aucune opportunité trouvée"
+              description={searchQuery 
+                ? "Essayez d'autres termes de recherche"
+                : "De nouvelles opportunités seront bientôt disponibles"}
+              action={searchQuery ? {
+                label: "Réinitialiser les filtres",
+                icon: RotateCcw,
+                onClick: () => {
+                  setSearchQuery('');
+                  setSelectedType('all');
+                }
+              } : undefined}
+            />
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredOpportunities.map((opportunity) => (
