@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { 
   MessageSquare, 
@@ -8,6 +8,8 @@ import {
   Clock,
   User,
   Building2,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,107 +18,77 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-
-interface Comment {
-  id: string;
-  content: string;
-  created_at: string;
-  user_id: string;
-  is_internal: boolean | null;
-  parent_id: string | null;
-}
+import { useStartupMessages } from "@/hooks/useStartupMessages";
+import { PushPermissionBanner } from "@/components/notifications/PushPermissionBanner";
 
 export default function Messages() {
   const { user } = useAuth();
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    messages,
+    loading,
+    error,
+    sendMessage,
+    institutionOnline,
+    typingUsers,
+    setTyping,
+    markAsRead,
+    applicationId,
+  } = useStartupMessages();
+
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
-  const [applicationId, setApplicationId] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const lastTypingRef = useRef<number>(0);
 
+  // Scroll to bottom when new messages arrive
   useEffect(() => {
-    fetchMessages();
-  }, [user]);
-
-  const fetchMessages = async () => {
-    if (!user) return;
-
-    try {
-      // First get the user's startup and application
-      const { data: startup } = await supabase
-        .from("startups")
-        .select("id")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (!startup) {
-        setLoading(false);
-        return;
-      }
-
-      const { data: application } = await supabase
-        .from("applications")
-        .select("id")
-        .eq("startup_id", startup.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (!application) {
-        setLoading(false);
-        return;
-      }
-
-      setApplicationId(application.id);
-
-      // Fetch comments for this application (excluding internal ones)
-      const { data: commentsData, error } = await supabase
-        .from("application_comments")
-        .select("*")
-        .eq("application_id", application.id)
-        .or("is_internal.is.null,is_internal.eq.false")
-        .order("created_at", { ascending: true });
-
-      if (error) throw error;
-
-      setComments(commentsData || []);
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-      toast.error("Erreur lors du chargement des messages");
-    } finally {
-      setLoading(false);
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  };
+  }, [messages]);
+
+  // Mark messages as read when viewing
+  useEffect(() => {
+    markAsRead();
+  }, [markAsRead]);
+
+  // Show error toast
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !applicationId || !user) return;
+    if (!newMessage.trim() || !applicationId) return;
 
     setSending(true);
-    try {
-      const { error } = await supabase
-        .from("application_comments")
-        .insert({
-          application_id: applicationId,
-          user_id: user.id,
-          content: newMessage.trim(),
-          is_internal: false,
-        });
-
-      if (error) throw error;
-
+    setTyping(false);
+    
+    const success = await sendMessage(newMessage.trim());
+    
+    if (success) {
       setNewMessage("");
-      fetchMessages();
       toast.success("Message envoyé");
-    } catch (error) {
-      console.error("Error sending message:", error);
+    } else {
       toast.error("Erreur lors de l'envoi du message");
-    } finally {
-      setSending(false);
+    }
+    
+    setSending(false);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setNewMessage(e.target.value);
+    
+    // Throttle typing indicator
+    const now = Date.now();
+    if (now - lastTypingRef.current > 1000) {
+      setTyping(true);
+      lastTypingRef.current = now;
     }
   };
 
@@ -146,10 +118,13 @@ export default function Messages() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="h-[calc(100vh-12rem)] flex flex-col"
+      className="h-[calc(100vh-12rem)] flex flex-col gap-4"
     >
+      {/* Push Permission Banner */}
+      <PushPermissionBanner />
+
       {/* Header */}
-      <div className="mb-6">
+      <div>
         <h1 className="text-2xl font-bold text-foreground">Messages</h1>
         <p className="text-muted-foreground">
           Échangez avec l'équipe de labellisation concernant votre dossier
@@ -169,16 +144,29 @@ export default function Messages() {
                 <CardDescription>Ministère de l'Économie Numérique</CardDescription>
               </div>
             </div>
-            <Badge variant="success" className="gap-1">
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              En ligne
+            <Badge 
+              variant={institutionOnline ? "success" : "secondary"} 
+              className="gap-1"
+            >
+              {institutionOnline ? (
+                <>
+                  <Wifi className="w-3 h-3" />
+                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  En ligne
+                </>
+              ) : (
+                <>
+                  <WifiOff className="w-3 h-3" />
+                  Hors ligne
+                </>
+              )}
             </Badge>
           </div>
         </CardHeader>
 
         {/* Messages Area */}
-        <ScrollArea className="flex-1 p-4">
-          {comments.length === 0 ? (
+        <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+          {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center py-12">
               <MessageSquare className="w-12 h-12 text-muted-foreground mb-4" />
               <h3 className="font-semibold mb-2">Aucun message</h3>
@@ -188,20 +176,20 @@ export default function Messages() {
             </div>
           ) : (
             <div className="space-y-4">
-              {comments.map((comment, index) => {
-                const isOwn = isOwnMessage(comment.user_id);
+              {messages.map((message, index) => {
+                const isOwn = isOwnMessage(message.user_id);
                 const showDate =
                   index === 0 ||
-                  format(new Date(comment.created_at), "yyyy-MM-dd") !==
-                    format(new Date(comments[index - 1].created_at), "yyyy-MM-dd");
+                  format(new Date(message.created_at), "yyyy-MM-dd") !==
+                    format(new Date(messages[index - 1].created_at), "yyyy-MM-dd");
 
                 return (
-                  <div key={comment.id}>
+                  <div key={message.id}>
                     {showDate && (
                       <div className="flex items-center justify-center my-4">
                         <Separator className="flex-1" />
                         <span className="px-3 text-xs text-muted-foreground">
-                          {format(new Date(comment.created_at), "d MMMM yyyy", { locale: fr })}
+                          {format(new Date(message.created_at), "d MMMM yyyy", { locale: fr })}
                         </span>
                         <Separator className="flex-1" />
                       </div>
@@ -223,14 +211,19 @@ export default function Messages() {
                             : "bg-muted rounded-tl-none"
                         }`}
                       >
-                        <p className="text-sm">{comment.content}</p>
+                        {!isOwn && message.author?.full_name && (
+                          <p className="text-xs font-medium mb-1 opacity-70">
+                            {message.author.full_name}
+                          </p>
+                        )}
+                        <p className="text-sm">{message.content}</p>
                         <div
                           className={`flex items-center gap-1 mt-1 text-xs ${
                             isOwn ? "text-primary-foreground/70 justify-end" : "text-muted-foreground"
                           }`}
                         >
                           <Clock className="w-3 h-3" />
-                          {format(new Date(comment.created_at), "HH:mm")}
+                          {format(new Date(message.created_at), "HH:mm")}
                           {isOwn && <CheckCheck className="w-3 h-3 ml-1" />}
                         </div>
                       </div>
@@ -238,6 +231,22 @@ export default function Messages() {
                   </div>
                 );
               })}
+
+              {/* Typing indicator */}
+              {typingUsers.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex items-center gap-2 text-sm text-muted-foreground"
+                >
+                  <div className="flex gap-1">
+                    <span className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "300ms" }} />
+                  </div>
+                  <span>{typingUsers.join(", ")} écrit...</span>
+                </motion.div>
+              )}
             </div>
           )}
         </ScrollArea>
@@ -248,7 +257,7 @@ export default function Messages() {
             <Textarea
               placeholder="Écrivez votre message..."
               value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
+              onChange={handleInputChange}
               className="min-h-[60px] resize-none"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
@@ -256,6 +265,7 @@ export default function Messages() {
                   handleSendMessage();
                 }
               }}
+              onBlur={() => setTyping(false)}
             />
             <Button
               onClick={handleSendMessage}
