@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -7,12 +7,10 @@ interface UsePushNotificationsResult {
   permission: NotificationPermission | "unsupported";
   isSubscribed: boolean;
   loading: boolean;
+  vapidKeyStatus: "loading" | "available" | "missing";
   subscribe: () => Promise<boolean>;
   unsubscribe: () => Promise<void>;
 }
-
-// VAPID public key - to be set via environment
-const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY || "";
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -25,14 +23,36 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   return outputArray;
 }
 
+// Cache for VAPID key to avoid repeated calls
+let vapidKeyCache: string | null = null;
+
+async function getVapidPublicKey(): Promise<string | null> {
+  if (vapidKeyCache) return vapidKeyCache;
+  
+  try {
+    const { data, error } = await supabase.functions.invoke("get-vapid-key");
+    if (error || !data?.publicKey) {
+      console.error("Failed to fetch VAPID key:", error);
+      return null;
+    }
+    vapidKeyCache = data.publicKey;
+    return data.publicKey;
+  } catch (err) {
+    console.error("Error fetching VAPID key:", err);
+    return null;
+  }
+}
+
 export function usePushNotifications(): UsePushNotificationsResult {
   const { user } = useAuth();
   const [isSupported, setIsSupported] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission | "unsupported">("unsupported");
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [vapidKeyStatus, setVapidKeyStatus] = useState<"loading" | "available" | "missing">("loading");
+  const vapidKeyRef = useRef<string | null>(null);
 
-  // Check support and current state
+  // Check support, current state, and fetch VAPID key
   useEffect(() => {
     const checkSupport = async () => {
       const supported = "Notification" in window && "serviceWorker" in navigator && "PushManager" in window;
@@ -40,6 +60,11 @@ export function usePushNotifications(): UsePushNotificationsResult {
 
       if (supported) {
         setPermission(Notification.permission);
+
+        // Fetch VAPID key
+        const key = await getVapidPublicKey();
+        vapidKeyRef.current = key;
+        setVapidKeyStatus(key ? "available" : "missing");
 
         // Check if already subscribed
         if ("serviceWorker" in navigator) {
@@ -51,6 +76,8 @@ export function usePushNotifications(): UsePushNotificationsResult {
             console.error("Error checking subscription:", err);
           }
         }
+      } else {
+        setVapidKeyStatus("missing");
       }
     };
 
@@ -73,7 +100,9 @@ export function usePushNotifications(): UsePushNotificationsResult {
 
   // Subscribe to push notifications
   const subscribe = useCallback(async (): Promise<boolean> => {
-    if (!isSupported || !user || !supabase || !VAPID_PUBLIC_KEY) {
+    const vapidKey = vapidKeyRef.current || await getVapidPublicKey();
+    
+    if (!isSupported || !user || !supabase || !vapidKey) {
       console.warn("Push notifications not supported or VAPID key missing");
       return false;
     }
@@ -98,7 +127,7 @@ export function usePushNotifications(): UsePushNotificationsResult {
       }
 
       // Subscribe to push
-      const applicationServerKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+      const applicationServerKey = urlBase64ToUint8Array(vapidKey);
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: applicationServerKey.buffer as ArrayBuffer,
@@ -169,6 +198,7 @@ export function usePushNotifications(): UsePushNotificationsResult {
     permission,
     isSubscribed,
     loading,
+    vapidKeyStatus,
     subscribe,
     unsubscribe,
   };
