@@ -17,23 +17,38 @@ export type Database = {
       application_comments: {
         Row: {
           application_id: string
+          attachments: Json | null
           content: string
           created_at: string
+          edited_at: string | null
           id: string
+          is_internal: boolean | null
+          mentions: string[] | null
+          parent_id: string | null
           user_id: string
         }
         Insert: {
           application_id: string
+          attachments?: Json | null
           content: string
           created_at?: string
+          edited_at?: string | null
           id?: string
+          is_internal?: boolean | null
+          mentions?: string[] | null
+          parent_id?: string | null
           user_id: string
         }
         Update: {
           application_id?: string
+          attachments?: Json | null
           content?: string
           created_at?: string
+          edited_at?: string | null
           id?: string
+          is_internal?: boolean | null
+          mentions?: string[] | null
+          parent_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -42,6 +57,13 @@ export type Database = {
             columns: ["application_id"]
             isOneToOne: false
             referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "application_comments"
             referencedColumns: ["id"]
           },
         ]

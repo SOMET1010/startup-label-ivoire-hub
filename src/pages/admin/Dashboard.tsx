@@ -64,6 +64,7 @@ import { format, subDays, startOfYear, isAfter } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useAuth } from "@/contexts/AuthContext";
 import EvaluationList from "@/components/evaluation/EvaluationList";
+import { EvaluationChat } from "@/components/evaluation/EvaluationChat";
 import ApplicationFilters from "@/components/admin/ApplicationFilters";
 import DocumentViewer from "@/components/admin/DocumentViewer";
 import RequestDocumentDialog, { DOCUMENT_TYPES } from "@/components/admin/RequestDocumentDialog";
@@ -1024,15 +1025,18 @@ export default function AdminDashboard() {
         </div>
       </main>
 
-      {/* Details Dialog */}
+      {/* Details Dialog with Chat */}
       <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh]">
-          <DialogHeader>
-            <DialogTitle>Détails de la candidature</DialogTitle>
-          </DialogHeader>
-          <ScrollArea className="max-h-[calc(90vh-140px)]">
+        <DialogContent className="max-w-6xl max-h-[90vh] p-0 overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-5 h-[85vh]">
+            {/* Details Panel - 3 columns */}
+            <div className="lg:col-span-3 overflow-y-auto">
+              <DialogHeader className="p-6 pb-0">
+                <DialogTitle>Détails de la candidature</DialogTitle>
+              </DialogHeader>
+              <ScrollArea className="h-[calc(85vh-80px)] px-6 pb-6">
             {selectedApplication && (
-              <div className="space-y-6 pr-4">
+              <div className="space-y-6 pr-4 pt-4">
                 {/* Startup Info Section */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Informations de la startup</h3>
@@ -1240,12 +1244,24 @@ export default function AdminDashboard() {
                 />
               </div>
             )}
-          </ScrollArea>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDetailsDialog(false)}>
-              Fermer
-            </Button>
-          </DialogFooter>
+              </ScrollArea>
+              <div className="p-4 border-t flex justify-end">
+                <Button variant="outline" onClick={() => setShowDetailsDialog(false)}>
+                  Fermer
+                </Button>
+              </div>
+            </div>
+            
+            {/* Chat Panel - 2 columns */}
+            {selectedApplication && (
+              <div className="lg:col-span-2 hidden lg:flex flex-col h-full border-l">
+                <EvaluationChat 
+                  applicationId={selectedApplication.id} 
+                  className="border-0 rounded-none h-full"
+                />
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 
