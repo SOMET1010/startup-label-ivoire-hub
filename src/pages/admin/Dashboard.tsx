@@ -167,6 +167,7 @@ export default function AdminDashboard() {
   const [showDocumentRequestDialog, setShowDocumentRequestDialog] = useState(false);
   const [documentRequests, setDocumentRequests] = useState<DocumentRequest[]>([]);
   const [loadingDocRequests, setLoadingDocRequests] = useState(false);
+  const [markingFulfilledId, setMarkingFulfilledId] = useState<string | null>(null);
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");
@@ -569,6 +570,46 @@ export default function AdminDashboard() {
       setDocumentRequests([]);
     } finally {
       setLoadingDocRequests(false);
+    }
+  };
+
+  const handleMarkAsFulfilled = async (requestId: string) => {
+    if (!supabase || !selectedApplication) return;
+    
+    setMarkingFulfilledId(requestId);
+    try {
+      const { error } = await supabase
+        .from('document_requests')
+        .update({ fulfilled_at: new Date().toISOString() })
+        .eq('id', requestId);
+
+      if (error) throw error;
+
+      // Update local state
+      setDocumentRequests(prev => 
+        prev.map(req => 
+          req.id === requestId 
+            ? { ...req, fulfilled_at: new Date().toISOString() } 
+            : req
+        )
+      );
+
+      toast({
+        title: "Document marqué comme fourni",
+        description: "La demande de document a été mise à jour.",
+      });
+
+      // Refresh main data to update pending count
+      fetchData();
+    } catch (error) {
+      console.error('Error marking document as fulfilled:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de marquer le document comme fourni.",
+      });
+    } finally {
+      setMarkingFulfilledId(null);
     }
   };
 
@@ -1035,9 +1076,27 @@ export default function AdminDashboard() {
                                 )}
                                 <span className="font-medium">{docLabel}</span>
                               </div>
-                              <Badge variant={isFulfilled ? "default" : "outline"}>
-                                {isFulfilled ? "Fourni" : "En attente"}
-                              </Badge>
+                              <div className="flex items-center gap-2">
+                                <Badge variant={isFulfilled ? "default" : "outline"}>
+                                  {isFulfilled ? "Fourni" : "En attente"}
+                                </Badge>
+                                {!isFulfilled && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-7 text-xs bg-green-50 hover:bg-green-100 text-green-700 border-green-300"
+                                    onClick={() => handleMarkAsFulfilled(req.id)}
+                                    disabled={markingFulfilledId === req.id}
+                                  >
+                                    {markingFulfilledId === req.id ? (
+                                      <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                                    ) : (
+                                      <CheckCircle className="h-3 w-3 mr-1" />
+                                    )}
+                                    Marquer fourni
+                                  </Button>
+                                )}
+                              </div>
                             </div>
                             
                             {req.message && (
