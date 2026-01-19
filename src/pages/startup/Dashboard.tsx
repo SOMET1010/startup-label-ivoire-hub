@@ -5,22 +5,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { motion } from "framer-motion";
 import {
   Bell,
-  Calendar,
+  FileText,
   Gift,
   Users,
-  FileText,
-  ArrowRight,
-  ExternalLink,
   RefreshCw,
+  ExternalLink,
 } from "lucide-react";
-import { NextActionCard } from "@/components/dashboard/NextActionCard";
-import { ApplicationStatusWidget } from "@/components/dashboard/ApplicationStatusWidget";
-import { DocumentsStatusWidget } from "@/components/dashboard/DocumentsStatusWidget";
-import { DashboardTimeline } from "@/components/dashboard/DashboardTimeline";
-import { TrackingIdWidget } from "@/components/dashboard/TrackingIdWidget";
 import { normalizeStatus } from "@/components/shared/StatusBadge";
+import { StatusHeader } from "@/components/dashboard/StatusHeader";
+import { HorizontalTimeline } from "@/components/dashboard/HorizontalTimeline";
+import { CompletionCard } from "@/components/dashboard/CompletionCard";
+import { InstitutionMessagesCard } from "@/components/dashboard/InstitutionMessagesCard";
+import { NextActionsCard } from "@/components/dashboard/NextActionsCard";
+import { StartupCTABanner } from "@/components/dashboard/StartupCTABanner";
+import { TrackingIdWidget } from "@/components/dashboard/TrackingIdWidget";
 
 interface StartupData {
   id: string;
@@ -82,7 +83,7 @@ export default function StartupDashboard() {
           if (applications && applications.length > 0) {
             setApplication(applications[0]);
 
-            // Compter les commentaires non lus (simplification)
+            // Compter les commentaires non lus
             const { count } = await supabase
               .from("application_comments")
               .select("id", { count: "exact", head: true })
@@ -116,13 +117,16 @@ export default function StartupDashboard() {
   };
 
   const currentStatus = application?.status || startup?.status;
+  const documents = getDocuments();
+  const hasIncompleteDocuments = documents.some((d) => d.required && !d.uploaded);
 
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-6">
           <Skeleton className="h-8 w-64" />
-          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-16 w-full" />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Skeleton className="h-64" />
             <Skeleton className="h-64" />
@@ -133,140 +137,99 @@ export default function StartupDashboard() {
     );
   }
 
+  // Si pas de startup, afficher le CTA
+  if (!startup) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-8"
+        >
+          <h1 className="text-3xl font-bold mb-2">
+            Bienvenue, {profile?.full_name || "Entrepreneur"} !
+          </h1>
+          <p className="text-muted-foreground">
+            Commencez votre parcours vers le Label Startup Numérique.
+          </p>
+        </motion.div>
+
+        <StartupCTABanner />
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">
-          Bienvenue, {profile?.full_name || "Entrepreneur"} !
-        </h1>
-        <p className="text-muted-foreground">
-          Gérez votre candidature au Label Startup Numérique et suivez votre progression.
-        </p>
-      </div>
+      {/* Section Statut */}
+      <Card className="mb-8">
+        <CardContent className="pt-6 space-y-6">
+          {/* Header avec badge de statut */}
+          <StatusHeader status={currentStatus} />
 
-      {/* Carte Action Principale */}
-      <NextActionCard
-        status={currentStatus}
-        startupName={startup?.name}
-        hasUnreadComments={unreadComments > 0}
-        missingDocumentsCount={normalizeStatus(currentStatus) === "incomplete" ? 1 : 0}
-        className="mb-8"
-      />
-
-      {/* Grille des widgets */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* Widget Statut */}
-        <ApplicationStatusWidget
-          status={currentStatus}
-          submittedAt={application?.submitted_at}
-        />
-
-        {/* Widget Documents */}
-        <DocumentsStatusWidget
-          documents={getDocuments()}
-          applicationStatus={currentStatus || undefined}
-        />
-
-        {/* Widget Timeline compact */}
-        <Card className="h-full">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-primary/10">
-                <Calendar className="h-4 w-4 text-primary" />
-              </div>
-              Progression
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <DashboardTimeline
-              status={currentStatus}
-              submittedAt={application?.submitted_at}
-              compact={false}
-            />
-          </CardContent>
-        </Card>
-      </div>
+          {/* Timeline horizontale */}
+          <HorizontalTimeline status={currentStatus} className="py-4" />
+        </CardContent>
+      </Card>
 
       {/* Widget Tracking ID - Visible si application soumise */}
       {application?.id && application.submitted_at && (
         <TrackingIdWidget applicationId={application.id} className="mb-8" />
       )}
 
-      {/* Section Actions rapides */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <QuickActionCard
-          icon={FileText}
-          title="Ma candidature"
-          description="Voir ou modifier votre dossier"
-          href={startup ? "/startup/candidature" : "/postuler"}
-        />
-        <QuickActionCard
-          icon={Users}
-          title="Réseau"
-          description="Connectez-vous avec d'autres startups"
-          href="/startup/reseau"
-          disabled={normalizeStatus(currentStatus) !== "approved"}
-        />
-        <QuickActionCard
-          icon={Gift}
-          title="Opportunités"
-          description="Appels à projets et financements"
-          href="/startup/opportunites"
-          disabled={normalizeStatus(currentStatus) !== "approved"}
-        />
-        <QuickActionCard
-          icon={RefreshCw}
-          title="Renouvellement"
-          description="Renouveler votre label"
-          href="/startup/renouvellement"
-          disabled={normalizeStatus(currentStatus) !== "expired"}
+      {/* Grille des 3 cartes principales */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Complétude du dossier */}
+        <CompletionCard documents={documents} />
+
+        {/* Messages de l'institution */}
+        <InstitutionMessagesCard unreadCount={unreadComments} />
+
+        {/* Prochaines actions */}
+        <NextActionsCard
+          status={currentStatus}
+          hasIncompleteDocuments={hasIncompleteDocuments}
+          hasUnreadComments={unreadComments > 0}
         />
       </div>
 
-      {/* Notifications récentes */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bell className="h-5 w-5" />
-            Notifications récentes
-            {unreadComments > 0 && (
-              <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-accent text-accent-foreground rounded-full">
-                {unreadComments} nouveau{unreadComments > 1 ? "x" : ""}
-              </span>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {unreadComments > 0 ? (
-            <div className="space-y-3">
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-accent/10 border border-accent/20">
-                <div className="p-2 rounded-full bg-accent/20">
-                  <Bell className="h-4 w-4 text-accent" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-sm">
-                    Vous avez {unreadComments} commentaire{unreadComments > 1 ? "s" : ""} du comité
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Consultez le suivi de votre candidature
-                  </p>
-                </div>
-                <Button asChild variant="ghost" size="sm">
-                  <Link to="/startup/suivi">
-                    Voir
-                    <ArrowRight className="h-3 w-3 ml-1" />
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              Aucune notification pour le moment.
-            </p>
-          )}
-        </CardContent>
-      </Card>
+      {/* Section Actions rapides */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4, duration: 0.4 }}
+      >
+        <h3 className="text-lg font-semibold mb-4">Accès rapides</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <QuickActionCard
+            icon={FileText}
+            title="Ma candidature"
+            description="Voir ou modifier votre dossier"
+            href={startup ? "/postuler" : "/postuler"}
+          />
+          <QuickActionCard
+            icon={Users}
+            title="Réseau"
+            description="Connectez-vous avec d'autres startups"
+            href="/startup/reseau"
+            disabled={normalizeStatus(currentStatus) !== "approved"}
+          />
+          <QuickActionCard
+            icon={Gift}
+            title="Opportunités"
+            description="Appels à projets et financements"
+            href="/startup/opportunites"
+            disabled={normalizeStatus(currentStatus) !== "approved"}
+          />
+          <QuickActionCard
+            icon={RefreshCw}
+            title="Renouvellement"
+            description="Renouveler votre label"
+            href="/startup/renouvellement"
+            disabled={normalizeStatus(currentStatus) !== "expired"}
+          />
+        </div>
+      </motion.div>
     </div>
   );
 }
