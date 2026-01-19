@@ -24,7 +24,7 @@ const stats = [
   },
   {
     icon: TrendingUp,
-    value: "15M$",
+    value: "10 Mds",
     label: "Investissements",
     description: "levés par les startups",
   },
