@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.renewal-reminders]
 verify_jwt = false
+
+[functions.notify-voting-decision]
+verify_jwt = false

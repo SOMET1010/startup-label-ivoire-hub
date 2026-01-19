@@ -10,7 +10,9 @@ export type NotificationType =
   | 'new_opportunity' 
   | 'new_resource' 
   | 'comment' 
-  | 'renewal_reminder';
+  | 'renewal_reminder'
+  | 'quorum_reached'
+  | 'decision_applied';
 
 export interface Notification {
   id: string;
