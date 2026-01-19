@@ -39,6 +39,7 @@ interface AdminMetrics {
   
   // Document requests
   pendingDocumentRequests: number;
+  applicationsWithPendingDocs: number;
   averageRoundTrips: number;
 }
 
@@ -119,10 +120,13 @@ export function useAdminMetrics() {
       // Fetch document requests
       const { data: docRequests, error: docError } = await supabase
         .from('document_requests')
-        .select('id, fulfilled_at')
+        .select('id, application_id, fulfilled_at')
         .is('fulfilled_at', null);
 
       const pendingDocumentRequests = docRequests?.length || 0;
+      const applicationsWithPendingDocs = docRequests 
+        ? new Set(docRequests.map((r: { application_id: string }) => r.application_id)).size
+        : 0;
 
       // Calculate average round trips (number of document requests per application)
       const { data: allDocRequests } = await supabase
@@ -152,6 +156,7 @@ export function useAdminMetrics() {
         completionRate,
         monthlyStats,
         pendingDocumentRequests,
+        applicationsWithPendingDocs,
         averageRoundTrips,
       });
     } catch (err: any) {
