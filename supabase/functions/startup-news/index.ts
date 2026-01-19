@@ -16,7 +16,13 @@ serve(async (req) => {
       throw new Error("PERPLEXITY_API_KEY is not configured");
     }
 
-    const { query = "startups technologiques Côte d'Ivoire actualités" } = await req.json().catch(() => ({}));
+    const { 
+      query = "startups technologiques Côte d'Ivoire actualités",
+      category = null,
+      limit = 10
+    } = await req.json().catch(() => ({}));
+
+    const categoryFilter = category ? ` dans la catégorie ${category}` : "";
 
     console.log("Fetching news for query:", query);
 
@@ -39,7 +45,7 @@ serve(async (req) => {
           },
           {
             role: "user",
-            content: `Trouve les 6 dernières actualités sur ${query}. Retourne un tableau JSON avec les actualités.`
+            content: `Trouve les ${limit} dernières actualités sur ${query}${categoryFilter}. Retourne un tableau JSON avec les actualités les plus récentes et pertinentes.`
           }
         ],
         search_recency_filter: "month",
