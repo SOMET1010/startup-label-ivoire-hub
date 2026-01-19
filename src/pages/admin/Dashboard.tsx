@@ -31,6 +31,16 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   FileCheck,
   Users,
   Building,
@@ -44,6 +54,7 @@ import {
   Shield,
   Star,
   FileQuestion,
+  Trash2,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -168,6 +179,11 @@ export default function AdminDashboard() {
   const [documentRequests, setDocumentRequests] = useState<DocumentRequest[]>([]);
   const [loadingDocRequests, setLoadingDocRequests] = useState(false);
   const [markingFulfilledId, setMarkingFulfilledId] = useState<string | null>(null);
+  
+  // Cancel document request
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [requestToCancel, setRequestToCancel] = useState<DocumentRequest | null>(null);
+  const [cancellingRequestId, setCancellingRequestId] = useState<string | null>(null);
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");
@@ -615,6 +631,67 @@ export default function AdminDashboard() {
       });
     } finally {
       setMarkingFulfilledId(null);
+    }
+  };
+
+  const handleCancelDocumentRequest = async () => {
+    if (!supabase || !requestToCancel || !selectedApplication) return;
+
+    setCancellingRequestId(requestToCancel.id);
+    try {
+      // 1. Delete the document request
+      const { error } = await supabase
+        .from('document_requests')
+        .delete()
+        .eq('id', requestToCancel.id);
+
+      if (error) throw error;
+
+      // 2. Get the user_id from the application
+      const { data: appData } = await supabase
+        .from("applications")
+        .select("user_id")
+        .eq("id", selectedApplication.id)
+        .single();
+
+      // 3. Create a notification for the startup
+      if (appData?.user_id) {
+        const docLabel = DOCUMENT_TYPES.find(d => d.value === requestToCancel.document_type)?.label || requestToCancel.document_type;
+
+        await supabase.from("startup_notifications").insert({
+          user_id: appData.user_id,
+          type: "document_request_cancelled",
+          title: "Demande de document annulée",
+          message: `La demande de "${docLabel}" pour votre candidature a été annulée par l'équipe d'évaluation.`,
+          link: "/suivi-candidature",
+          metadata: {
+            application_id: selectedApplication.id,
+            document_type: requestToCancel.document_type,
+          },
+        });
+      }
+
+      // 4. Update local state
+      setDocumentRequests(prev => prev.filter(req => req.id !== requestToCancel.id));
+
+      toast({
+        title: "Demande annulée",
+        description: "La demande de document a été supprimée et la startup notifiée.",
+      });
+
+      // 5. Refresh main data to update pending count
+      fetchData();
+    } catch (error) {
+      console.error('Error cancelling document request:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible d'annuler la demande de document.",
+      });
+    } finally {
+      setCancellingRequestId(null);
+      setShowCancelDialog(false);
+      setRequestToCancel(null);
     }
   };
 
@@ -1088,20 +1165,39 @@ export default function AdminDashboard() {
                                   {isFulfilled ? "Fourni" : "En attente"}
                                 </Badge>
                                 {!isFulfilled && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="h-7 text-xs bg-green-50 hover:bg-green-100 text-green-700 border-green-300"
-                                    onClick={() => handleMarkAsFulfilled(req.id)}
-                                    disabled={markingFulfilledId === req.id}
-                                  >
-                                    {markingFulfilledId === req.id ? (
-                                      <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                                    ) : (
-                                      <CheckCircle className="h-3 w-3 mr-1" />
-                                    )}
-                                    Marquer fourni
-                                  </Button>
+                                  <div className="flex items-center gap-1">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-7 text-xs bg-green-50 hover:bg-green-100 text-green-700 border-green-300"
+                                      onClick={() => handleMarkAsFulfilled(req.id)}
+                                      disabled={markingFulfilledId === req.id || cancellingRequestId === req.id}
+                                    >
+                                      {markingFulfilledId === req.id ? (
+                                        <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                                      ) : (
+                                        <CheckCircle className="h-3 w-3 mr-1" />
+                                      )}
+                                      Marquer fourni
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-7 text-xs bg-red-50 hover:bg-red-100 text-red-700 border-red-300"
+                                      onClick={() => {
+                                        setRequestToCancel(req);
+                                        setShowCancelDialog(true);
+                                      }}
+                                      disabled={markingFulfilledId === req.id || cancellingRequestId === req.id}
+                                    >
+                                      {cancellingRequestId === req.id ? (
+                                        <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                                      ) : (
+                                        <Trash2 className="h-3 w-3 mr-1" />
+                                      )}
+                                      Annuler
+                                    </Button>
+                                  </div>
                                 )}
                               </div>
                             </div>
@@ -1283,6 +1379,34 @@ export default function AdminDashboard() {
         }}
         adminUserId={user?.id || ""}
       />
+
+      {/* Cancel Document Request Alert Dialog */}
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Annuler cette demande de document ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              La demande de "{DOCUMENT_TYPES.find(d => d.value === requestToCancel?.document_type)?.label || requestToCancel?.document_type}" 
+              sera supprimée et la startup sera notifiée de l'annulation.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={!!cancellingRequestId}>
+              Non, garder
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleCancelDocumentRequest}
+              disabled={!!cancellingRequestId}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {cancellingRequestId ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : null}
+              Oui, annuler
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Footer />
     </div>
