@@ -12,6 +12,7 @@ import CloudStatusBanner from "./components/CloudStatusBanner";
 import LabelCoach from "./components/LabelCoach";
 import PageLoader from "./components/PageLoader";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { StartupLayout } from "./components/startup/StartupLayout";
 
 // Pages critiques - import statique pour chargement instantané
 import Index from "./pages/Index";
@@ -43,6 +44,9 @@ const AuditLogs = lazy(() => import("./pages/admin/AuditLogs"));
 
 // Pages startup - lazy loading
 const StartupDashboard = lazy(() => import("./pages/startup/Dashboard"));
+const StartupDossier = lazy(() => import("./pages/startup/Dossier"));
+const StartupMessages = lazy(() => import("./pages/startup/Messages"));
+const StartupSupport = lazy(() => import("./pages/startup/Support"));
 const LabelSpace = lazy(() => import("./pages/startup/LabelSpace"));
 const Resources = lazy(() => import("./pages/startup/Resources"));
 const Opportunities = lazy(() => import("./pages/startup/Opportunities"));
@@ -52,6 +56,53 @@ const Renewal = lazy(() => import("./pages/startup/Renewal"));
 const StartupProfile = lazy(() => import("./pages/startup/Profile"));
 
 const queryClient = new QueryClient();
+
+// Startup routes wrapper component
+const StartupRoutes = () => (
+  <ProtectedRoute>
+    <RoleGate allowedRoles={['startup']}>
+      <StartupLayout>
+        <Routes>
+          <Route index element={<StartupDashboard />} />
+          <Route path="dossier" element={<StartupDossier />} />
+          <Route path="messages" element={<StartupMessages />} />
+          <Route path="opportunites" element={
+            <LabelGate>
+              <Opportunities />
+            </LabelGate>
+          } />
+          <Route path="reseau" element={
+            <LabelGate>
+              <Network />
+            </LabelGate>
+          } />
+          <Route path="ressources" element={
+            <LabelGate>
+              <Resources />
+            </LabelGate>
+          } />
+          <Route path="support" element={<StartupSupport />} />
+          <Route path="profile" element={<StartupProfile />} />
+          <Route path="label-space" element={
+            <LabelGate>
+              <LabelSpace />
+            </LabelGate>
+          } />
+          <Route path="events" element={
+            <LabelGate>
+              <Events />
+            </LabelGate>
+          } />
+          <Route path="renewal" element={
+            <LabelGate>
+              <Renewal />
+            </LabelGate>
+          } />
+        </Routes>
+      </StartupLayout>
+    </RoleGate>
+  </ProtectedRoute>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -85,27 +136,9 @@ const App = () => (
             <Route path="/mot-de-passe-oublie" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             
-            {/* Startup routes (protected) */}
-            <Route 
-              path="/startup" 
-              element={
-                <ProtectedRoute>
-                  <RoleGate allowedRoles={['startup']}>
-                    <StartupDashboard />
-                  </RoleGate>
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/startup/profile" 
-              element={
-                <ProtectedRoute>
-                  <RoleGate allowedRoles={['startup']}>
-                    <StartupProfile />
-                  </RoleGate>
-                </ProtectedRoute>
-              } 
-            />
+            {/* Startup routes with dedicated layout */}
+            <Route path="/startup/*" element={<StartupRoutes />} />
+            
             <Route path="/suivi-candidature" element={<SuiviCandidature />} />
             
             {/* Admin routes (protected) */}
