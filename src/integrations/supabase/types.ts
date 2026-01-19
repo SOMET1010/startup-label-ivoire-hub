@@ -692,6 +692,77 @@ export type Database = {
         }
         Relationships: []
       }
+      voting_decisions: {
+        Row: {
+          application_id: string
+          approve_count: number | null
+          average_score: number | null
+          calculated_decision: string | null
+          created_at: string | null
+          decided_at: string | null
+          decided_by: string | null
+          decision_confidence: number | null
+          decision_notes: string | null
+          decision_source: string | null
+          final_decision: string | null
+          id: string
+          pending_count: number | null
+          quorum_reached: boolean | null
+          quorum_required: number
+          reject_count: number | null
+          total_votes: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          application_id: string
+          approve_count?: number | null
+          average_score?: number | null
+          calculated_decision?: string | null
+          created_at?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_confidence?: number | null
+          decision_notes?: string | null
+          decision_source?: string | null
+          final_decision?: string | null
+          id?: string
+          pending_count?: number | null
+          quorum_reached?: boolean | null
+          quorum_required?: number
+          reject_count?: number | null
+          total_votes?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          application_id?: string
+          approve_count?: number | null
+          average_score?: number | null
+          calculated_decision?: string | null
+          created_at?: string | null
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_confidence?: number | null
+          decision_notes?: string | null
+          decision_source?: string | null
+          final_decision?: string | null
+          id?: string
+          pending_count?: number | null
+          quorum_reached?: boolean | null
+          quorum_required?: number
+          reject_count?: number | null
+          total_votes?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "voting_decisions_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: true
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
