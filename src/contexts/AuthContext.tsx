@@ -5,12 +5,15 @@ import { useToast } from '@/hooks/use-toast';
 
 type UserRole = 'admin' | 'startup' | 'evaluator' | 'public';
 
-interface Profile {
+export type ThemePreference = 'light' | 'dark' | 'system';
+
+export interface Profile {
   id: string;
   user_id: string;
   email: string | null;
   full_name: string | null;
   avatar_url: string | null;
+  preferred_theme: ThemePreference;
   created_at: string;
   updated_at: string;
 }
