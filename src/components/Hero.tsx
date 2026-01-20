@@ -1,21 +1,9 @@
-import { ArrowRight, CheckCircle2, Shield, TrendingUp, Building2, Users } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import PremiumBadge from "./PremiumBadge";
-
-const benefits = [
-  { icon: Shield, label: "Fiscalité avantageuse" },
-  { icon: Building2, label: "Marchés publics" },
-  { icon: TrendingUp, label: "Visibilité nationale" },
-  { icon: Users, label: "Réseau d'entrepreneurs" },
-];
-
-const stats = [
-  { value: "500+", label: "Startups actives" },
-  { value: "50+", label: "Labellisées" },
-  { value: "15M$", label: "Investissements" },
-];
+import { HERO_STATS } from "@/lib/constants/features";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -40,12 +28,19 @@ const itemVariants = {
   },
 } as const;
 
+/**
+ * Hero simplifié - 1 CTA unique + 3 mini-stats
+ * Suppression: bannière des 4 benefits (redondante avec AdvantagesSection)
+ * Correction: devise en FCFA
+ */
 const Hero = () => {
   return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-background via-background to-muted/50">
+    <section 
+      className="relative min-h-[85vh] flex items-center overflow-hidden bg-gradient-to-br from-background via-background to-muted/50"
+      aria-labelledby="hero-title"
+    >
       {/* Background decorations */}
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Gradient orbs */}
+      <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
         <motion.div 
           className="absolute top-20 -left-32 w-96 h-96 bg-primary/10 rounded-full blur-3xl"
           initial={{ opacity: 0, scale: 0.8 }}
@@ -61,19 +56,19 @@ const Hero = () => {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-primary/5 to-secondary/5 rounded-full blur-3xl" />
         
         {/* Grid pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-30" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20" />
       </div>
 
-      <div className="container mx-auto px-4 py-20 relative z-10">
+      <div className="container mx-auto px-4 py-16 relative z-10">
         <motion.div 
-          className="max-w-4xl mx-auto text-center"
+          className="max-w-3xl mx-auto text-center"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
           {/* Premium Badge */}
           <motion.div 
-            className="mb-8 flex justify-center"
+            className="mb-6 flex justify-center"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
@@ -83,6 +78,7 @@ const Hero = () => {
 
           {/* Main heading */}
           <motion.h1 
+            id="hero-title"
             className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight"
             variants={itemVariants}
           >
@@ -93,72 +89,48 @@ const Hero = () => {
 
           {/* Subtitle */}
           <motion.p 
-            className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed"
+            className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed"
             variants={itemVariants}
           >
             Une reconnaissance de l'État pour les startups innovantes à fort impact.
             Accédez aux avantages exclusifs réservés aux entreprises labellisées.
           </motion.p>
 
-          {/* CTAs */}
+          {/* Single CTA */}
           <motion.div 
-            className="flex flex-col sm:flex-row gap-4 justify-center mb-12"
+            className="flex flex-col items-center gap-4 mb-10"
             variants={itemVariants}
           >
             <Link to="/eligibilite">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button 
                   size="lg" 
-                  className="gradient-premium text-primary-foreground px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all w-full sm:w-auto"
+                  className="gradient-premium text-primary-foreground px-10 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+                  aria-label="Vérifier votre éligibilité au Label Startup"
                 >
-                  <CheckCircle2 className="mr-2 w-5 h-5" />
+                  <CheckCircle2 className="mr-2 w-5 h-5" aria-hidden="true" />
                   Vérifier mon éligibilité
                 </Button>
               </motion.div>
             </Link>
-            <Link to="/avantages">
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="px-8 py-6 text-lg font-semibold border-2 border-primary/20 hover:bg-primary/5 w-full sm:w-auto"
-                >
-                  Comprendre les avantages
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
-              </motion.div>
+            
+            {/* Secondary link */}
+            <Link 
+              to="/avantages" 
+              className="text-sm text-muted-foreground hover:text-primary transition-colors underline-offset-4 hover:underline"
+            >
+              Découvrir les avantages du label →
             </Link>
           </motion.div>
 
-          {/* Benefits banner */}
-          <motion.div 
-            className="bg-card/80 backdrop-blur-sm rounded-2xl border border-border p-6 mb-12 shadow-lg"
-            variants={itemVariants}
-          >
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {benefits.map((benefit, index) => (
-                <motion.div 
-                  key={index} 
-                  className="flex items-center justify-center gap-2 text-muted-foreground"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.6 + index * 0.1 }}
-                >
-                  <benefit.icon className="w-5 h-5 text-primary" />
-                  <span className="text-sm font-medium">{benefit.label}</span>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Mini stats */}
+          {/* Mini stats - 3 items */}
           <motion.div 
             className="flex flex-wrap justify-center gap-8 md:gap-12"
             variants={itemVariants}
           >
-            {stats.map((stat, index) => (
+            {HERO_STATS.map((stat, index) => (
               <motion.div 
-                key={index} 
+                key={stat.label} 
                 className="text-center"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -173,7 +145,7 @@ const Hero = () => {
       </div>
 
       {/* Bottom gradient fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" aria-hidden="true" />
     </section>
   );
 };

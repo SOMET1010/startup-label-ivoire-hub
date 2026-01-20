@@ -1,59 +1,51 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import Features from "@/components/Features";
+import AdvantagesSection from "@/components/AdvantagesSection";
 import Stats from "@/components/Stats";
 import Testimonials from "@/components/Testimonials";
-import Contact from "@/components/Contact";
 import CTA from "@/components/CTA";
 import Footer from "@/components/Footer";
-import NewsFeed from "@/components/NewsFeed";
-import FaqCard from "@/components/FaqCard";
-import Benefits from "@/components/Benefits";
 import StartupJourney from "@/components/StartupJourney";
-import ComparisonTable from "@/components/ComparisonTable";
 
+/**
+ * Page d'accueil restructurée - 6 sections (vs 10 avant)
+ * 
+ * Structure:
+ * 1. Hero - CTA unique + 3 stats
+ * 2. StartupJourney - Parcours simplifié
+ * 3. AdvantagesSection - 6 avantages (fusion Features + Benefits)
+ * 4. Stats - Impact national (inchangé)
+ * 5. Testimonials - Témoignages (inchangé)
+ * 6. CTA - Conversion finale + FAQ intégré
+ * 
+ * Sections supprimées/déplacées:
+ * - ComparisonTable → page /avantages uniquement
+ * - Benefits → fusionné dans AdvantagesSection
+ * - NewsFeed → page /actualites
+ * - Contact → page dédiée + footer
+ * - FaqCard standalone → intégré dans CTA
+ */
 const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow">
-        {/* Hero Premium - Positionnement & Confiance */}
+        {/* 1. Hero - Positionnement & CTA unique */}
         <Hero />
         
-        {/* Parcours Startup - Timeline horizontale */}
+        {/* 2. Parcours - Timeline simplifiée */}
         <StartupJourney />
         
-        {/* Features - Avantages du label */}
-        <Features />
+        {/* 3. Avantages - Fusion Features + Benefits */}
+        <AdvantagesSection />
         
-        {/* Tableau Comparatif - Conversion */}
-        <ComparisonTable />
-        
-        {/* Benefits - Détails des avantages */}
-        <Benefits />
-        
-        {/* Stats - Impact National */}
+        {/* 4. Stats - Impact National */}
         <Stats />
         
-        {/* Témoignages - Preuve sociale */}
+        {/* 5. Témoignages - Preuve sociale */}
         <Testimonials />
         
-        {/* Actualités */}
-        <NewsFeed />
-        
-        {/* FAQ rapide */}
-        <div className="py-16 bg-background">
-          <div className="container mx-auto px-4">
-            <div className="max-w-md mx-auto">
-              <FaqCard />
-            </div>
-          </div>
-        </div>
-        
-        {/* Contact */}
-        <Contact />
-        
-        {/* CTA Final Premium */}
+        {/* 6. CTA Final + FAQ intégré */}
         <CTA />
       </main>
       <Footer />

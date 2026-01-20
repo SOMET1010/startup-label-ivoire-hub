@@ -67,41 +67,58 @@ const Navbar = () => {
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-muted-foreground hover:text-primary transition-colors font-medium">
+          {/* Desktop Navigation - Simplifié à 4 items principaux */}
+          <div className="hidden md:flex items-center space-x-6">
+            <Link 
+              to="/" 
+              className="text-muted-foreground hover:text-primary transition-colors font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
+            >
               Accueil
             </Link>
             <div className="relative group">
-              <button className="flex items-center text-muted-foreground hover:text-primary transition-colors font-medium">
-                Labellisation <ChevronDown className="ml-1 h-4 w-4" />
+              <button 
+                className="flex items-center text-muted-foreground hover:text-primary transition-colors font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                Labellisation <ChevronDown className="ml-1 h-4 w-4" aria-hidden="true" />
               </button>
-              <div className="absolute left-0 mt-2 w-48 bg-card rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 border border-border">
-                <Link to="/criteres" className="block px-4 py-2 text-sm text-foreground hover:bg-accent">
-                  Critères d'éligibilité
+              <div 
+                className="absolute left-0 mt-2 w-44 bg-card rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-border"
+                role="menu"
+              >
+                <Link 
+                  to="/criteres" 
+                  className="block px-4 py-2.5 text-sm text-foreground hover:bg-accent rounded-t-lg focus-visible:bg-accent focus-visible:outline-none"
+                  role="menuitem"
+                >
+                  Critères
                 </Link>
-                <Link to="/avantages" className="block px-4 py-2 text-sm text-foreground hover:bg-accent">
-                  Avantages
-                </Link>
-                <Link to="/postuler" className="block px-4 py-2 text-sm text-foreground hover:bg-accent">
+                <Link 
+                  to="/postuler" 
+                  className="block px-4 py-2.5 text-sm text-foreground hover:bg-accent rounded-b-lg focus-visible:bg-accent focus-visible:outline-none"
+                  role="menuitem"
+                >
                   Postuler
                 </Link>
               </div>
             </div>
-            <Link to="/annuaire" className="text-muted-foreground hover:text-primary transition-colors font-medium">
+            <Link 
+              to="/annuaire" 
+              className="text-muted-foreground hover:text-primary transition-colors font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
+            >
               Annuaire
             </Link>
-            <Link to="/accompagnement" className="text-muted-foreground hover:text-primary transition-colors font-medium">
-              Accompagnement
-            </Link>
-            <Link to="/entreprises-ia" className="text-muted-foreground hover:text-primary transition-colors font-medium">
-              Entreprises IA
+            <Link 
+              to="/actualites" 
+              className="text-muted-foreground hover:text-primary transition-colors font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
+            >
+              Actualités
             </Link>
           </div>
 
-          {/* Auth Buttons */}
+          {/* Auth Buttons - Sans BrandToggle */}
           <div className="hidden md:flex items-center space-x-3">
-            <BrandToggle />
             {loading ? (
               <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
             ) : user ? (
@@ -166,47 +183,42 @@ const Navbar = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden text-foreground focus:outline-none"
+            className="md:hidden text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm p-1"
             onClick={toggleMenu}
+            aria-label={isMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+            aria-expanded={isMenuOpen}
           >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isMenuOpen ? <X size={24} aria-hidden="true" /> : <Menu size={24} aria-hidden="true" />}
           </button>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu - Simplifié à 4 items */}
         {isMenuOpen && (
-          <div className="md:hidden mt-4 pb-4">
-            <div className="flex flex-col space-y-4">
+          <nav className="md:hidden mt-4 pb-4" role="navigation" aria-label="Menu mobile">
+            <div className="flex flex-col space-y-3">
               <Link
                 to="/"
-                className="text-muted-foreground hover:text-primary transition-colors font-medium"
+                className="text-muted-foreground hover:text-primary transition-colors font-medium py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Accueil
               </Link>
               <details className="group">
-                <summary className="flex cursor-pointer list-none items-center justify-between text-muted-foreground hover:text-primary transition-colors font-medium">
+                <summary className="flex cursor-pointer list-none items-center justify-between text-muted-foreground hover:text-primary transition-colors font-medium py-2">
                   Labellisation
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-4 w-4" aria-hidden="true" />
                 </summary>
                 <div className="mt-2 ml-4 flex flex-col space-y-2">
                   <Link 
                     to="/criteres" 
-                    className="text-muted-foreground hover:text-primary transition-colors"
+                    className="text-muted-foreground hover:text-primary transition-colors py-1"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Critères d'éligibilité
-                  </Link>
-                  <Link 
-                    to="/avantages" 
-                    className="text-muted-foreground hover:text-primary transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Avantages
+                    Critères
                   </Link>
                   <Link 
                     to="/postuler" 
-                    className="text-muted-foreground hover:text-primary transition-colors"
+                    className="text-muted-foreground hover:text-primary transition-colors py-1"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Postuler
@@ -215,30 +227,20 @@ const Navbar = () => {
               </details>
               <Link
                 to="/annuaire"
-                className="text-muted-foreground hover:text-primary transition-colors font-medium"
+                className="text-muted-foreground hover:text-primary transition-colors font-medium py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Annuaire
               </Link>
               <Link
-                to="/accompagnement"
-                className="text-muted-foreground hover:text-primary transition-colors font-medium"
+                to="/actualites"
+                className="text-muted-foreground hover:text-primary transition-colors font-medium py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Accompagnement
-              </Link>
-              <Link
-                to="/entreprises-ia"
-                className="text-muted-foreground hover:text-primary transition-colors font-medium"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Entreprises IA
+                Actualités
               </Link>
 
-              <div className="pt-2 border-t border-border">
-                <div className="flex justify-center mb-4">
-                  <BrandToggle />
-                </div>
+              <div className="pt-3 border-t border-border">
                 {user ? (
                   <div className="flex flex-col space-y-2">
                     <div className="flex items-center space-x-3 py-2">
@@ -279,8 +281,8 @@ const Navbar = () => {
                 )}
               </div>
             </div>
-          </div>
-          )}
+          </nav>
+        )}
         </div>
       </nav>
     </>
