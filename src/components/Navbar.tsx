@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, Moon, Sun } from "lucide-react";
+import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, Moon, Sun, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBrand } from "@/hooks/useBrand";
@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
@@ -22,7 +23,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { brand } = useBrand();
   const isInstitutional = brand === "ansut";
-  const { isDark, setTheme, mounted } = useAppTheme();
+  const { theme, isDark, setTheme, mounted } = useAppTheme();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -120,8 +121,8 @@ const Navbar = () => {
 
           {/* Auth Buttons avec Theme Toggle */}
           <div className="hidden md:flex items-center space-x-3">
-            {/* Theme Toggle */}
-            {mounted && (
+            {/* Theme Toggle - visible uniquement si non connecté */}
+            {mounted && !user && (
               <Button
                 variant="ghost"
                 size="icon"
@@ -165,6 +166,41 @@ const Navbar = () => {
                         {userRole}
                       </span>
                     )}
+                  </div>
+                  <DropdownMenuSeparator />
+                  <div className="p-2">
+                    <DropdownMenuLabel className="text-xs font-normal text-muted-foreground px-0 mb-2">
+                      Thème
+                    </DropdownMenuLabel>
+                    <div className="flex gap-1">
+                      <Button
+                        variant={theme === 'light' ? 'default' : 'ghost'}
+                        size="sm"
+                        className="flex-1 h-8"
+                        onClick={() => setTheme('light')}
+                        aria-label="Thème clair"
+                      >
+                        <Sun className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant={theme === 'dark' ? 'default' : 'ghost'}
+                        size="sm"
+                        className="flex-1 h-8"
+                        onClick={() => setTheme('dark')}
+                        aria-label="Thème sombre"
+                      >
+                        <Moon className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant={theme === 'system' ? 'default' : 'ghost'}
+                        size="sm"
+                        className="flex-1 h-8"
+                        onClick={() => setTheme('system')}
+                        aria-label="Thème système"
+                      >
+                        <Monitor className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
@@ -270,6 +306,39 @@ const Navbar = () => {
                       <div>
                         <p className="text-sm font-medium">{profile?.full_name || "Utilisateur"}</p>
                         <p className="text-xs text-muted-foreground">{user.email}</p>
+                      </div>
+                    </div>
+                    {/* Theme selector mobile */}
+                    <div className="py-2">
+                      <p className="text-xs text-muted-foreground mb-2">Thème</p>
+                      <div className="flex gap-1">
+                        <Button
+                          variant={theme === 'light' ? 'default' : 'outline'}
+                          size="sm"
+                          className="flex-1 h-8"
+                          onClick={() => setTheme('light')}
+                          aria-label="Thème clair"
+                        >
+                          <Sun className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant={theme === 'dark' ? 'default' : 'outline'}
+                          size="sm"
+                          className="flex-1 h-8"
+                          onClick={() => setTheme('dark')}
+                          aria-label="Thème sombre"
+                        >
+                          <Moon className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant={theme === 'system' ? 'default' : 'outline'}
+                          size="sm"
+                          className="flex-1 h-8"
+                          onClick={() => setTheme('system')}
+                          aria-label="Thème système"
+                        >
+                          <Monitor className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                     <Link to={getDashboardLink()} onClick={() => setIsMenuOpen(false)}>
