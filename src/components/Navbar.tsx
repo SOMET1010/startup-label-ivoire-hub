@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard } from "lucide-react";
+import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBrand } from "@/hooks/useBrand";
+import { useAppTheme } from "@/hooks/useAppTheme";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +15,6 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import GovTopBar from "@/components/gov/GovTopBar";
-import { BrandToggle } from "@/components/BrandSwitcher";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -22,6 +22,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { brand } = useBrand();
   const isInstitutional = brand === "ansut";
+  const { isDark, setTheme, mounted } = useAppTheme();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -117,8 +118,25 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* Auth Buttons - Sans BrandToggle */}
+          {/* Auth Buttons avec Theme Toggle */}
           <div className="hidden md:flex items-center space-x-3">
+            {/* Theme Toggle */}
+            {mounted && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setTheme(isDark ? 'light' : 'dark')}
+                aria-label="Basculer le mode sombre"
+                className="h-9 w-9"
+              >
+                {isDark ? (
+                  <Sun className="h-5 w-5 text-amber-500" />
+                ) : (
+                  <Moon className="h-5 w-5 text-muted-foreground" />
+                )}
+              </Button>
+            )}
+            
             {loading ? (
               <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
             ) : user ? (

@@ -55,6 +55,7 @@ import {
   isPreviewable, 
   getDocumentType 
 } from '@/hooks/useSecureDocument';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const profileFormSchema = z.object({
   name: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
@@ -693,7 +694,7 @@ export default function StartupProfile() {
                 </Card>
               </TabsContent>
 
-              <TabsContent value="settings">
+              <TabsContent value="settings" className="space-y-4">
                 <Card>
                   <CardHeader>
                     <CardTitle>Paramètres de visibilité</CardTitle>
@@ -736,6 +737,19 @@ export default function StartupProfile() {
                         />
                       </form>
                     </Form>
+                  </CardContent>
+                </Card>
+
+                {/* Apparence */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Apparence</CardTitle>
+                    <CardDescription>
+                      Personnalisez l'affichage de l'interface
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ThemeToggle />
                   </CardContent>
                 </Card>
               </TabsContent>
