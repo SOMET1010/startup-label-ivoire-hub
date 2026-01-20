@@ -1,67 +1,83 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Shield, Clock, CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Shield, Clock } from "lucide-react";
 import PremiumBadge from "./PremiumBadge";
+import FaqCard from "./FaqCard";
+import { TRUST_INDICATORS } from "@/lib/constants/features";
 
+const iconMap = {
+  online: Shield,
+  response: Clock,
+  free: CheckCircle2,
+} as const;
+
+/**
+ * CTA final simplifié avec FAQ intégré
+ * 1 seul bouton principal + indicateurs de confiance + FAQ rapide
+ */
 const CTA = () => {
   return (
-    <section className="py-20 bg-gradient-to-br from-primary via-primary/95 to-primary/90 text-primary-foreground relative overflow-hidden">
+    <section 
+      className="py-20 bg-gradient-to-br from-primary via-primary/95 to-primary/90 text-primary-foreground relative overflow-hidden"
+      aria-labelledby="cta-title"
+    >
       {/* Background decorations */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-secondary/20 rounded-full blur-3xl" />
+      <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-secondary/15 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary-foreground/5 rounded-full blur-3xl" />
       </div>
 
-      <div className="container mx-auto px-4 text-center relative z-10">
-        {/* Badge */}
-        <div className="flex justify-center mb-8">
-          <PremiumBadge variant="certified" className="bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground" />
-        </div>
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          {/* Left: CTA content */}
+          <div className="text-center lg:text-left">
+            {/* Badge */}
+            <div className="flex justify-center lg:justify-start mb-6">
+              <PremiumBadge 
+                variant="certified" 
+                className="bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground" 
+              />
+            </div>
 
-        {/* Heading */}
-        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
-          Rejoignez les startups d'élite
-        </h2>
-        <p className="text-xl md:text-2xl mb-10 max-w-3xl mx-auto text-primary-foreground/90">
-          Obtenez la reconnaissance officielle de l'État et accédez aux opportunités exclusives du label
-        </p>
+            {/* Heading */}
+            <h2 id="cta-title" className="text-3xl md:text-4xl font-bold mb-4">
+              Rejoignez les startups d'élite
+            </h2>
+            <p className="text-lg md:text-xl mb-8 text-primary-foreground/90 max-w-lg">
+              Obtenez la reconnaissance officielle de l'État et accédez aux opportunités exclusives du label
+            </p>
 
-        {/* CTAs */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
-          <Link to="/eligibilite">
-            <Button 
-              size="lg" 
-              className="w-full sm:w-auto bg-secondary text-secondary-foreground hover:bg-secondary/90 px-8 py-6 text-lg font-semibold shadow-lg"
-            >
-              <CheckCircle2 className="mr-2 w-5 h-5" />
-              Vérifier mon éligibilité
-            </Button>
-          </Link>
-          <Link to="/postuler">
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="w-full sm:w-auto border-2 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 px-8 py-6 text-lg font-semibold"
-            >
-              Postuler maintenant
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-          </Link>
-        </div>
+            {/* Single CTA */}
+            <div className="mb-8">
+              <Link to="/eligibilite">
+                <Button 
+                  size="lg" 
+                  className="bg-secondary text-secondary-foreground hover:bg-secondary/90 px-8 py-6 text-lg font-semibold shadow-lg"
+                  aria-label="Vérifier votre éligibilité au Label Startup"
+                >
+                  <CheckCircle2 className="mr-2 w-5 h-5" aria-hidden="true" />
+                  Vérifier mon éligibilité
+                </Button>
+              </Link>
+            </div>
 
-        {/* Trust indicators */}
-        <div className="flex flex-wrap justify-center gap-6 md:gap-10 text-primary-foreground/80">
-          <div className="flex items-center gap-2">
-            <Shield className="w-5 h-5" />
-            <span className="text-sm font-medium">Processus 100% en ligne</span>
+            {/* Trust indicators */}
+            <div className="flex flex-wrap justify-center lg:justify-start gap-6 text-primary-foreground/80">
+              {TRUST_INDICATORS.map((indicator) => {
+                const Icon = iconMap[indicator.key];
+                return (
+                  <div key={indicator.key} className="flex items-center gap-2">
+                    <Icon className="w-4 h-4" aria-hidden="true" />
+                    <span className="text-sm font-medium">{indicator.label}</span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Clock className="w-5 h-5" />
-            <span className="text-sm font-medium">Réponse sous 30 jours</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5" />
-            <span className="text-sm font-medium">Accompagnement gratuit</span>
+
+          {/* Right: FAQ Card */}
+          <div className="lg:pl-8">
+            <FaqCard />
           </div>
         </div>
       </div>
