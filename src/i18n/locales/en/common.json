@@ -60,5 +60,10 @@
     "light": "Light",
     "dark": "Dark",
     "system": "System"
+  },
+  "language": {
+    "label": "Language",
+    "french": "Français",
+    "english": "English"
   }
 }
