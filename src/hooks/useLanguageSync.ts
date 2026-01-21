@@ -3,25 +3,35 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
 
 /**
- * Hook that synchronizes the i18n language with the user's preferred language
- * stored in their profile. This ensures the UI language matches user preferences
- * across sessions and devices.
+ * Hook that synchronizes the i18n language with the user's preferred language.
+ * - For authenticated users: uses profile.preferred_language from Supabase
+ * - For visitors: uses localStorage to persist preference
  */
 export function useLanguageSync() {
   const { i18n } = useTranslation();
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
 
   useEffect(() => {
-    const preferredLanguage = profile?.preferred_language || 'fr';
-    
-    // Only change language if it differs from current
-    if (i18n.language !== preferredLanguage) {
-      i18n.changeLanguage(preferredLanguage);
+    if (user && profile?.preferred_language) {
+      // Authenticated user: use profile preference
+      if (i18n.language !== profile.preferred_language) {
+        i18n.changeLanguage(profile.preferred_language);
+      }
+    } else if (!user) {
+      // Visitor: read from localStorage
+      const stored = localStorage.getItem('preferred_language');
+      if (stored && ['fr', 'en'].includes(stored) && stored !== i18n.language) {
+        i18n.changeLanguage(stored);
+      }
     }
-  }, [profile?.preferred_language, i18n]);
+  }, [user, profile?.preferred_language, i18n]);
 
   const changeLanguage = async (lang: string) => {
     await i18n.changeLanguage(lang);
+    // Persist to localStorage for visitors
+    if (!user) {
+      localStorage.setItem('preferred_language', lang);
+    }
   };
 
   return { 

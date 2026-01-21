@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import GovTopBar from "@/components/gov/GovTopBar";
 
 const Navbar = () => {
@@ -123,21 +124,24 @@ const Navbar = () => {
 
           {/* Auth Buttons avec Theme Toggle */}
           <div className="hidden md:flex items-center space-x-3">
-            {/* Theme Toggle - visible uniquement si non connecté */}
+            {/* Language & Theme Toggle - visible when not logged in */}
             {mounted && !user && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setTheme(isDark ? 'light' : 'dark')}
-                aria-label={t('theme.dark')}
-                className="h-9 w-9"
-              >
-                {isDark ? (
-                  <Sun className="h-5 w-5 text-amber-500" />
-                ) : (
-                  <Moon className="h-5 w-5 text-muted-foreground" />
-                )}
-              </Button>
+              <>
+                <LanguageSwitcher />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setTheme(isDark ? 'light' : 'dark')}
+                  aria-label={t('theme.dark')}
+                  className="h-9 w-9"
+                >
+                  {isDark ? (
+                    <Sun className="h-5 w-5 text-amber-500" />
+                  ) : (
+                    <Moon className="h-5 w-5 text-muted-foreground" />
+                  )}
+                </Button>
+              </>
             )}
             
             {loading ? (
@@ -360,6 +364,11 @@ const Navbar = () => {
                   </div>
                 ) : (
                   <div className="flex flex-col space-y-2">
+                    {/* Language switcher for mobile visitors */}
+                    <div className="flex items-center justify-between py-2">
+                      <span className="text-sm text-muted-foreground">{t('language.label')}</span>
+                      <LanguageSwitcher />
+                    </div>
                     <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
                       <Button variant="outline" className="w-full">{t('nav.login')}</Button>
                     </Link>

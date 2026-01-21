@@ -39,19 +39,37 @@ const resources = {
   },
 };
 
+// Get initial language from localStorage, browser, or default to French
+const getInitialLanguage = (): string => {
+  if (typeof window !== 'undefined') {
+    // Check localStorage first
+    const stored = localStorage.getItem('preferred_language');
+    if (stored && supportedLanguages.includes(stored as SupportedLanguage)) {
+      return stored;
+    }
+    // Detect browser language
+    const browserLang = navigator.language.split('-')[0];
+    if (supportedLanguages.includes(browserLang as SupportedLanguage)) {
+      return browserLang;
+    }
+  }
+  // Default to French
+  return 'fr';
+};
+
 i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: 'fr', // Default language
+    lng: getInitialLanguage(),
     fallbackLng: 'fr',
     defaultNS: 'common',
     ns: ['common', 'home', 'auth', 'dashboard', 'settings', 'pages'],
     interpolation: {
-      escapeValue: false, // React already escapes values
+      escapeValue: false,
     },
     react: {
-      useSuspense: false, // Disable suspense for SSR compatibility
+      useSuspense: false,
     },
   });
 
