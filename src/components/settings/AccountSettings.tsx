@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { User, Mail, Loader2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -8,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 export function AccountSettings() {
+  const { t } = useTranslation('settings');
+  const { t: tCommon } = useTranslation('common');
   const { user, profile } = useAuth();
   const { toast } = useToast();
   const [fullName, setFullName] = useState(profile?.full_name || "");
@@ -26,14 +29,14 @@ export function AccountSettings() {
       if (error) throw error;
 
       toast({
-        title: "Profil mis à jour",
-        description: "Votre nom a été enregistré avec succès.",
+        title: t('messages.saved'),
+        description: t('messages.savedDescription'),
       });
     } catch (error) {
       console.error("Error updating profile:", error);
       toast({
-        title: "Erreur",
-        description: "Impossible de mettre à jour le profil.",
+        title: t('messages.error'),
+        description: t('messages.errorDescription'),
         variant: "destructive",
       });
     } finally {
@@ -46,7 +49,7 @@ export function AccountSettings() {
       <div className="space-y-3">
         <Label className="flex items-center gap-2">
           <Mail className="w-4 h-4 text-muted-foreground" />
-          Adresse email
+          {t('account.email')}
         </Label>
         <Input
           value={user?.email || ""}
@@ -54,21 +57,21 @@ export function AccountSettings() {
           className="max-w-md bg-muted"
         />
         <p className="text-sm text-muted-foreground">
-          L'adresse email ne peut pas être modifiée.
+          {t('account.emailReadonly')}
         </p>
       </div>
 
       <div className="space-y-3">
         <Label htmlFor="fullName" className="flex items-center gap-2">
           <User className="w-4 h-4 text-muted-foreground" />
-          Nom complet
+          {t('account.fullName')}
         </Label>
         <div className="flex gap-3 max-w-md">
           <Input
             id="fullName"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            placeholder="Votre nom complet"
+            placeholder={t('account.fullNamePlaceholder')}
           />
           <Button
             onClick={handleSave}
@@ -77,10 +80,10 @@ export function AccountSettings() {
             {isSaving ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Enregistrement...
+                {tCommon('actions.saving')}
               </>
             ) : (
-              "Enregistrer"
+              tCommon('actions.save')
             )}
           </Button>
         </div>

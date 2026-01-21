@@ -11,6 +11,7 @@
   "language": {
     "title": "Langue",
     "subtitle": "Choisissez la langue de l'interface",
+    "selectPlaceholder": "Sélectionner une langue",
     "fr": "Français",
     "en": "English"
   },
@@ -47,7 +48,8 @@
   "account": {
     "title": "Compte",
     "subtitle": "Informations de votre compte",
-    "email": "Email",
+    "email": "Adresse email",
+    "emailReadonly": "L'adresse email ne peut pas être modifiée.",
     "fullName": "Nom complet",
     "fullNamePlaceholder": "Votre nom complet"
   },

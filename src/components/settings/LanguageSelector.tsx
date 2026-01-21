@@ -1,5 +1,4 @@
-import { Globe } from "lucide-react";
-import { Label } from "@/components/ui/label";
+import { useTranslation } from "react-i18next";
 import {
   Select,
   SelectContent,
@@ -16,33 +15,33 @@ const LANGUAGE_OPTIONS: { value: LanguagePreference; label: string; flag: string
 ];
 
 export function LanguageSelector() {
+  const { t, i18n } = useTranslation('settings');
   const { preferences, setLanguage, isSyncing } = useUserPreferences();
 
+  const handleLanguageChange = async (value: LanguagePreference) => {
+    await setLanguage(value);
+    i18n.changeLanguage(value);
+  };
+
   return (
-    <div className="space-y-3">
-      <Label htmlFor="language" className="flex items-center gap-2">
-        <Globe className="w-4 h-4 text-muted-foreground" />
-        Langue de l'interface
-      </Label>
-      <Select
-        value={preferences.preferred_language}
-        onValueChange={(value: LanguagePreference) => setLanguage(value)}
-        disabled={isSyncing}
-      >
-        <SelectTrigger id="language" className="w-full max-w-xs">
-          <SelectValue placeholder="Sélectionner une langue" />
-        </SelectTrigger>
-        <SelectContent>
-          {LANGUAGE_OPTIONS.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              <span className="flex items-center gap-2">
-                <span>{option.flag}</span>
-                <span>{option.label}</span>
-              </span>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+    <Select
+      value={preferences.preferred_language}
+      onValueChange={handleLanguageChange}
+      disabled={isSyncing}
+    >
+      <SelectTrigger className="w-full max-w-xs">
+        <SelectValue placeholder={t('language.selectPlaceholder')} />
+      </SelectTrigger>
+      <SelectContent>
+        {LANGUAGE_OPTIONS.map((option) => (
+          <SelectItem key={option.value} value={option.value}>
+            <span className="flex items-center gap-2">
+              <span>{option.flag}</span>
+              <span>{option.label}</span>
+            </span>
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
