@@ -4,68 +4,44 @@ import CTA from "@/components/CTA";
 import { Link } from "react-router-dom";
 import { useBrand } from "@/hooks/useBrand";
 import { InstitutionalHero, InstitutionalCard, OfficialBadge } from "@/components/gov";
+import { useTranslation } from "react-i18next";
 
 const Avantages = () => {
   const { brand } = useBrand();
   const isInstitutional = brand === 'ansut';
+  const { t } = useTranslation('pages');
 
-  const fiscalBenefits = [
-    {
-      title: "Exonération de l'impôt sur les bénéfices",
-      description: "Exonération totale pendant les trois premières années suivant l'obtention du label, puis réduction de 50% pendant les deux années suivantes.",
+  // Section configuration
+  const sections = [
+    { 
+      key: 'fiscal', 
+      itemKeys: ['taxExemption', 'patentExemption', 'salaryTax'],
+      color: 'ivoire-orange',
+      govColor: 'gov-blue',
+      variant: 'primary' as const,
+      badgeVariant: 'certifie' as const,
     },
-    {
-      title: "Exonération de la contribution des patentes",
-      description: "Dispense totale du paiement de la patente pendant cinq ans à compter de l'obtention du label.",
+    { 
+      key: 'publicMarkets', 
+      itemKeys: ['reserved', 'preference', 'guarantees'],
+      color: 'ivoire-green',
+      govColor: 'gov-green',
+      variant: 'success' as const,
+      badgeVariant: 'officiel' as const,
     },
-    {
-      title: "Exonération de taxes sur les salaires",
-      description: "Réduction des charges sociales et patronales pour favoriser la création d'emplois.",
+    { 
+      key: 'funding', 
+      itemKeys: ['priority', 'investors', 'mentoring'],
+      color: 'startup-DEFAULT',
+      govColor: 'gov-blue',
+      variant: 'primary' as const,
     },
-  ];
-
-  const publicMarkets = [
-    {
-      title: "Marchés réservés",
-      description: "Accès à des marchés publics spécifiquement réservés aux startups labellisées.",
-    },
-    {
-      title: "Préférence nationale",
-      description: "Traitement préférentiel dans l'attribution des marchés publics à compétences équivalentes.",
-    },
-    {
-      title: "Allègement des garanties",
-      description: "Réduction des exigences de garanties financières pour les startups labellisées soumissionnant aux appels d'offres publics.",
-    },
-  ];
-
-  const funding = [
-    {
-      title: "Accès prioritaire aux fonds publics",
-      description: "Priorité dans l'accès aux fonds d'investissements publics et aux programmes de subventions gouvernementales.",
-    },
-    {
-      title: "Mise en relation avec les investisseurs",
-      description: "Accès facilité aux réseaux d'investisseurs locaux et internationaux à travers la plateforme.",
-    },
-    {
-      title: "Mentoring et formation",
-      description: "Accès à des programmes de mentoring et de formation spécialement conçus pour les startups labellisées.",
-    },
-  ];
-
-  const visibility = [
-    {
-      title: "Référencement dans l'annuaire officiel",
-      description: "Présence dans l'annuaire national des startups labellisées avec une fiche détaillée de présentation.",
-    },
-    {
-      title: "Participation aux événements nationaux",
-      description: "Invitations privilégiées aux événements officiels, salons professionnels et missions économiques.",
-    },
-    {
-      title: "Communauté et réseau",
-      description: "Intégration dans une communauté d'entrepreneurs innovants pour échanger des idées et développer des partenariats.",
+    { 
+      key: 'visibility', 
+      itemKeys: ['directory', 'events', 'community'],
+      color: 'investor-DEFAULT',
+      govColor: 'gov-green',
+      variant: 'success' as const,
     },
   ];
 
@@ -100,9 +76,9 @@ const Avantages = () => {
           <InstitutionalHero>
             <div className="max-w-3xl mx-auto text-center">
               <OfficialBadge variant="officiel" className="mb-4 inline-flex" />
-              <h1 className="text-4xl font-bold mb-4">Avantages du Label Startup</h1>
+              <h1 className="text-4xl font-bold mb-4">{t('benefits.hero.title')}</h1>
               <p className="text-xl text-white/80">
-                Découvrez les bénéfices exclusifs offerts aux startups labellisées
+                {t('benefits.hero.subtitle')}
               </p>
             </div>
           </InstitutionalHero>
@@ -110,9 +86,9 @@ const Avantages = () => {
           <section className="bg-muted/50 py-12">
             <div className="container mx-auto px-4">
               <div className="max-w-3xl mx-auto text-center">
-                <h1 className="text-4xl font-bold mb-4">Avantages du Label Startup</h1>
+                <h1 className="text-4xl font-bold mb-4">{t('benefits.hero.title')}</h1>
                 <p className="text-xl text-muted-foreground">
-                  Découvrez les bénéfices exclusifs offerts aux startups labellisées
+                  {t('benefits.hero.subtitle')}
                 </p>
               </div>
             </div>
@@ -123,76 +99,44 @@ const Avantages = () => {
         <section className="py-12">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto space-y-12">
-              {/* Fiscal benefits */}
-              <div>
-                <h2 className={`text-2xl font-bold mb-6 ${isInstitutional ? 'text-gov-blue' : 'text-ivoire-orange'}`}>
-                  Avantages Fiscaux
-                </h2>
-                {isInstitutional ? (
-                  <InstitutionalCard variant="primary" showBadge badgeVariant="certifie">
-                    {renderBenefitList(fiscalBenefits, 'ivoire-orange', isInstitutional)}
-                  </InstitutionalCard>
-                ) : (
-                  <div className="bg-card rounded-xl shadow-sm p-8">
-                    {renderBenefitList(fiscalBenefits, 'ivoire-orange', isInstitutional)}
-                  </div>
-                )}
-              </div>
+              {sections.map((section) => {
+                const items = section.itemKeys.map(itemKey => ({
+                  title: t(`benefits.sections.${section.key}.items.${itemKey}.title`),
+                  description: t(`benefits.sections.${section.key}.items.${itemKey}.description`),
+                }));
 
-              {/* Access to public markets */}
-              <div>
-                <h2 className={`text-2xl font-bold mb-6 ${isInstitutional ? 'text-gov-green' : 'text-ivoire-green'}`}>
-                  Accès aux Marchés Publics
-                </h2>
-                {isInstitutional ? (
-                  <InstitutionalCard variant="success" showBadge badgeVariant="officiel">
-                    {renderBenefitList(publicMarkets, 'ivoire-green', isInstitutional)}
-                  </InstitutionalCard>
-                ) : (
-                  <div className="bg-card rounded-xl shadow-sm p-8">
-                    {renderBenefitList(publicMarkets, 'ivoire-green', isInstitutional)}
-                  </div>
-                )}
-              </div>
+                const titleColorClass = isInstitutional 
+                  ? `text-${section.govColor}` 
+                  : `text-${section.color}`;
 
-              {/* Funding and support */}
-              <div>
-                <h2 className={`text-2xl font-bold mb-6 ${isInstitutional ? 'text-gov-blue' : 'text-startup-DEFAULT'}`}>
-                  Financement et Accompagnement
-                </h2>
-                {isInstitutional ? (
-                  <InstitutionalCard variant="primary">
-                    {renderBenefitList(funding, 'startup-DEFAULT', isInstitutional)}
-                  </InstitutionalCard>
-                ) : (
-                  <div className="bg-card rounded-xl shadow-sm p-8">
-                    {renderBenefitList(funding, 'startup-DEFAULT', isInstitutional)}
+                return (
+                  <div key={section.key}>
+                    <h2 className={`text-2xl font-bold mb-6 ${titleColorClass}`}>
+                      {t(`benefits.sections.${section.key}.title`)}
+                    </h2>
+                    {isInstitutional ? (
+                      <InstitutionalCard 
+                        variant={section.variant} 
+                        showBadge={!!section.badgeVariant} 
+                        badgeVariant={section.badgeVariant}
+                      >
+                        {renderBenefitList(items, section.color, isInstitutional)}
+                      </InstitutionalCard>
+                    ) : (
+                      <div className="bg-card rounded-xl shadow-sm p-8">
+                        {renderBenefitList(items, section.color, isInstitutional)}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-
-              {/* Visibility and networking */}
-              <div>
-                <h2 className={`text-2xl font-bold mb-6 ${isInstitutional ? 'text-gov-green' : 'text-investor-DEFAULT'}`}>
-                  Visibilité et Réseautage
-                </h2>
-                {isInstitutional ? (
-                  <InstitutionalCard variant="success">
-                    {renderBenefitList(visibility, 'investor-DEFAULT', isInstitutional)}
-                  </InstitutionalCard>
-                ) : (
-                  <div className="bg-card rounded-xl shadow-sm p-8">
-                    {renderBenefitList(visibility, 'investor-DEFAULT', isInstitutional)}
-                  </div>
-                )}
-              </div>
+                );
+              })}
 
               <div className="text-center mt-12">
-                <p className="text-xl mb-4">Prêt à bénéficier de tous ces avantages ?</p>
+                <p className="text-xl mb-4">{t('benefits.cta.title')}</p>
                 <Link to="/postuler" className={`inline-block px-6 py-3 text-white font-bold rounded-lg hover:opacity-90 transition-opacity ${
                   isInstitutional ? 'bg-gov-blue' : 'bg-ivoire-orange'
                 }`}>
-                  Postuler au label maintenant
+                  {t('benefits.cta.button')}
                 </Link>
               </div>
             </div>

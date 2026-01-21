@@ -3,22 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { useState } from "react";
-
-const quickFaqs = [
-  {
-    question: "Qu'est-ce que le Label Startup ?",
-    answer: "Le Label Startup est une reconnaissance officielle accordée par le gouvernement ivoirien aux entreprises innovantes du secteur numérique."
-  },
-  {
-    question: "Quels sont les critères d'éligibilité ?",
-    answer: "Une entreprise légalement constituée en Côte d'Ivoire, ayant moins de 8 ans d'existence, opérant dans le numérique avec un produit/service innovant."
-  },
-  {
-    question: "Quelle est la durée du Label ?",
-    answer: "Le Label est accordé pour une période de 5 ans, renouvelable sous conditions."
-  }
-];
+import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 /**
  * Carte FAQ compacte - utilisée dans le CTA final
@@ -26,15 +12,26 @@ const quickFaqs = [
  */
 const FaqCard = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { t } = useTranslation('pages');
+
+  // FAQ keys for iteration
+  const faqKeys = ['what', 'eligibility', 'duration'] as const;
+
+  const quickFaqs = useMemo(() => {
+    return faqKeys.map(key => ({
+      question: t(`faqCard.quickFaqs.${key}.question`),
+      answer: t(`faqCard.quickFaqs.${key}.answer`),
+    }));
+  }, [t]);
 
   return (
     <Card className="bg-card/95 backdrop-blur-sm border-border/50 shadow-xl">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center text-lg gap-2 text-foreground">
           <HelpCircle className="h-5 w-5 text-primary" aria-hidden="true" />
-          Questions fréquentes
+          {t('faqCard.title')}
         </CardTitle>
-        <CardDescription>Réponses rapides à vos questions</CardDescription>
+        <CardDescription>{t('faqCard.subtitle')}</CardDescription>
       </CardHeader>
       <CardContent>
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -55,12 +52,12 @@ const FaqCard = () => {
           <div className="flex gap-2 mt-4">
             <CollapsibleTrigger asChild>
               <Button variant="ghost" size="sm" className="flex-1">
-                {isOpen ? "Voir moins" : "Voir plus"}
+                {isOpen ? t('faqCard.showLess') : t('faqCard.showMore')}
               </Button>
             </CollapsibleTrigger>
             <Button variant="outline" size="sm" asChild className="flex-1">
               <Link to="/faq">
-                Toutes les FAQ
+                {t('faqCard.viewAll')}
               </Link>
             </Button>
           </div>

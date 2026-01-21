@@ -7,6 +7,7 @@ import frHome from './locales/fr/home.json';
 import frAuth from './locales/fr/auth.json';
 import frDashboard from './locales/fr/dashboard.json';
 import frSettings from './locales/fr/settings.json';
+import frPages from './locales/fr/pages.json';
 
 // English translations
 import enCommon from './locales/en/common.json';
@@ -14,6 +15,7 @@ import enHome from './locales/en/home.json';
 import enAuth from './locales/en/auth.json';
 import enDashboard from './locales/en/dashboard.json';
 import enSettings from './locales/en/settings.json';
+import enPages from './locales/en/pages.json';
 
 export const supportedLanguages = ['fr', 'en'] as const;
 export type SupportedLanguage = typeof supportedLanguages[number];
@@ -25,6 +27,7 @@ const resources = {
     auth: frAuth,
     dashboard: frDashboard,
     settings: frSettings,
+    pages: frPages,
   },
   en: {
     common: enCommon,
@@ -32,6 +35,7 @@ const resources = {
     auth: enAuth,
     dashboard: enDashboard,
     settings: enSettings,
+    pages: enPages,
   },
 };
 
@@ -42,7 +46,7 @@ i18n
     lng: 'fr', // Default language
     fallbackLng: 'fr',
     defaultNS: 'common',
-    ns: ['common', 'home', 'auth', 'dashboard', 'settings'],
+    ns: ['common', 'home', 'auth', 'dashboard', 'settings', 'pages'],
     interpolation: {
       escapeValue: false, // React already escapes values
     },

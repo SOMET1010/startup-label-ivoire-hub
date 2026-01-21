@@ -1,0 +1,258 @@
+{
+  "faq": {
+    "hero": {
+      "title": "Frequently Asked Questions",
+      "subtitle": "Everything you need to know about the Digital Startup Label in Côte d'Ivoire",
+      "searchPlaceholder": "Search for a question..."
+    },
+    "noResults": {
+      "title": "No results found",
+      "subtitle": "Try modifying your search"
+    },
+    "sidebar": {
+      "title": "Categories"
+    },
+    "categories": {
+      "label": {
+        "name": "The Startup Label",
+        "questions": {
+          "what": {
+            "question": "What is the Digital Startup Label in Côte d'Ivoire?",
+            "answer": "The Digital Startup Label is an official recognition granted by the Ivorian State to innovative companies operating in the digital sector. It aims to promote and support young companies developing innovative technological solutions."
+          },
+          "duration": {
+            "question": "What is the validity period of the Label?",
+            "answer": "The Digital Startup Label is granted for a period of 5 years from its date of attribution. Upon expiration, the startup must submit a renewal application demonstrating that it still meets the eligibility criteria."
+          },
+          "verify": {
+            "question": "How to verify if a company is labeled?",
+            "answer": "You can verify the status of a labeled startup by consulting the official directory available on our platform. Each labeled startup has a verified profile page with its unique labeling number."
+          }
+        }
+      },
+      "eligibility": {
+        "name": "Eligibility",
+        "questions": {
+          "criteria": {
+            "question": "What are the eligibility criteria?",
+            "answer": "To be eligible, your company must: be legally established in Côte d'Ivoire, be less than 8 years old, operate in the digital sector, offer an innovative product or service, have a scalable business model, and be majority-owned by Ivorians or residents."
+          },
+          "foreigners": {
+            "question": "Can foreign-owned companies apply?",
+            "answer": "Yes, but they must have their headquarters in Côte d'Ivoire and be majority-owned (more than 50%) by Ivorian citizens or permanent residents. Subsidiaries of foreign companies are not eligible."
+          },
+          "sectors": {
+            "question": "Which sectors are covered by the Label?",
+            "answer": "The Label covers all digital sectors: FinTech, EdTech, HealthTech, AgriTech, E-commerce, Artificial Intelligence, IoT, Cybersecurity, GreenTech, and many more. The key is that your solution relies on technological innovation."
+          }
+        }
+      },
+      "process": {
+        "name": "Application Process",
+        "questions": {
+          "apply": {
+            "question": "How to submit an application?",
+            "answer": "The application is done entirely online through our platform. You must create an account, complete the application form, attach the required documents (RCCM, statutes, business plan, etc.), then submit your file. You will receive a confirmation by email."
+          },
+          "timeline": {
+            "question": "How long does the evaluation process take?",
+            "answer": "The complete process generally takes 6 to 8 weeks: 1-2 weeks for document verification, 2-3 weeks for technical evaluation, and 2-3 weeks for committee deliberation. You are informed at each stage of your file's progress."
+          },
+          "rejection": {
+            "question": "What happens if my application is rejected?",
+            "answer": "In case of rejection, you will receive a detailed report explaining the reasons for the decision. You can submit a new application after 6 months, taking into account the recommendations made. Support can be offered to improve your file."
+          }
+        }
+      },
+      "benefits": {
+        "name": "Label Benefits",
+        "questions": {
+          "fiscal": {
+            "question": "What are the tax benefits?",
+            "answer": "Labeled startups benefit from significant tax exemptions: total exemption from corporate tax for 3 years, then 50% reduction for the following 2 years. They are also exempt from business license tax for 5 years."
+          },
+          "markets": {
+            "question": "How to access public contracts?",
+            "answer": "The Label gives you access to public contracts reserved for labeled startups. You also benefit from preferential treatment in contract allocation and reduced financial guarantee requirements."
+          },
+          "funding": {
+            "question": "What financing facilities are available?",
+            "answer": "Labeled startups have priority access to public investment funds, dedicated credit lines, and are connected to a network of local and international investors. Mentoring and training programs are also available."
+          }
+        }
+      },
+      "support": {
+        "name": "Support",
+        "questions": {
+          "mentoring": {
+            "question": "What support is offered to labeled startups?",
+            "answer": "Labeled startups benefit from a comprehensive support program: mentoring by experts, thematic training, access to coworking spaces, networking with other entrepreneurs, and participation in national and international events."
+          },
+          "community": {
+            "question": "Is there a community of labeled startups?",
+            "answer": "Yes, all labeled startups are part of an exclusive network that allows them to exchange, collaborate and develop synergies. Regular events are organized to promote networking and experience sharing."
+          },
+          "renewal": {
+            "question": "How to renew my Label?",
+            "answer": "6 months before your Label expires, you will receive a notification inviting you to initiate the renewal procedure. You will need to submit an activity report, demonstrate your growth and confirm that you still meet the eligibility criteria."
+          }
+        }
+      }
+    }
+  },
+  "criteria": {
+    "hero": {
+      "title": "Eligibility Criteria",
+      "subtitle": "Discover the requirements to obtain the Digital Startup Label in accordance with Law No. 2023-901 of November 23, 2023."
+    },
+    "quiz": {
+      "title": "Check your eligibility in 3 minutes",
+      "subtitle": "Answer a few questions to find out if your startup can obtain the Label",
+      "button": "Test my eligibility"
+    },
+    "sectionTitle": "To be eligible for the Startup Label, your company must:",
+    "items": {
+      "legal": {
+        "title": "Be a legally established company in Côte d'Ivoire",
+        "description": "Your company must be formally registered with the competent authorities (RCCM, DGI) and have its headquarters in Côte d'Ivoire."
+      },
+      "age": {
+        "title": "Be less than 8 years old",
+        "description": "The creation date of your company must not exceed 8 years at the time of the labeling application."
+      },
+      "innovative": {
+        "title": "Offer an innovative product or service in the digital sector",
+        "description": "Your solution must bring significant innovation and use digital technologies as the main lever."
+      },
+      "scalable": {
+        "title": "Have a scalable business model",
+        "description": "Your business model must demonstrate rapid growth potential without proportional cost increase."
+      },
+      "ownership": {
+        "title": "Be majority-owned by Ivorians or residents",
+        "description": "At least 51% of the company's capital must be held by Ivorian citizens or permanent residents."
+      },
+      "jobs": {
+        "title": "Contribute to local job creation",
+        "description": "Your company must demonstrate its commitment to job creation in Côte d'Ivoire."
+      }
+    },
+    "documents": {
+      "title": "Required documents:",
+      "items": [
+        "Labeling application form (available on the platform)",
+        "Trade and Credit Register (RCCM)",
+        "Company statutes",
+        "Tax status certificate",
+        "Business plan or pitch deck",
+        "CV of the founder(s)",
+        "Any other document justifying innovation (patents, certifications, etc.)"
+      ]
+    },
+    "buttons": {
+      "checkEligibility": "Check my eligibility",
+      "apply": "Apply for the label"
+    }
+  },
+  "benefits": {
+    "hero": {
+      "title": "Startup Label Benefits",
+      "subtitle": "Discover the exclusive benefits offered to labeled startups"
+    },
+    "sections": {
+      "fiscal": {
+        "title": "Tax Benefits",
+        "items": {
+          "taxExemption": {
+            "title": "Corporate tax exemption",
+            "description": "Total exemption during the first three years following label obtention, then 50% reduction for the following two years."
+          },
+          "patentExemption": {
+            "title": "Business license exemption",
+            "description": "Total exemption from business license payment for five years from label obtention."
+          },
+          "salaryTax": {
+            "title": "Salary tax exemption",
+            "description": "Reduction of social and employer charges to promote job creation."
+          }
+        }
+      },
+      "publicMarkets": {
+        "title": "Access to Public Contracts",
+        "items": {
+          "reserved": {
+            "title": "Reserved contracts",
+            "description": "Access to public contracts specifically reserved for labeled startups."
+          },
+          "preference": {
+            "title": "National preference",
+            "description": "Preferential treatment in the allocation of public contracts at equivalent competencies."
+          },
+          "guarantees": {
+            "title": "Guarantee reduction",
+            "description": "Reduction of financial guarantee requirements for labeled startups bidding on public tenders."
+          }
+        }
+      },
+      "funding": {
+        "title": "Funding and Support",
+        "items": {
+          "priority": {
+            "title": "Priority access to public funds",
+            "description": "Priority access to public investment funds and government grant programs."
+          },
+          "investors": {
+            "title": "Connection with investors",
+            "description": "Facilitated access to local and international investor networks through the platform."
+          },
+          "mentoring": {
+            "title": "Mentoring and training",
+            "description": "Access to mentoring and training programs specially designed for labeled startups."
+          }
+        }
+      },
+      "visibility": {
+        "title": "Visibility and Networking",
+        "items": {
+          "directory": {
+            "title": "Listing in the official directory",
+            "description": "Presence in the national directory of labeled startups with a detailed presentation page."
+          },
+          "events": {
+            "title": "Participation in national events",
+            "description": "Privileged invitations to official events, trade shows and business missions."
+          },
+          "community": {
+            "title": "Community and network",
+            "description": "Integration into a community of innovative entrepreneurs to exchange ideas and develop partnerships."
+          }
+        }
+      }
+    },
+    "cta": {
+      "title": "Ready to benefit from all these advantages?",
+      "button": "Apply for the label now"
+    }
+  },
+  "faqCard": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Quick answers to your questions",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "viewAll": "All FAQs",
+    "quickFaqs": {
+      "what": {
+        "question": "What is the Startup Label?",
+        "answer": "The Startup Label is an official recognition granted by the Ivorian government to innovative companies in the digital sector."
+      },
+      "eligibility": {
+        "question": "What are the eligibility criteria?",
+        "answer": "A company legally established in Côte d'Ivoire, less than 8 years old, operating in digital with an innovative product/service."
+      },
+      "duration": {
+        "question": "What is the Label duration?",
+        "answer": "The Label is granted for a period of 5 years, renewable under conditions."
+      }
+    }
+  }
+}

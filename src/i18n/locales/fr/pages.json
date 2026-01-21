@@ -1,0 +1,258 @@
+{
+  "faq": {
+    "hero": {
+      "title": "Foire Aux Questions",
+      "subtitle": "Tout ce que vous devez savoir sur le Label Startup Numérique en Côte d'Ivoire",
+      "searchPlaceholder": "Rechercher une question..."
+    },
+    "noResults": {
+      "title": "Aucun résultat trouvé",
+      "subtitle": "Essayez de modifier votre recherche"
+    },
+    "sidebar": {
+      "title": "Catégories"
+    },
+    "categories": {
+      "label": {
+        "name": "Le Label Startup",
+        "questions": {
+          "what": {
+            "question": "Qu'est-ce que le Label Startup Numérique en Côte d'Ivoire ?",
+            "answer": "Le Label Startup Numérique est une reconnaissance officielle accordée par l'État ivoirien aux entreprises innovantes opérant dans le secteur du numérique. Il vise à promouvoir et soutenir les jeunes entreprises qui développent des solutions technologiques innovantes."
+          },
+          "duration": {
+            "question": "Quelle est la durée de validité du Label ?",
+            "answer": "Le Label Startup Numérique est accordé pour une durée de 5 ans à compter de sa date d'attribution. À l'expiration de cette période, la startup doit soumettre une demande de renouvellement en démontrant qu'elle remplit toujours les critères d'éligibilité."
+          },
+          "verify": {
+            "question": "Comment vérifier si une entreprise est labellisée ?",
+            "answer": "Vous pouvez vérifier le statut d'une startup labellisée en consultant l'annuaire officiel disponible sur notre plateforme. Chaque startup labellisée dispose d'une page de profil vérifiée avec son numéro de labellisation unique."
+          }
+        }
+      },
+      "eligibility": {
+        "name": "Éligibilité",
+        "questions": {
+          "criteria": {
+            "question": "Quels sont les critères d'éligibilité ?",
+            "answer": "Pour être éligible, votre entreprise doit : être légalement constituée en Côte d'Ivoire, avoir moins de 8 ans d'existence, opérer dans le secteur numérique, proposer un produit ou service innovant, avoir un modèle économique scalable, et être majoritairement détenue par des Ivoiriens ou des résidents."
+          },
+          "foreigners": {
+            "question": "Les entreprises à capitaux étrangers peuvent-elles postuler ?",
+            "answer": "Oui, mais elles doivent avoir leur siège social en Côte d'Ivoire et être majoritairement détenues (plus de 50%) par des citoyens ivoiriens ou des résidents permanents. Les filiales de sociétés étrangères ne sont pas éligibles."
+          },
+          "sectors": {
+            "question": "Quels secteurs sont concernés par le Label ?",
+            "answer": "Le Label concerne tous les secteurs du numérique : FinTech, EdTech, HealthTech, AgriTech, E-commerce, Intelligence Artificielle, IoT, Cybersécurité, GreenTech, et bien d'autres. L'essentiel est que votre solution repose sur une innovation technologique."
+          }
+        }
+      },
+      "process": {
+        "name": "Processus de candidature",
+        "questions": {
+          "apply": {
+            "question": "Comment soumettre une candidature ?",
+            "answer": "La candidature se fait entièrement en ligne via notre plateforme. Vous devez créer un compte, compléter le formulaire de candidature, joindre les documents requis (RCCM, statuts, business plan, etc.), puis soumettre votre dossier. Vous recevrez une confirmation par email."
+          },
+          "timeline": {
+            "question": "Combien de temps prend le processus d'évaluation ?",
+            "answer": "Le processus complet prend généralement 6 à 8 semaines : 1-2 semaines pour la vérification des documents, 2-3 semaines pour l'évaluation technique, et 2-3 semaines pour la délibération du comité. Vous êtes informé à chaque étape de l'avancement de votre dossier."
+          },
+          "rejection": {
+            "question": "Que se passe-t-il si ma candidature est rejetée ?",
+            "answer": "En cas de rejet, vous recevrez un rapport détaillé expliquant les motifs de la décision. Vous pouvez soumettre une nouvelle candidature après 6 mois, en tenant compte des recommandations formulées. Un accompagnement peut vous être proposé pour améliorer votre dossier."
+          }
+        }
+      },
+      "benefits": {
+        "name": "Avantages du Label",
+        "questions": {
+          "fiscal": {
+            "question": "Quels sont les avantages fiscaux ?",
+            "answer": "Les startups labellisées bénéficient d'exonérations fiscales significatives : exonération totale de l'impôt sur les bénéfices pendant 3 ans, puis réduction de 50% les 2 années suivantes. Elles sont également exonérées de la patente pendant 5 ans."
+          },
+          "markets": {
+            "question": "Comment accéder aux marchés publics ?",
+            "answer": "Le Label vous donne accès à des marchés publics réservés aux startups labellisées. Vous bénéficiez également d'un traitement préférentiel dans l'attribution des marchés et d'un allègement des exigences de garanties financières."
+          },
+          "funding": {
+            "question": "Quelles facilités de financement sont disponibles ?",
+            "answer": "Les startups labellisées ont un accès prioritaire aux fonds d'investissement publics, aux lignes de crédit dédiées, et sont mises en relation avec un réseau d'investisseurs locaux et internationaux. Des programmes de mentoring et de formation sont également disponibles."
+          }
+        }
+      },
+      "support": {
+        "name": "Accompagnement",
+        "questions": {
+          "mentoring": {
+            "question": "Quel accompagnement est proposé aux startups labellisées ?",
+            "answer": "Les startups labellisées bénéficient d'un programme d'accompagnement complet : mentoring par des experts, formations thématiques, accès à des espaces de coworking, mise en réseau avec d'autres entrepreneurs, et participation à des événements nationaux et internationaux."
+          },
+          "community": {
+            "question": "Existe-t-il une communauté de startups labellisées ?",
+            "answer": "Oui, toutes les startups labellisées font partie d'un réseau exclusif qui leur permet d'échanger, de collaborer et de développer des synergies. Des événements réguliers sont organisés pour favoriser le networking et le partage d'expériences."
+          },
+          "renewal": {
+            "question": "Comment renouveler mon Label ?",
+            "answer": "6 mois avant l'expiration de votre Label, vous recevrez une notification vous invitant à initier la procédure de renouvellement. Vous devrez soumettre un rapport d'activité, démontrer votre croissance et confirmer que vous respectez toujours les critères d'éligibilité."
+          }
+        }
+      }
+    }
+  },
+  "criteria": {
+    "hero": {
+      "title": "Critères d'éligibilité",
+      "subtitle": "Découvrez les conditions requises pour obtenir le Label Startup numérique conformément à la Loi n°2023-901 du 23 novembre 2023."
+    },
+    "quiz": {
+      "title": "Vérifiez votre éligibilité en 3 minutes",
+      "subtitle": "Répondez à quelques questions pour savoir si votre startup peut obtenir le Label",
+      "button": "Tester mon éligibilité"
+    },
+    "sectionTitle": "Pour être éligible au Label Startup, votre entreprise doit :",
+    "items": {
+      "legal": {
+        "title": "Être une entreprise légalement constituée en Côte d'Ivoire",
+        "description": "Votre entreprise doit être formellement enregistrée auprès des autorités compétentes (RCCM, DGI) et avoir son siège social en Côte d'Ivoire."
+      },
+      "age": {
+        "title": "Avoir moins de 8 ans d'existence",
+        "description": "La date de création de votre entreprise ne doit pas dépasser 8 ans au moment de la demande de labellisation."
+      },
+      "innovative": {
+        "title": "Proposer un produit ou service innovant dans le secteur numérique",
+        "description": "Votre solution doit apporter une innovation significative et utiliser les technologies numériques comme levier principal."
+      },
+      "scalable": {
+        "title": "Avoir un modèle économique scalable",
+        "description": "Votre business model doit démontrer un potentiel de croissance rapide sans augmentation proportionnelle des coûts."
+      },
+      "ownership": {
+        "title": "Être majoritairement détenue par des Ivoiriens ou résidents",
+        "description": "Au moins 51% du capital de l'entreprise doit être détenu par des citoyens ivoiriens ou des résidents permanents."
+      },
+      "jobs": {
+        "title": "Contribuer à la création d'emplois locaux",
+        "description": "Votre entreprise doit démontrer son engagement dans la création d'emplois en Côte d'Ivoire."
+      }
+    },
+    "documents": {
+      "title": "Documents requis :",
+      "items": [
+        "Formulaire de demande de labellisation (disponible sur la plateforme)",
+        "Registre de Commerce et du Crédit Mobilier (RCCM)",
+        "Statuts de l'entreprise",
+        "Attestation de situation fiscale",
+        "Business plan ou pitch deck",
+        "CV du ou des fondateurs",
+        "Tout autre document justifiant l'innovation (brevets, certifications, etc.)"
+      ]
+    },
+    "buttons": {
+      "checkEligibility": "Vérifier mon éligibilité",
+      "apply": "Postuler au label"
+    }
+  },
+  "benefits": {
+    "hero": {
+      "title": "Avantages du Label Startup",
+      "subtitle": "Découvrez les bénéfices exclusifs offerts aux startups labellisées"
+    },
+    "sections": {
+      "fiscal": {
+        "title": "Avantages Fiscaux",
+        "items": {
+          "taxExemption": {
+            "title": "Exonération de l'impôt sur les bénéfices",
+            "description": "Exonération totale pendant les trois premières années suivant l'obtention du label, puis réduction de 50% pendant les deux années suivantes."
+          },
+          "patentExemption": {
+            "title": "Exonération de la contribution des patentes",
+            "description": "Dispense totale du paiement de la patente pendant cinq ans à compter de l'obtention du label."
+          },
+          "salaryTax": {
+            "title": "Exonération de taxes sur les salaires",
+            "description": "Réduction des charges sociales et patronales pour favoriser la création d'emplois."
+          }
+        }
+      },
+      "publicMarkets": {
+        "title": "Accès aux Marchés Publics",
+        "items": {
+          "reserved": {
+            "title": "Marchés réservés",
+            "description": "Accès à des marchés publics spécifiquement réservés aux startups labellisées."
+          },
+          "preference": {
+            "title": "Préférence nationale",
+            "description": "Traitement préférentiel dans l'attribution des marchés publics à compétences équivalentes."
+          },
+          "guarantees": {
+            "title": "Allègement des garanties",
+            "description": "Réduction des exigences de garanties financières pour les startups labellisées soumissionnant aux appels d'offres publics."
+          }
+        }
+      },
+      "funding": {
+        "title": "Financement et Accompagnement",
+        "items": {
+          "priority": {
+            "title": "Accès prioritaire aux fonds publics",
+            "description": "Priorité dans l'accès aux fonds d'investissements publics et aux programmes de subventions gouvernementales."
+          },
+          "investors": {
+            "title": "Mise en relation avec les investisseurs",
+            "description": "Accès facilité aux réseaux d'investisseurs locaux et internationaux à travers la plateforme."
+          },
+          "mentoring": {
+            "title": "Mentoring et formation",
+            "description": "Accès à des programmes de mentoring et de formation spécialement conçus pour les startups labellisées."
+          }
+        }
+      },
+      "visibility": {
+        "title": "Visibilité et Réseautage",
+        "items": {
+          "directory": {
+            "title": "Référencement dans l'annuaire officiel",
+            "description": "Présence dans l'annuaire national des startups labellisées avec une fiche détaillée de présentation."
+          },
+          "events": {
+            "title": "Participation aux événements nationaux",
+            "description": "Invitations privilégiées aux événements officiels, salons professionnels et missions économiques."
+          },
+          "community": {
+            "title": "Communauté et réseau",
+            "description": "Intégration dans une communauté d'entrepreneurs innovants pour échanger des idées et développer des partenariats."
+          }
+        }
+      }
+    },
+    "cta": {
+      "title": "Prêt à bénéficier de tous ces avantages ?",
+      "button": "Postuler au label maintenant"
+    }
+  },
+  "faqCard": {
+    "title": "Questions fréquentes",
+    "subtitle": "Réponses rapides à vos questions",
+    "showMore": "Voir plus",
+    "showLess": "Voir moins",
+    "viewAll": "Toutes les FAQ",
+    "quickFaqs": {
+      "what": {
+        "question": "Qu'est-ce que le Label Startup ?",
+        "answer": "Le Label Startup est une reconnaissance officielle accordée par le gouvernement ivoirien aux entreprises innovantes du secteur numérique."
+      },
+      "eligibility": {
+        "question": "Quels sont les critères d'éligibilité ?",
+        "answer": "Une entreprise légalement constituée en Côte d'Ivoire, ayant moins de 8 ans d'existence, opérant dans le numérique avec un produit/service innovant."
+      },
+      "duration": {
+        "question": "Quelle est la durée du Label ?",
+        "answer": "Le Label est accordé pour une période de 5 ans, renouvelable sous conditions."
+      }
+    }
+  }
+}
