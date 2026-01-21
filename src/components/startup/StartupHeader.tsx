@@ -1,8 +1,8 @@
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { 
   Menu, 
-  Bell, 
   User, 
   LogOut, 
   Settings,
@@ -19,27 +19,34 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { useAuth } from "@/contexts/AuthContext";
 
-const ROUTE_LABELS: Record<string, string> = {
-  "/startup": "Tableau de bord",
-  "/startup/dossier": "Mon dossier",
-  "/startup/messages": "Messages",
-  "/startup/opportunites": "Opportunités",
-  "/startup/reseau": "Réseau",
-  "/startup/ressources": "Ressources",
-  "/startup/support": "Support",
-  "/startup/profile": "Mon compte",
+const ROUTE_KEYS: Record<string, string> = {
+  "/startup": "header.routes.dashboard",
+  "/startup/dossier": "header.routes.application",
+  "/startup/messages": "header.routes.messages",
+  "/startup/opportunites": "header.routes.opportunities",
+  "/startup/reseau": "header.routes.network",
+  "/startup/ressources": "header.routes.resources",
+  "/startup/support": "header.routes.support",
+  "/startup/profile": "header.routes.profile",
+  "/startup/settings": "header.routes.settings",
+  "/startup/events": "header.routes.events",
 };
 
 export function StartupHeader() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, profile, signOut } = useAuth();
+  const { t } = useTranslation('dashboard');
 
-  const currentLabel = ROUTE_LABELS[location.pathname] || "Espace Startup";
+  const getRouteLabel = (path: string): string => {
+    const key = ROUTE_KEYS[path];
+    return key ? t(key) : t('header.breadcrumb.startup');
+  };
+
+  const currentLabel = getRouteLabel(location.pathname);
 
   const getInitials = (name?: string | null) => {
     if (!name) return "ST";
@@ -58,11 +65,11 @@ export function StartupHeader() {
 
   const getBreadcrumbs = () => {
     const parts = location.pathname.split("/").filter(Boolean);
-    const breadcrumbs = [{ label: "Espace Startup", href: "/startup" }];
+    const breadcrumbs = [{ label: t('header.breadcrumb.startup'), href: "/startup" }];
     
     if (parts.length > 1) {
       const currentPath = "/" + parts.join("/");
-      const label = ROUTE_LABELS[currentPath];
+      const label = getRouteLabel(currentPath);
       if (label && currentPath !== "/startup") {
         breadcrumbs.push({ label, href: currentPath });
       }
@@ -125,7 +132,7 @@ export function StartupHeader() {
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium leading-none">
-                  {profile?.full_name || "Utilisateur"}
+                  {profile?.full_name || t('header.userMenu.defaultUser')}
                 </p>
                 <p className="text-xs leading-none text-muted-foreground">
                   {user?.email}
@@ -135,16 +142,16 @@ export function StartupHeader() {
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => navigate("/startup/profile")}>
               <User className="mr-2 h-4 w-4" />
-              <span>Mon profil</span>
+              <span>{t('header.userMenu.profile')}</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/startup")}>
+            <DropdownMenuItem onClick={() => navigate("/startup/settings")}>
               <Settings className="mr-2 h-4 w-4" />
-              <span>Paramètres</span>
+              <span>{t('header.userMenu.settings')}</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
               <LogOut className="mr-2 h-4 w-4" />
-              <span>Déconnexion</span>
+              <span>{t('header.userMenu.logout')}</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

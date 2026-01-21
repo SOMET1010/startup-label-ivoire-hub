@@ -14,13 +14,52 @@
     "status": {
       "labeled": "Labellisée",
       "inProgress": "En cours"
-    }
+    },
+    "labelRequired": "Label requis",
+    "backToHome": "Retour à l'accueil",
+    "defaultStartupName": "Ma Startup"
   },
   "header": {
     "welcome": "Bienvenue",
     "breadcrumb": {
       "startup": "Espace Startup"
+    },
+    "routes": {
+      "dashboard": "Tableau de bord",
+      "application": "Mon dossier",
+      "messages": "Messages",
+      "opportunities": "Opportunités",
+      "network": "Réseau",
+      "resources": "Ressources",
+      "support": "Support",
+      "profile": "Mon compte",
+      "settings": "Paramètres",
+      "events": "Événements"
+    },
+    "userMenu": {
+      "defaultUser": "Utilisateur",
+      "profile": "Mon profil",
+      "settings": "Paramètres",
+      "logout": "Déconnexion"
     }
+  },
+  "timeline": {
+    "steps": {
+      "draft": "Brouillon",
+      "pending": "Soumission",
+      "verification": "Vérification",
+      "underReview": "Évaluation",
+      "approved": "Décision"
+    },
+    "inProgress": "En cours",
+    "rejected": "Rejetée",
+    "expired": "Expirée",
+    "incomplete": "Incomplet",
+    "estimatedDate": "Est. {{date}}",
+    "submittedDate": "Soumis le {{date}}",
+    "rejectionMessage": "Votre candidature n'a pas été retenue",
+    "expirationMessage": "Votre label a expiré",
+    "incompleteMessage": "Documents manquants à fournir"
   },
   "dashboard": {
     "title": "Tableau de bord",

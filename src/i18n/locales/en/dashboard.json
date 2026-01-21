@@ -14,13 +14,52 @@
     "status": {
       "labeled": "Labeled",
       "inProgress": "In progress"
-    }
+    },
+    "labelRequired": "Label required",
+    "backToHome": "Back to home",
+    "defaultStartupName": "My Startup"
   },
   "header": {
     "welcome": "Welcome",
     "breadcrumb": {
       "startup": "Startup Space"
+    },
+    "routes": {
+      "dashboard": "Dashboard",
+      "application": "My application",
+      "messages": "Messages",
+      "opportunities": "Opportunities",
+      "network": "Network",
+      "resources": "Resources",
+      "support": "Support",
+      "profile": "My account",
+      "settings": "Settings",
+      "events": "Events"
+    },
+    "userMenu": {
+      "defaultUser": "User",
+      "profile": "My profile",
+      "settings": "Settings",
+      "logout": "Log out"
     }
+  },
+  "timeline": {
+    "steps": {
+      "draft": "Draft",
+      "pending": "Submission",
+      "verification": "Verification",
+      "underReview": "Evaluation",
+      "approved": "Decision"
+    },
+    "inProgress": "In progress",
+    "rejected": "Rejected",
+    "expired": "Expired",
+    "incomplete": "Incomplete",
+    "estimatedDate": "Est. {{date}}",
+    "submittedDate": "Submitted on {{date}}",
+    "rejectionMessage": "Your application was not accepted",
+    "expirationMessage": "Your label has expired",
+    "incompleteMessage": "Missing documents to provide"
   },
   "dashboard": {
     "title": "Dashboard",
