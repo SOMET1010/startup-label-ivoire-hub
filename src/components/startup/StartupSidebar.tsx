@@ -153,14 +153,14 @@ export function StartupSidebar() {
                         isDisabled && "opacity-50 cursor-not-allowed"
                       )}
                     >
-                      {isDisabled ? (
+                    {isDisabled ? (
                         <div className="flex items-center gap-3 px-3 py-2">
                           <item.icon className="w-5 h-5" />
                           {!isCollapsed && (
                             <>
                               <span>{label}</span>
                               <Badge variant="muted" className="ml-auto text-xs">
-                                Label requis
+                                {t('sidebar.labelRequired')}
                               </Badge>
                             </>
                           )}
@@ -200,10 +200,10 @@ export function StartupSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip={isCollapsed ? "Retour à l'accueil" : undefined}>
+                <SidebarMenuButton asChild tooltip={isCollapsed ? t('sidebar.backToHome') : undefined}>
                   <Link to="/" className="flex items-center gap-3 text-muted-foreground hover:text-foreground">
                     <Home className="w-5 h-5" />
-                    {!isCollapsed && <span>Retour à l'accueil</span>}
+                    {!isCollapsed && <span>{t('sidebar.backToHome')}</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -225,7 +225,7 @@ export function StartupSidebar() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">
-                  {startup?.name || "Ma Startup"}
+                  {startup?.name || t('sidebar.defaultStartupName')}
                 </p>
                 <Badge variant={status.variant} className="mt-1 text-xs">
                   {status.label}
