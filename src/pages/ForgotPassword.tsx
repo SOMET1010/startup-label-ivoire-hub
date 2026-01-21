@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslation } from "react-i18next";
 import { Mail, ArrowLeft, CheckCircle, Rocket, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,7 @@ const forgotPasswordSchema = z.object({
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
 export default function ForgotPassword() {
+  const { t } = useTranslation('auth');
   const [isLoading, setIsLoading] = useState(false);
   const [isEmailSent, setIsEmailSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +32,7 @@ export default function ForgotPassword() {
 
   const onSubmit = async (data: ForgotPasswordFormData) => {
     if (!supabase) {
-      setError("Service non disponible. Veuillez réessayer plus tard.");
+      setError(t('errors.serviceUnavailable'));
       return;
     }
 
@@ -43,18 +45,16 @@ export default function ForgotPassword() {
       });
 
       if (resetError) {
-        // Pour des raisons de sécurité, on ne révèle pas si l'email existe ou non
         if (resetError.message.includes("rate limit")) {
-          setError("Trop de tentatives. Veuillez réessayer dans quelques minutes.");
+          setError(t('errors.rateLimited'));
         } else {
-          // On affiche quand même le succès pour ne pas révéler si l'email existe
           setIsEmailSent(true);
         }
       } else {
         setIsEmailSent(true);
       }
     } catch (err) {
-      setError("Une erreur est survenue. Veuillez réessayer.");
+      setError(t('errors.generic'));
     } finally {
       setIsLoading(false);
     }
@@ -76,7 +76,7 @@ export default function ForgotPassword() {
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Retour à la connexion
+            {t('forgotPassword.backToLogin')}
           </Link>
         </div>
       </header>
@@ -99,12 +99,12 @@ export default function ForgotPassword() {
                 )}
               </div>
               <CardTitle className="text-2xl">
-                {isEmailSent ? "Email envoyé !" : "Mot de passe oublié ?"}
+                {isEmailSent ? t('forgotPassword.titleSuccess') : t('forgotPassword.title')}
               </CardTitle>
               <CardDescription className="text-base">
                 {isEmailSent 
-                  ? "Vérifiez votre boîte de réception"
-                  : "Entrez votre adresse email pour recevoir un lien de récupération"
+                  ? t('forgotPassword.subtitleSuccess')
+                  : t('forgotPassword.subtitle')
                 }
               </CardDescription>
             </CardHeader>
@@ -119,13 +119,13 @@ export default function ForgotPassword() {
                   <Alert className="bg-primary/5 border-primary/20">
                     <CheckCircle className="h-4 w-4 text-primary" />
                     <AlertDescription className="text-sm">
-                      Si un compte existe avec cette adresse email, vous recevrez un lien de récupération dans quelques minutes.
+                      {t('forgotPassword.successAlert')}
                     </AlertDescription>
                   </Alert>
                   
                   <div className="text-sm text-muted-foreground space-y-2">
-                    <p>📧 Vérifiez également votre dossier spam</p>
-                    <p>⏱️ Le lien expire dans 1 heure</p>
+                    <p>📧 {t('forgotPassword.checkSpam')}</p>
+                    <p>⏱️ {t('forgotPassword.linkExpires')}</p>
                   </div>
 
                   <div className="pt-4 space-y-3">
@@ -137,12 +137,12 @@ export default function ForgotPassword() {
                         form.reset();
                       }}
                     >
-                      Renvoyer un email
+                      {t('forgotPassword.resendEmail')}
                     </Button>
                     <Link to="/auth" className="block">
                       <Button variant="ghost" className="w-full">
                         <ArrowLeft className="w-4 h-4 mr-2" />
-                        Retour à la connexion
+                        {t('forgotPassword.backToLogin')}
                       </Button>
                     </Link>
                   </div>
@@ -161,11 +161,11 @@ export default function ForgotPassword() {
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Adresse email</FormLabel>
+                          <FormLabel>{t('forgotPassword.email')}</FormLabel>
                           <FormControl>
                             <Input
                               type="email"
-                              placeholder="votre@email.com"
+                              placeholder={t('forgotPassword.emailPlaceholder')}
                               autoComplete="email"
                               disabled={isLoading}
                               {...field}
@@ -184,12 +184,12 @@ export default function ForgotPassword() {
                       {isLoading ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Envoi en cours...
+                          {t('forgotPassword.submitting')}
                         </>
                       ) : (
                         <>
                           <Mail className="w-4 h-4 mr-2" />
-                          Envoyer le lien de récupération
+                          {t('forgotPassword.sendButton')}
                         </>
                       )}
                     </Button>
@@ -200,7 +200,7 @@ export default function ForgotPassword() {
                         className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
                       >
                         <ArrowLeft className="w-3 h-3" />
-                        Retour à la connexion
+                        {t('forgotPassword.backToLogin')}
                       </Link>
                     </div>
                   </form>
@@ -213,7 +213,7 @@ export default function ForgotPassword() {
 
       {/* Footer */}
       <footer className="p-4 text-center text-sm text-muted-foreground">
-        <p>© 2025 Label Startup Côte d'Ivoire. Tous droits réservés.</p>
+        <p>{t('common.footer')}</p>
       </footer>
     </div>
   );

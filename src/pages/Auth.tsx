@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +40,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 type SignupFormData = z.infer<typeof signupSchema>;
 
 export default function Auth() {
+  const { t } = useTranslation('auth');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -98,7 +100,7 @@ export default function Auth() {
         firstName: data.firstName,
         lastName: data.lastName,
       });
-      setSuccess("Compte créé avec succès ! Vous pouvez maintenant vous connecter.");
+      setSuccess(t('signup.successMessage'));
       setShowSignup(false);
       signupForm.reset();
     } catch (err: any) {
@@ -113,22 +115,22 @@ export default function Auth() {
     const message = err?.message?.toLowerCase() || "";
     
     if (message.includes("invalid login credentials")) {
-      return "Email ou mot de passe incorrect";
+      return t('errors.invalidCredentials');
     }
     if (message.includes("email already registered") || message.includes("user already registered")) {
-      return "Cette adresse email est déjà utilisée";
+      return t('errors.emailInUse');
     }
     if (message.includes("invalid email")) {
-      return "Adresse email invalide";
+      return t('errors.invalidEmail');
     }
     if (message.includes("weak password")) {
-      return "Le mot de passe est trop faible";
+      return t('errors.weakPassword');
     }
     if (message.includes("network") || message.includes("fetch")) {
-      return "Erreur de connexion. Vérifiez votre connexion internet.";
+      return t('errors.networkError');
     }
     
-    return err?.message || "Une erreur est survenue. Veuillez réessayer.";
+    return err?.message || t('errors.generic');
   };
 
   return (
@@ -151,7 +153,7 @@ export default function Auth() {
           className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
         >
           <ArrowLeft className="w-4 h-4" />
-          Retour à l'accueil
+          {t('common.backToHome')}
         </Link>
       </header>
       
@@ -182,11 +184,11 @@ export default function Auth() {
             <CardContent className="pt-8 pb-6 px-8">
               <div className="text-center mb-6">
                 <h1 className="text-2xl font-bold text-foreground mb-2">
-                  Connexion à la plateforme
+                  {t('common.platformTitle')}
                 </h1>
                 <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                   <Lock className="w-4 h-4" />
-                  <span>Plateforme officielle – données sécurisées</span>
+                  <span>{t('common.securityBadge')}</span>
                 </div>
               </div>
 
@@ -203,7 +205,7 @@ export default function Auth() {
                               <Input 
                                 {...field} 
                                 type="email" 
-                                placeholder="Adresse email"
+                                placeholder={t('login.emailPlaceholder')}
                                 className="h-12 bg-background border-border"
                                 disabled={isLoading}
                               />
@@ -222,7 +224,7 @@ export default function Auth() {
                               <Input 
                                 {...field} 
                                 type="password" 
-                                placeholder="Mot de passe"
+                                placeholder={t('login.passwordPlaceholder')}
                                 className="h-12 bg-background border-border"
                                 disabled={isLoading}
                               />
@@ -246,7 +248,7 @@ export default function Auth() {
                                 />
                               </FormControl>
                               <label className="text-sm text-muted-foreground cursor-pointer">
-                                Se souvenir de moi
+                                {t('login.rememberMe')}
                               </label>
                             </FormItem>
                           )}
@@ -256,7 +258,7 @@ export default function Auth() {
                           to="/mot-de-passe-oublie" 
                           className="text-sm text-primary hover:underline"
                         >
-                          Mot de passe oublié ?
+                          {t('login.forgotPassword')}
                         </Link>
                       </div>
 
@@ -268,10 +270,10 @@ export default function Auth() {
                         {isLoading ? (
                           <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Connexion...
+                            {t('login.submitting')}
                           </>
                         ) : (
-                          "Se connecter"
+                          t('login.submit')
                         )}
                       </Button>
                     </form>
@@ -282,7 +284,7 @@ export default function Auth() {
                     className="w-full h-12 mt-3 font-medium border-border"
                     onClick={() => { setShowSignup(true); setError(null); }}
                   >
-                    Créer un compte startup
+                    {t('signup.createAccount')}
                   </Button>
                 </>
               ) : (
@@ -298,7 +300,7 @@ export default function Auth() {
                               <FormControl>
                                 <Input 
                                   {...field} 
-                                  placeholder="Prénom"
+                                  placeholder={t('signup.firstNamePlaceholder')}
                                   className="h-12 bg-background border-border"
                                   disabled={isLoading}
                                 />
@@ -316,7 +318,7 @@ export default function Auth() {
                               <FormControl>
                                 <Input 
                                   {...field} 
-                                  placeholder="Nom"
+                                  placeholder={t('signup.lastNamePlaceholder')}
                                   className="h-12 bg-background border-border"
                                   disabled={isLoading}
                                 />
@@ -336,7 +338,7 @@ export default function Auth() {
                               <Input 
                                 {...field} 
                                 type="email" 
-                                placeholder="Adresse email"
+                                placeholder={t('signup.emailPlaceholder')}
                                 className="h-12 bg-background border-border"
                                 disabled={isLoading}
                               />
@@ -355,14 +357,14 @@ export default function Auth() {
                               <Input 
                                 {...field} 
                                 type="password" 
-                                placeholder="Mot de passe"
+                                placeholder={t('signup.passwordPlaceholder')}
                                 className="h-12 bg-background border-border"
                                 disabled={isLoading}
                               />
                             </FormControl>
                             <FormMessage />
                             <p className="text-xs text-muted-foreground">
-                              8 caractères min., 1 majuscule, 1 minuscule, 1 chiffre
+                              {t('signup.passwordHint')}
                             </p>
                           </FormItem>
                         )}
@@ -377,7 +379,7 @@ export default function Auth() {
                               <Input 
                                 {...field} 
                                 type="password" 
-                                placeholder="Confirmer le mot de passe"
+                                placeholder={t('signup.confirmPasswordPlaceholder')}
                                 className="h-12 bg-background border-border"
                                 disabled={isLoading}
                               />
@@ -395,10 +397,10 @@ export default function Auth() {
                         {isLoading ? (
                           <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Création...
+                            {t('signup.submitting')}
                           </>
                         ) : (
-                          "Créer mon compte"
+                          t('signup.submit')
                         )}
                       </Button>
                     </form>
@@ -409,7 +411,7 @@ export default function Auth() {
                     className="w-full h-12 mt-3 font-medium border-border"
                     onClick={() => { setShowSignup(false); setError(null); }}
                   >
-                    J'ai déjà un compte
+                    {t('signup.hasAccountButton')}
                   </Button>
                 </>
               )}
@@ -420,16 +422,16 @@ export default function Auth() {
           <Card className="mt-4 border shadow-lg bg-card">
             <CardContent className="py-6 px-8 text-center">
               <h2 className="text-lg font-semibold text-foreground mb-2">
-                Vous êtes une startup ?
+                {t('startupCTA.title')}
               </h2>
               <p className="text-sm text-muted-foreground mb-4">
-                Créez un compte pour déposer votre dossier de labellisation.
+                {t('startupCTA.description')}
               </p>
               <Button 
                 className="bg-accent hover:bg-accent/90 text-accent-foreground font-medium px-6"
                 onClick={() => { setShowSignup(true); setError(null); }}
               >
-                Inscrire ma startup
+                {t('startupCTA.button')}
               </Button>
             </CardContent>
           </Card>
@@ -437,11 +439,11 @@ export default function Auth() {
           {/* Footer Links */}
           <div className="text-center mt-6 text-sm text-muted-foreground">
             <Link to="/mentions-legales" className="hover:text-primary transition-colors">
-              Conditions d'utilisation
+              {t('common.termsOfUse')}
             </Link>
             <span className="mx-2">·</span>
             <Link to="/confidentialite" className="hover:text-primary transition-colors">
-              Politique de confidentialité
+              {t('common.privacyPolicy')}
             </Link>
           </div>
         </motion.div>
