@@ -11,6 +11,7 @@ import {
   Home,
   Award,
   ChevronRight,
+  Settings,
 } from "lucide-react";
 import {
   Sidebar,
@@ -73,6 +74,12 @@ const STARTUP_NAV_ITEMS = [
     icon: HelpCircle, 
     label: "Support", 
     href: "/startup/support",
+    labelOnly: false,
+  },
+  { 
+    icon: Settings, 
+    label: "Paramètres", 
+    href: "/startup/settings",
     labelOnly: false,
   },
 ];
