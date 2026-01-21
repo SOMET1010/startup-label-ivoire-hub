@@ -54,6 +54,7 @@ const Events = lazy(() => import("./pages/startup/Events"));
 const Network = lazy(() => import("./pages/startup/Network"));
 const Renewal = lazy(() => import("./pages/startup/Renewal"));
 const StartupProfile = lazy(() => import("./pages/startup/Profile"));
+const StartupSettings = lazy(() => import("./pages/startup/Settings"));
 
 // Page de test - à supprimer en production
 const TestPush = lazy(() => import("./pages/TestPush"));
@@ -101,6 +102,7 @@ const StartupRoutes = () => (
               <Renewal />
             </LabelGate>
           } />
+          <Route path="settings" element={<StartupSettings />} />
         </Routes>
       </StartupLayout>
     </RoleGate>
