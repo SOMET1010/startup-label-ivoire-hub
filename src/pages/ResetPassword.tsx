@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslation } from "react-i18next";
 import { KeyRound, ArrowLeft, CheckCircle, Rocket, Loader2, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +28,7 @@ const resetPasswordSchema = z.object({
 type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
 export default function ResetPassword() {
+  const { t } = useTranslation('auth');
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -70,7 +72,7 @@ export default function ResetPassword() {
 
   const onSubmit = async (data: ResetPasswordFormData) => {
     if (!supabase) {
-      setError("Service non disponible. Veuillez réessayer plus tard.");
+      setError(t('errors.serviceUnavailable'));
       return;
     }
 
@@ -84,25 +86,23 @@ export default function ResetPassword() {
 
       if (updateError) {
         if (updateError.message.includes("same password")) {
-          setError("Le nouveau mot de passe doit être différent de l'ancien.");
+          setError(t('errors.samePassword'));
         } else if (updateError.message.includes("session")) {
-          setError("Session expirée. Veuillez demander un nouveau lien de récupération.");
+          setError(t('errors.sessionExpired'));
         } else {
-          setError("Une erreur est survenue. Veuillez réessayer.");
+          setError(t('errors.generic'));
         }
       } else {
         setIsSuccess(true);
-        // Déconnexion pour forcer une nouvelle connexion avec le nouveau mot de passe
         await supabase.auth.signOut();
       }
     } catch (err) {
-      setError("Une erreur est survenue. Veuillez réessayer.");
+      setError(t('errors.generic'));
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Calcul de la force du mot de passe
   const getPasswordStrength = (pwd: string): { score: number; label: string; color: string } => {
     let score = 0;
     if (pwd.length >= 8) score++;
@@ -111,10 +111,10 @@ export default function ResetPassword() {
     if (/[0-9]/.test(pwd)) score++;
     if (/[^A-Za-z0-9]/.test(pwd)) score++;
 
-    if (score <= 2) return { score, label: "Faible", color: "bg-destructive" };
-    if (score <= 3) return { score, label: "Moyen", color: "bg-yellow-500" };
-    if (score <= 4) return { score, label: "Bon", color: "bg-primary" };
-    return { score, label: "Excellent", color: "bg-primary" };
+    if (score <= 2) return { score, label: t('passwordStrength.weak'), color: "bg-destructive" };
+    if (score <= 3) return { score, label: t('passwordStrength.medium'), color: "bg-yellow-500" };
+    if (score <= 4) return { score, label: t('passwordStrength.good'), color: "bg-primary" };
+    return { score, label: t('passwordStrength.excellent'), color: "bg-primary" };
   };
 
   const passwordStrength = getPasswordStrength(password);
@@ -128,7 +128,6 @@ export default function ResetPassword() {
     );
   }
 
-  // Session invalide
   if (isValidSession === false) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 flex flex-col">
@@ -149,23 +148,23 @@ export default function ResetPassword() {
               <div className="mx-auto w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mb-4">
                 <AlertCircle className="w-8 h-8 text-destructive" />
               </div>
-              <CardTitle className="text-2xl">Lien expiré</CardTitle>
+              <CardTitle className="text-2xl">{t('expiredLink.title')}</CardTitle>
               <CardDescription className="text-base">
-                Ce lien de récupération a expiré ou n'est pas valide.
+                {t('expiredLink.description')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground text-center">
-                Les liens de récupération expirent après 1 heure pour des raisons de sécurité.
+                {t('expiredLink.reason')}
               </p>
               <div className="flex flex-col gap-3">
                 <Link to="/mot-de-passe-oublie">
-                  <Button className="w-full">Demander un nouveau lien</Button>
+                  <Button className="w-full">{t('expiredLink.requestNew')}</Button>
                 </Link>
                 <Link to="/auth">
                   <Button variant="ghost" className="w-full">
                     <ArrowLeft className="w-4 h-4 mr-2" />
-                    Retour à la connexion
+                    {t('forgotPassword.backToLogin')}
                   </Button>
                 </Link>
               </div>
@@ -192,7 +191,7 @@ export default function ResetPassword() {
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Retour à la connexion
+            {t('forgotPassword.backToLogin')}
           </Link>
         </div>
       </header>
@@ -215,12 +214,12 @@ export default function ResetPassword() {
                 )}
               </div>
               <CardTitle className="text-2xl">
-                {isSuccess ? "Mot de passe réinitialisé !" : "Nouveau mot de passe"}
+                {isSuccess ? t('resetPassword.titleSuccess') : t('resetPassword.password')}
               </CardTitle>
               <CardDescription className="text-base">
                 {isSuccess 
-                  ? "Vous pouvez maintenant vous connecter"
-                  : "Choisissez un nouveau mot de passe sécurisé"
+                  ? t('resetPassword.subtitleSuccess')
+                  : t('resetPassword.subtitle')
                 }
               </CardDescription>
             </CardHeader>
@@ -235,13 +234,13 @@ export default function ResetPassword() {
                   <Alert className="bg-primary/5 border-primary/20">
                     <CheckCircle className="h-4 w-4 text-primary" />
                     <AlertDescription>
-                      Votre mot de passe a été mis à jour avec succès.
+                      {t('resetPassword.successAlert')}
                     </AlertDescription>
                   </Alert>
 
                   <Link to="/auth">
                     <Button className="w-full bg-primary hover:bg-primary/90">
-                      Se connecter
+                      {t('resetPassword.login')}
                     </Button>
                   </Link>
                 </motion.div>
@@ -259,7 +258,7 @@ export default function ResetPassword() {
                       name="password"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Nouveau mot de passe</FormLabel>
+                          <FormLabel>{t('resetPassword.password')}</FormLabel>
                           <FormControl>
                             <div className="relative">
                               <Input
@@ -296,7 +295,7 @@ export default function ResetPassword() {
                                 ))}
                               </div>
                               <p className="text-xs text-muted-foreground">
-                                Force : {passwordStrength.label}
+                                {t('resetPassword.strength')}: {passwordStrength.label}
                               </p>
                             </div>
                           )}
@@ -309,7 +308,7 @@ export default function ResetPassword() {
                       name="confirmPassword"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Confirmer le mot de passe</FormLabel>
+                          <FormLabel>{t('resetPassword.confirmPassword')}</FormLabel>
                           <FormControl>
                             <div className="relative">
                               <Input
@@ -336,16 +335,16 @@ export default function ResetPassword() {
                     {/* Exigences du mot de passe */}
                     <div className="text-xs text-muted-foreground space-y-1">
                       <p className={password.length >= 8 ? "text-primary" : ""}>
-                        {password.length >= 8 ? "✓" : "○"} 8 caractères minimum
+                        {password.length >= 8 ? "✓" : "○"} {t('passwordRequirements.minLength')}
                       </p>
                       <p className={/[A-Z]/.test(password) ? "text-primary" : ""}>
-                        {/[A-Z]/.test(password) ? "✓" : "○"} Une lettre majuscule
+                        {/[A-Z]/.test(password) ? "✓" : "○"} {t('passwordRequirements.uppercase')}
                       </p>
                       <p className={/[a-z]/.test(password) ? "text-primary" : ""}>
-                        {/[a-z]/.test(password) ? "✓" : "○"} Une lettre minuscule
+                        {/[a-z]/.test(password) ? "✓" : "○"} {t('passwordRequirements.lowercase')}
                       </p>
                       <p className={/[0-9]/.test(password) ? "text-primary" : ""}>
-                        {/[0-9]/.test(password) ? "✓" : "○"} Un chiffre
+                        {/[0-9]/.test(password) ? "✓" : "○"} {t('passwordRequirements.number')}
                       </p>
                     </div>
 
@@ -357,12 +356,12 @@ export default function ResetPassword() {
                       {isLoading ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Réinitialisation...
+                          {t('resetPassword.submitting')}
                         </>
                       ) : (
                         <>
                           <KeyRound className="w-4 h-4 mr-2" />
-                          Réinitialiser mon mot de passe
+                          {t('resetPassword.resetButton')}
                         </>
                       )}
                     </Button>
@@ -376,7 +375,7 @@ export default function ResetPassword() {
 
       {/* Footer */}
       <footer className="p-4 text-center text-sm text-muted-foreground">
-        <p>© 2025 Label Startup Côte d'Ivoire. Tous droits réservés.</p>
+        <p>{t('common.footer')}</p>
       </footer>
     </div>
   );
