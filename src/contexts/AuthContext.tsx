@@ -6,6 +6,15 @@ import { useToast } from '@/hooks/use-toast';
 type UserRole = 'admin' | 'startup' | 'evaluator' | 'public';
 
 export type ThemePreference = 'light' | 'dark' | 'system';
+export type LanguagePreference = 'fr' | 'en';
+export type DateFormatPreference = 'dd/MM/yyyy' | 'MM/dd/yyyy' | 'yyyy-MM-dd';
+
+export interface EmailNotificationsPreferences {
+  status_updates: boolean;
+  events: boolean;
+  opportunities: boolean;
+  newsletter: boolean;
+}
 
 export interface Profile {
   id: string;
@@ -14,6 +23,9 @@ export interface Profile {
   full_name: string | null;
   avatar_url: string | null;
   preferred_theme: ThemePreference;
+  preferred_language: LanguagePreference;
+  email_notifications: EmailNotificationsPreferences;
+  date_format: DateFormatPreference;
   created_at: string;
   updated_at: string;
 }

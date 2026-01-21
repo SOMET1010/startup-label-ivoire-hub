@@ -577,9 +577,12 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          date_format: string | null
           email: string | null
+          email_notifications: Json | null
           full_name: string | null
           id: string
+          preferred_language: string | null
           preferred_theme: string | null
           updated_at: string
           user_id: string
@@ -587,9 +590,12 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          date_format?: string | null
           email?: string | null
+          email_notifications?: Json | null
           full_name?: string | null
           id?: string
+          preferred_language?: string | null
           preferred_theme?: string | null
           updated_at?: string
           user_id: string
@@ -597,9 +603,12 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          date_format?: string | null
           email?: string | null
+          email_notifications?: Json | null
           full_name?: string | null
           id?: string
+          preferred_language?: string | null
           preferred_theme?: string | null
           updated_at?: string
           user_id?: string
