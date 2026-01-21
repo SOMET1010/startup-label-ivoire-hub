@@ -1,0 +1,60 @@
+{
+  "title": "Settings",
+  "subtitle": "Manage your preferences and customize your experience",
+  "appearance": {
+    "title": "Appearance",
+    "subtitle": "Choose the interface theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "language": {
+    "title": "Language",
+    "subtitle": "Choose the interface language",
+    "fr": "Français",
+    "en": "English"
+  },
+  "dateFormat": {
+    "title": "Date Format",
+    "subtitle": "Choose the date display format",
+    "preview": "Preview",
+    "formats": {
+      "ddMMyyyy": "DD/MM/YYYY",
+      "MMddyyyy": "MM/DD/YYYY",
+      "yyyyMMdd": "YYYY-MM-DD"
+    }
+  },
+  "notifications": {
+    "title": "Email Notifications",
+    "subtitle": "Manage the emails you receive",
+    "statusUpdates": {
+      "title": "Status Updates",
+      "description": "Receive an email when your application status changes"
+    },
+    "events": {
+      "title": "Events",
+      "description": "Be informed about new events and workshops"
+    },
+    "opportunities": {
+      "title": "Opportunities",
+      "description": "Receive new funding and partnership opportunities"
+    },
+    "newsletter": {
+      "title": "Newsletter",
+      "description": "Receive our monthly newsletter with ecosystem news"
+    }
+  },
+  "account": {
+    "title": "Account",
+    "subtitle": "Your account information",
+    "email": "Email",
+    "fullName": "Full name",
+    "fullNamePlaceholder": "Your full name"
+  },
+  "messages": {
+    "saved": "Preferences saved",
+    "savedDescription": "Your preferences have been updated.",
+    "error": "Save error",
+    "errorDescription": "Unable to save your preferences."
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "title": "Paramètres",
+  "subtitle": "Gérez vos préférences et personnalisez votre expérience",
+  "appearance": {
+    "title": "Apparence",
+    "subtitle": "Choisissez le thème de l'interface",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
+  },
+  "language": {
+    "title": "Langue",
+    "subtitle": "Choisissez la langue de l'interface",
+    "fr": "Français",
+    "en": "English"
+  },
+  "dateFormat": {
+    "title": "Format de date",
+    "subtitle": "Choisissez le format d'affichage des dates",
+    "preview": "Aperçu",
+    "formats": {
+      "ddMMyyyy": "JJ/MM/AAAA",
+      "MMddyyyy": "MM/JJ/AAAA",
+      "yyyyMMdd": "AAAA-MM-JJ"
+    }
+  },
+  "notifications": {
+    "title": "Notifications email",
+    "subtitle": "Gérez les emails que vous recevez",
+    "statusUpdates": {
+      "title": "Mises à jour de statut",
+      "description": "Recevez un email lorsque le statut de votre candidature change"
+    },
+    "events": {
+      "title": "Événements",
+      "description": "Soyez informé des nouveaux événements et ateliers"
+    },
+    "opportunities": {
+      "title": "Opportunités",
+      "description": "Recevez les nouvelles opportunités de financement et partenariats"
+    },
+    "newsletter": {
+      "title": "Newsletter",
+      "description": "Recevez notre newsletter mensuelle avec les actualités de l'écosystème"
+    }
+  },
+  "account": {
+    "title": "Compte",
+    "subtitle": "Informations de votre compte",
+    "email": "Email",
+    "fullName": "Nom complet",
+    "fullNamePlaceholder": "Votre nom complet"
+  },
+  "messages": {
+    "saved": "Préférences sauvegardées",
+    "savedDescription": "Vos préférences ont été mises à jour.",
+    "error": "Erreur de sauvegarde",
+    "errorDescription": "Impossible de sauvegarder vos préférences."
+  }
+}

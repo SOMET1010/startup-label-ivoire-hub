@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   LayoutDashboard,
   FileText,
@@ -31,65 +32,66 @@ import { useLabelStatus } from "@/hooks/useLabelStatus";
 import { useNotifications } from "@/hooks/useNotifications";
 import { cn } from "@/lib/utils";
 
-const STARTUP_NAV_ITEMS = [
-  { 
-    icon: LayoutDashboard, 
-    label: "Tableau de bord", 
-    href: "/startup", 
-    exact: true,
-    labelOnly: false,
-  },
-  { 
-    icon: FileText, 
-    label: "Mon dossier", 
-    href: "/startup/dossier",
-    labelOnly: false,
-  },
-  { 
-    icon: MessageSquare, 
-    label: "Messages", 
-    href: "/startup/messages",
-    hasBadge: true,
-    labelOnly: false,
-  },
-  { 
-    icon: Target, 
-    label: "Opportunités", 
-    href: "/startup/opportunites",
-    labelOnly: true,
-  },
-  { 
-    icon: Users, 
-    label: "Réseau", 
-    href: "/startup/reseau",
-    labelOnly: true,
-  },
-  { 
-    icon: BookOpen, 
-    label: "Ressources", 
-    href: "/startup/ressources",
-    labelOnly: true,
-  },
-  { 
-    icon: HelpCircle, 
-    label: "Support", 
-    href: "/startup/support",
-    labelOnly: false,
-  },
-  { 
-    icon: Settings, 
-    label: "Paramètres", 
-    href: "/startup/settings",
-    labelOnly: false,
-  },
-];
-
 export function StartupSidebar() {
   const location = useLocation();
   const { state } = useSidebar();
   const { isLabeled, startup } = useLabelStatus();
   const { unreadCount } = useNotifications();
   const isCollapsed = state === "collapsed";
+  const { t } = useTranslation('dashboard');
+
+  const STARTUP_NAV_ITEMS = [
+    { 
+      icon: LayoutDashboard, 
+      labelKey: "sidebar.dashboard",
+      href: "/startup", 
+      exact: true,
+      labelOnly: false,
+    },
+    { 
+      icon: FileText, 
+      labelKey: "sidebar.application",
+      href: "/startup/dossier",
+      labelOnly: false,
+    },
+    { 
+      icon: MessageSquare, 
+      labelKey: "sidebar.messages",
+      href: "/startup/messages",
+      hasBadge: true,
+      labelOnly: false,
+    },
+    { 
+      icon: Target, 
+      labelKey: "sidebar.opportunities",
+      href: "/startup/opportunites",
+      labelOnly: true,
+    },
+    { 
+      icon: Users, 
+      labelKey: "sidebar.network",
+      href: "/startup/reseau",
+      labelOnly: true,
+    },
+    { 
+      icon: BookOpen, 
+      labelKey: "sidebar.resources",
+      href: "/startup/ressources",
+      labelOnly: true,
+    },
+    { 
+      icon: HelpCircle, 
+      labelKey: "sidebar.support",
+      href: "/startup/support",
+      labelOnly: false,
+    },
+    { 
+      icon: Settings, 
+      labelKey: "sidebar.settings",
+      href: "/startup/settings",
+      labelOnly: false,
+    },
+  ];
 
   const isActive = (href: string, exact?: boolean) => {
     if (exact) {
@@ -100,9 +102,9 @@ export function StartupSidebar() {
 
   const getStatusBadge = () => {
     if (isLabeled) {
-      return { label: "Labellisée", variant: "success" as const };
+      return { label: t('sidebar.status.labeled'), variant: "success" as const };
     }
-    return { label: "En cours", variant: "warning" as const };
+    return { label: t('sidebar.status.inProgress'), variant: "warning" as const };
   };
 
   const status = getStatusBadge();
@@ -121,7 +123,7 @@ export function StartupSidebar() {
               className="flex flex-col"
             >
               <span className="font-bold text-lg text-foreground">Ivoire Hub</span>
-              <span className="text-xs text-muted-foreground">Espace Startup</span>
+              <span className="text-xs text-muted-foreground">{t('header.breadcrumb.startup')}</span>
             </motion.div>
           )}
         </Link>
@@ -136,6 +138,7 @@ export function StartupSidebar() {
               {STARTUP_NAV_ITEMS.map((item) => {
                 const isItemActive = isActive(item.href, item.exact);
                 const isDisabled = item.labelOnly && !isLabeled;
+                const label = t(item.labelKey);
 
                 return (
                   <SidebarMenuItem key={item.href}>
@@ -143,7 +146,7 @@ export function StartupSidebar() {
                       asChild
                       isActive={isItemActive}
                       disabled={isDisabled}
-                      tooltip={isCollapsed ? item.label : undefined}
+                      tooltip={isCollapsed ? label : undefined}
                       className={cn(
                         "relative transition-all duration-200",
                         isItemActive && "bg-primary/10 text-primary font-medium",
@@ -155,7 +158,7 @@ export function StartupSidebar() {
                           <item.icon className="w-5 h-5" />
                           {!isCollapsed && (
                             <>
-                              <span>{item.label}</span>
+                              <span>{label}</span>
                               <Badge variant="muted" className="ml-auto text-xs">
                                 Label requis
                               </Badge>
@@ -167,7 +170,7 @@ export function StartupSidebar() {
                           <item.icon className="w-5 h-5" />
                           {!isCollapsed && (
                             <>
-                              <span>{item.label}</span>
+                              <span>{label}</span>
                               {item.hasBadge && unreadCount > 0 && (
                                 <Badge 
                                   variant="destructive" 

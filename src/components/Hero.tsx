@@ -1,5 +1,6 @@
 import { CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import PremiumBadge from "./PremiumBadge";
@@ -34,6 +35,8 @@ const itemVariants = {
  * Correction: devise en FCFA
  */
 const Hero = () => {
+  const { t } = useTranslation('home');
+
   return (
     <section 
       className="relative min-h-[85vh] flex items-center overflow-hidden bg-gradient-to-br from-background via-background to-muted/50"
@@ -82,7 +85,7 @@ const Hero = () => {
             className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight"
             variants={itemVariants}
           >
-            Le <span className="text-primary">Label Officiel</span> des
+            {t('hero.title')} <span className="text-primary">{t('hero.titleHighlight')}</span>
             <br />
             <span className="gradient-text">Startups Numériques</span> Ivoiriennes
           </motion.h1>
@@ -92,8 +95,7 @@ const Hero = () => {
             className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed"
             variants={itemVariants}
           >
-            Une reconnaissance de l'État pour les startups innovantes à fort impact.
-            Accédez aux avantages exclusifs réservés aux entreprises labellisées.
+            {t('hero.subtitle')}
           </motion.p>
 
           {/* Single CTA */}
@@ -106,10 +108,10 @@ const Hero = () => {
                 <Button 
                   size="lg" 
                   className="gradient-premium text-primary-foreground px-10 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
-                  aria-label="Vérifier votre éligibilité au Label Startup"
+                  aria-label={t('hero.cta')}
                 >
                   <CheckCircle2 className="mr-2 w-5 h-5" aria-hidden="true" />
-                  Vérifier mon éligibilité
+                  {t('hero.cta')}
                 </Button>
               </motion.div>
             </Link>
@@ -119,7 +121,7 @@ const Hero = () => {
               to="/avantages" 
               className="text-sm text-muted-foreground hover:text-primary transition-colors underline-offset-4 hover:underline"
             >
-              Découvrir les avantages du label →
+              {t('hero.learnMore')} →
             </Link>
           </motion.div>
 

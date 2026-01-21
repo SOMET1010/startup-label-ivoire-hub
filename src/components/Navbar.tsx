@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, Moon, Sun, Monitor } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBrand } from "@/hooks/useBrand";
@@ -24,6 +25,7 @@ const Navbar = () => {
   const { brand } = useBrand();
   const isInstitutional = brand === "ansut";
   const { theme, isDark, setTheme, mounted } = useAppTheme();
+  const { t } = useTranslation('common');
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -69,13 +71,13 @@ const Navbar = () => {
             </div>
           </Link>
 
-          {/* Desktop Navigation - Simplifié à 4 items principaux */}
+          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             <Link 
               to="/" 
               className="text-muted-foreground hover:text-primary transition-colors font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
             >
-              Accueil
+              {t('nav.home')}
             </Link>
             <div className="relative group">
               <button 
@@ -83,7 +85,7 @@ const Navbar = () => {
                 aria-haspopup="true"
                 aria-expanded="false"
               >
-                Labellisation <ChevronDown className="ml-1 h-4 w-4" aria-hidden="true" />
+                {t('nav.labeling')} <ChevronDown className="ml-1 h-4 w-4" aria-hidden="true" />
               </button>
               <div 
                 className="absolute left-0 mt-2 w-44 bg-card rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-border"
@@ -94,14 +96,14 @@ const Navbar = () => {
                   className="block px-4 py-2.5 text-sm text-foreground hover:bg-accent rounded-t-lg focus-visible:bg-accent focus-visible:outline-none"
                   role="menuitem"
                 >
-                  Critères
+                  {t('nav.criteria')}
                 </Link>
                 <Link 
                   to="/postuler" 
                   className="block px-4 py-2.5 text-sm text-foreground hover:bg-accent rounded-b-lg focus-visible:bg-accent focus-visible:outline-none"
                   role="menuitem"
                 >
-                  Postuler
+                  {t('nav.apply')}
                 </Link>
               </div>
             </div>
@@ -109,13 +111,13 @@ const Navbar = () => {
               to="/annuaire" 
               className="text-muted-foreground hover:text-primary transition-colors font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
             >
-              Annuaire
+              {t('nav.directory')}
             </Link>
             <Link 
               to="/actualites" 
               className="text-muted-foreground hover:text-primary transition-colors font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
             >
-              Actualités
+              {t('nav.news')}
             </Link>
           </div>
 
@@ -127,7 +129,7 @@ const Navbar = () => {
                 variant="ghost"
                 size="icon"
                 onClick={() => setTheme(isDark ? 'light' : 'dark')}
-                aria-label="Basculer le mode sombre"
+                aria-label={t('theme.dark')}
                 className="h-9 w-9"
               >
                 {isDark ? (
@@ -170,7 +172,7 @@ const Navbar = () => {
                   <DropdownMenuSeparator />
                   <div className="p-2">
                     <DropdownMenuLabel className="text-xs font-normal text-muted-foreground px-0 mb-2">
-                      Thème
+                      {t('theme.light')}
                     </DropdownMenuLabel>
                     <div className="flex gap-1">
                       <Button
@@ -178,7 +180,7 @@ const Navbar = () => {
                         size="sm"
                         className="flex-1 h-8"
                         onClick={() => setTheme('light')}
-                        aria-label="Thème clair"
+                        aria-label={t('theme.light')}
                       >
                         <Sun className="h-4 w-4" />
                       </Button>
@@ -187,7 +189,7 @@ const Navbar = () => {
                         size="sm"
                         className="flex-1 h-8"
                         onClick={() => setTheme('dark')}
-                        aria-label="Thème sombre"
+                        aria-label={t('theme.dark')}
                       >
                         <Moon className="h-4 w-4" />
                       </Button>
@@ -196,7 +198,7 @@ const Navbar = () => {
                         size="sm"
                         className="flex-1 h-8"
                         onClick={() => setTheme('system')}
-                        aria-label="Thème système"
+                        aria-label={t('theme.system')}
                       >
                         <Monitor className="h-4 w-4" />
                       </Button>
@@ -206,19 +208,19 @@ const Navbar = () => {
                   <DropdownMenuItem asChild>
                     <Link to={getDashboardLink()} className="cursor-pointer">
                       <LayoutDashboard className="mr-2 h-4 w-4" />
-                      Dashboard
+                      {t('nav.dashboard')}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to="/profil" className="cursor-pointer">
                       <User className="mr-2 h-4 w-4" />
-                      Mon profil
+                      {t('nav.profile')}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive focus:text-destructive">
                     <LogOut className="mr-2 h-4 w-4" />
-                    Déconnexion
+                    {t('nav.logout')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -226,10 +228,10 @@ const Navbar = () => {
             ) : (
               <>
                 <Link to="/auth">
-                  <Button variant="ghost">Connexion</Button>
+                  <Button variant="ghost">{t('nav.login')}</Button>
                 </Link>
                 <Link to="/auth">
-                  <Button>Inscription</Button>
+                  <Button>{t('nav.register')}</Button>
                 </Link>
               </>
             )}
@@ -246,7 +248,7 @@ const Navbar = () => {
           </button>
         </div>
 
-        {/* Mobile Menu - Simplifié à 4 items */}
+        {/* Mobile Menu */}
         {isMenuOpen && (
           <nav className="md:hidden mt-4 pb-4" role="navigation" aria-label="Menu mobile">
             <div className="flex flex-col space-y-3">
@@ -255,11 +257,11 @@ const Navbar = () => {
                 className="text-muted-foreground hover:text-primary transition-colors font-medium py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Accueil
+                {t('nav.home')}
               </Link>
               <details className="group">
                 <summary className="flex cursor-pointer list-none items-center justify-between text-muted-foreground hover:text-primary transition-colors font-medium py-2">
-                  Labellisation
+                  {t('nav.labeling')}
                   <ChevronDown className="h-4 w-4" aria-hidden="true" />
                 </summary>
                 <div className="mt-2 ml-4 flex flex-col space-y-2">
@@ -268,14 +270,14 @@ const Navbar = () => {
                     className="text-muted-foreground hover:text-primary transition-colors py-1"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Critères
+                    {t('nav.criteria')}
                   </Link>
                   <Link 
                     to="/postuler" 
                     className="text-muted-foreground hover:text-primary transition-colors py-1"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Postuler
+                    {t('nav.apply')}
                   </Link>
                 </div>
               </details>
@@ -284,14 +286,14 @@ const Navbar = () => {
                 className="text-muted-foreground hover:text-primary transition-colors font-medium py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Annuaire
+                {t('nav.directory')}
               </Link>
               <Link
                 to="/actualites"
                 className="text-muted-foreground hover:text-primary transition-colors font-medium py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Actualités
+                {t('nav.news')}
               </Link>
 
               <div className="pt-3 border-t border-border">
@@ -310,14 +312,14 @@ const Navbar = () => {
                     </div>
                     {/* Theme selector mobile */}
                     <div className="py-2">
-                      <p className="text-xs text-muted-foreground mb-2">Thème</p>
+                      <p className="text-xs text-muted-foreground mb-2">{t('theme.light')}</p>
                       <div className="flex gap-1">
                         <Button
                           variant={theme === 'light' ? 'default' : 'outline'}
                           size="sm"
                           className="flex-1 h-8"
                           onClick={() => setTheme('light')}
-                          aria-label="Thème clair"
+                          aria-label={t('theme.light')}
                         >
                           <Sun className="h-4 w-4" />
                         </Button>
@@ -326,7 +328,7 @@ const Navbar = () => {
                           size="sm"
                           className="flex-1 h-8"
                           onClick={() => setTheme('dark')}
-                          aria-label="Thème sombre"
+                          aria-label={t('theme.dark')}
                         >
                           <Moon className="h-4 w-4" />
                         </Button>
@@ -335,7 +337,7 @@ const Navbar = () => {
                           size="sm"
                           className="flex-1 h-8"
                           onClick={() => setTheme('system')}
-                          aria-label="Thème système"
+                          aria-label={t('theme.system')}
                         >
                           <Monitor className="h-4 w-4" />
                         </Button>
@@ -344,7 +346,7 @@ const Navbar = () => {
                     <Link to={getDashboardLink()} onClick={() => setIsMenuOpen(false)}>
                       <Button variant="outline" className="w-full justify-start">
                         <LayoutDashboard className="mr-2 h-4 w-4" />
-                        Dashboard
+                        {t('nav.dashboard')}
                       </Button>
                     </Link>
                     <Button 
@@ -353,16 +355,16 @@ const Navbar = () => {
                       onClick={() => { handleSignOut(); setIsMenuOpen(false); }}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
-                      Déconnexion
+                      {t('nav.logout')}
                     </Button>
                   </div>
                 ) : (
                   <div className="flex flex-col space-y-2">
                     <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
-                      <Button variant="outline" className="w-full">Connexion</Button>
+                      <Button variant="outline" className="w-full">{t('nav.login')}</Button>
                     </Link>
                     <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
-                      <Button className="w-full">Inscription</Button>
+                      <Button className="w-full">{t('nav.register')}</Button>
                     </Link>
                   </div>
                 )}

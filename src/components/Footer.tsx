@@ -1,11 +1,13 @@
 import { Link } from "react-router-dom";
 import { ExternalLink, Facebook, Twitter, Linkedin } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useBrand } from "@/hooks/useBrand";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   const { brand } = useBrand();
   const isInstitutional = brand === "ansut";
+  const { t } = useTranslation('common');
 
   return (
     <footer className={isInstitutional ? "footer-institutional text-white" : "bg-gray-900 text-white"}>
@@ -67,7 +69,7 @@ const Footer = () => {
             <p className="text-gray-300 mt-2">
               {isInstitutional 
                 ? "Agence Nationale du Service Universel des Télécommunications. Service public de labellisation des startups numériques."
-                : "Plateforme officielle de labellisation et d'accompagnement des startups numériques en Côte d'Ivoire."
+                : t('footer.description')
               }
             </p>
             <div className="flex mt-4 space-x-4">
@@ -102,26 +104,26 @@ const Footer = () => {
           </div>
           
           <div>
-            <h3 className="text-lg font-bold mb-4">Liens rapides</h3>
+            <h3 className="text-lg font-bold mb-4">{t('footer.quickLinks')}</h3>
             <ul className="space-y-2">
               <li>
                 <Link to="/" className="text-gray-300 hover:text-white transition-colors">
-                  Accueil
+                  {t('nav.home')}
                 </Link>
               </li>
               <li>
                 <Link to="/postuler" className="text-gray-300 hover:text-white transition-colors">
-                  Postuler au label
+                  {t('nav.apply')}
                 </Link>
               </li>
               <li>
                 <Link to="/annuaire" className="text-gray-300 hover:text-white transition-colors">
-                  Annuaire des startups
+                  {t('nav.directory')}
                 </Link>
               </li>
               <li>
                 <Link to="/accompagnement" className="text-gray-300 hover:text-white transition-colors">
-                  Structures d'accompagnement
+                  {t('nav.support')}
                 </Link>
               </li>
               <li>
@@ -133,26 +135,26 @@ const Footer = () => {
           </div>
           
           <div>
-            <h3 className="text-lg font-bold mb-4">Informations</h3>
+            <h3 className="text-lg font-bold mb-4">{t('footer.information')}</h3>
             <ul className="space-y-2">
               <li>
                 <Link to="/faq" className="text-gray-300 hover:text-white transition-colors">
-                  FAQ
+                  {t('footer.faq')}
                 </Link>
               </li>
               <li>
                 <Link to="/contact" className="text-gray-300 hover:text-white transition-colors">
-                  Contact
+                  {t('footer.contact')}
                 </Link>
               </li>
               <li>
                 <Link to="/mentions-legales" className="text-gray-300 hover:text-white transition-colors">
-                  Mentions légales
+                  {t('footer.legal')}
                 </Link>
               </li>
               <li>
                 <Link to="/confidentialite" className="text-gray-300 hover:text-white transition-colors">
-                  Politique de confidentialité
+                  {t('footer.privacy')}
                 </Link>
               </li>
               {isInstitutional && (
@@ -166,7 +168,7 @@ const Footer = () => {
           </div>
           
           <div>
-            <h3 className="text-lg font-bold mb-4">Contact</h3>
+            <h3 className="text-lg font-bold mb-4">{t('footer.contactUs')}</h3>
             <address className="not-italic text-gray-300">
               {isInstitutional ? (
                 <>
@@ -177,17 +179,17 @@ const Footer = () => {
               ) : (
                 <>
                   <p>Ministère de la Communication et de l'Économie Numérique</p>
-                  <p>Abidjan, Côte d'Ivoire</p>
+                  <p>{t('footer.address')}</p>
                 </>
               )}
               <p className="mt-2">
                 <a href="tel:+22520216300" className="hover:text-white transition-colors">
-                  +225 20 21 63 00
+                  {t('footer.phone')}
                 </a>
               </p>
               <p>
                 <a href={`mailto:${isInstitutional ? 'contact@ansut.ci' : 'contact@ivoirehub.ci'}`} className="hover:text-white transition-colors">
-                  {isInstitutional ? 'contact@ansut.ci' : 'contact@ivoirehub.ci'}
+                  {isInstitutional ? 'contact@ansut.ci' : t('footer.email')}
                 </a>
               </p>
             </address>
@@ -195,7 +197,7 @@ const Footer = () => {
         </div>
         
         <div className={`${isInstitutional ? 'footer-institutional-divider' : 'border-t border-gray-800'} mt-8 pt-8 flex flex-col md:flex-row justify-between items-center`}>
-          <p>© {currentYear} {isInstitutional ? 'ANSUT - République de Côte d\'Ivoire' : 'Ivoire Hub'}. Tous droits réservés.</p>
+          <p>© {currentYear} {isInstitutional ? 'ANSUT - République de Côte d\'Ivoire' : 'Ivoire Hub'}. {t('footer.rights')}.</p>
           <p className="mt-4 md:mt-0">
             {isInstitutional ? (
               <span className="text-gray-400 text-sm">

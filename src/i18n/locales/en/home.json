@@ -1,0 +1,96 @@
+{
+  "hero": {
+    "badge": "Official program",
+    "title": "Digital Startup Label",
+    "titleHighlight": "Côte d'Ivoire",
+    "subtitle": "Get the official label and benefit from tax advantages, personalized support, and national visibility to accelerate your growth.",
+    "cta": "Check my eligibility",
+    "learnMore": "Discover the benefits",
+    "stats": {
+      "startups": "Active startups",
+      "labeled": "Labeled",
+      "invested": "FCFA invested"
+    }
+  },
+  "advantages": {
+    "title": "Label Benefits",
+    "subtitle": "Discover the exclusive opportunities reserved for labeled startups",
+    "taxExemptions": {
+      "title": "Tax Exemptions",
+      "description": "Benefit from profit tax and business license exemptions for 5 years."
+    },
+    "publicMarkets": {
+      "title": "Public Market Access",
+      "description": "Participate in public tenders with preferential conditions for labeled startups."
+    },
+    "financing": {
+      "title": "Easier Financing",
+      "description": "Access public and private financing more easily thanks to official recognition."
+    },
+    "support": {
+      "title": "Personalized Support",
+      "description": "Enjoy regular follow-up and expert advice to accelerate your growth."
+    },
+    "visibility": {
+      "title": "National Visibility",
+      "description": "Increase your visibility with partners and investors thanks to the official label."
+    },
+    "network": {
+      "title": "Innovators Network",
+      "description": "Join a dynamic community of innovative entrepreneurs to collaborate and grow."
+    }
+  },
+  "journey": {
+    "title": "Your Path to the Label",
+    "subtitle": "A simple and transparent 4-step process",
+    "steps": {
+      "eligibility": {
+        "title": "Eligibility Test",
+        "description": "Check in a few minutes if your startup meets the label criteria."
+      },
+      "application": {
+        "title": "Application Submission",
+        "description": "Complete your online application with the required documents."
+      },
+      "evaluation": {
+        "title": "Evaluation",
+        "description": "Your application is reviewed by an expert committee within 30 days."
+      },
+      "labeling": {
+        "title": "Labeling",
+        "description": "Receive your label and access all program benefits."
+      }
+    },
+    "cta": "Get Started",
+    "processInfo": "100% online process • Response within 30 days"
+  },
+  "stats": {
+    "title": "The Ecosystem in Numbers",
+    "subtitle": "A dynamic network of innovative startups"
+  },
+  "testimonials": {
+    "title": "They Got the Label",
+    "subtitle": "Discover testimonials from labeled startups"
+  },
+  "news": {
+    "title": "News",
+    "subtitle": "Stay informed about the latest startup ecosystem news",
+    "viewAll": "View all news"
+  },
+  "cta": {
+    "title": "Ready to Join the Ecosystem?",
+    "subtitle": "Test your eligibility in less than 5 minutes and find out if you can benefit from the Digital Startup Label.",
+    "button": "Check my eligibility",
+    "trustIndicators": {
+      "online": "100% online process",
+      "response": "Response within 30 days",
+      "free": "Free support"
+    }
+  },
+  "comparison": {
+    "title": "Why Get the Label?",
+    "subtitle": "Compare the benefits between labeled and unlabeled startups",
+    "without": "Without Label",
+    "with": "With Label ✓"
+  }
+}
