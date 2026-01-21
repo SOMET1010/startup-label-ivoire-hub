@@ -1,6 +1,6 @@
 import { Settings as SettingsIcon, Palette, Globe, Calendar, Bell, User } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSelector } from "@/components/settings/LanguageSelector";
 import { DateFormatSelector } from "@/components/settings/DateFormatSelector";
@@ -9,6 +9,8 @@ import { AccountSettings } from "@/components/settings/AccountSettings";
 import { AuthProvider } from "@/contexts/AuthContext";
 
 function SettingsContent() {
+  const { t } = useTranslation('settings');
+
   return (
     <div className="space-y-8 p-6 max-w-4xl">
       {/* Header */}
@@ -18,9 +20,9 @@ function SettingsContent() {
             <SettingsIcon className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">Paramètres</h1>
+            <h1 className="text-2xl font-bold">{t('title')}</h1>
             <p className="text-muted-foreground">
-              Gérez vos préférences et personnalisez votre expérience
+              {t('subtitle')}
             </p>
           </div>
         </div>
@@ -31,10 +33,10 @@ function SettingsContent() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Palette className="w-5 h-5 text-primary" />
-            Apparence
+            {t('appearance.title')}
           </CardTitle>
           <CardDescription>
-            Choisissez le thème de l'interface
+            {t('appearance.subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -47,10 +49,10 @@ function SettingsContent() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Globe className="w-5 h-5 text-primary" />
-            Langue
+            {t('language.title')}
           </CardTitle>
           <CardDescription>
-            Choisissez la langue de l'interface
+            {t('language.subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -63,10 +65,10 @@ function SettingsContent() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Calendar className="w-5 h-5 text-primary" />
-            Format de date
+            {t('dateFormat.title')}
           </CardTitle>
           <CardDescription>
-            Choisissez le format d'affichage des dates
+            {t('dateFormat.subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -79,10 +81,10 @@ function SettingsContent() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Bell className="w-5 h-5 text-primary" />
-            Notifications email
+            {t('notifications.title')}
           </CardTitle>
           <CardDescription>
-            Gérez les emails que vous souhaitez recevoir
+            {t('notifications.subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -95,10 +97,10 @@ function SettingsContent() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <User className="w-5 h-5 text-primary" />
-            Compte
+            {t('account.title')}
           </CardTitle>
           <CardDescription>
-            Informations de votre compte
+            {t('account.subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -1,0 +1,64 @@
+{
+  "nav": {
+    "home": "Home",
+    "labeling": "Labeling",
+    "criteria": "Criteria",
+    "apply": "Apply",
+    "directory": "Directory",
+    "news": "News",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Log out",
+    "dashboard": "Dashboard",
+    "profile": "My profile",
+    "settings": "Settings",
+    "support": "Support",
+    "aiCompanies": "AI Companies",
+    "faq": "FAQ"
+  },
+  "footer": {
+    "rights": "All rights reserved",
+    "legal": "Legal Notice",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Use",
+    "faq": "FAQ",
+    "contact": "Contact",
+    "description": "The official platform for digital startup labeling in Côte d'Ivoire.",
+    "quickLinks": "Quick Links",
+    "information": "Information",
+    "contactUs": "Contact Us",
+    "address": "Abidjan, Côte d'Ivoire",
+    "phone": "+225 27 22 XX XX XX",
+    "email": "contact@labelstartup.ci"
+  },
+  "actions": {
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "continue": "Continue",
+    "seeMore": "See more",
+    "seeAll": "See all",
+    "loading": "Loading...",
+    "retry": "Retry",
+    "close": "Close",
+    "confirm": "Confirm"
+  },
+  "status": {
+    "success": "Success",
+    "error": "Error",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "inProgress": "In progress",
+    "labeled": "Labeled"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  }
+}

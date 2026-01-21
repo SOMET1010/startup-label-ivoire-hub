@@ -1,0 +1,96 @@
+{
+  "hero": {
+    "badge": "Programme officiel",
+    "title": "Label Startup Numérique",
+    "titleHighlight": "Côte d'Ivoire",
+    "subtitle": "Obtenez le label officiel et bénéficiez d'avantages fiscaux, d'un accompagnement personnalisé et d'une visibilité nationale pour accélérer votre croissance.",
+    "cta": "Tester mon éligibilité",
+    "learnMore": "Découvrir les avantages",
+    "stats": {
+      "startups": "Startups actives",
+      "labeled": "Labellisées",
+      "invested": "FCFA investis"
+    }
+  },
+  "advantages": {
+    "title": "Les avantages du Label",
+    "subtitle": "Découvrez les opportunités exclusives réservées aux startups labellisées",
+    "taxExemptions": {
+      "title": "Exonérations fiscales",
+      "description": "Bénéficiez d'exonérations d'impôts sur les bénéfices et de la contribution des patentes pendant 5 ans."
+    },
+    "publicMarkets": {
+      "title": "Accès aux marchés publics",
+      "description": "Participez aux appels d'offres publics avec des conditions préférentielles pour les startups labellisées."
+    },
+    "financing": {
+      "title": "Financement facilité",
+      "description": "Accédez plus facilement aux financements publics et privés grâce à la reconnaissance officielle."
+    },
+    "support": {
+      "title": "Accompagnement personnalisé",
+      "description": "Profitez d'un suivi régulier et de conseils d'experts pour accélérer votre croissance."
+    },
+    "visibility": {
+      "title": "Visibilité nationale",
+      "description": "Augmentez votre visibilité auprès des partenaires et investisseurs grâce au label officiel."
+    },
+    "network": {
+      "title": "Réseau d'innovateurs",
+      "description": "Rejoignez une communauté dynamique d'entrepreneurs innovants pour collaborer et grandir."
+    }
+  },
+  "journey": {
+    "title": "Votre parcours vers le Label",
+    "subtitle": "Un processus simple et transparent en 4 étapes",
+    "steps": {
+      "eligibility": {
+        "title": "Test d'éligibilité",
+        "description": "Vérifiez en quelques minutes si votre startup répond aux critères du label."
+      },
+      "application": {
+        "title": "Dépôt du dossier",
+        "description": "Complétez votre dossier de candidature en ligne avec les documents requis."
+      },
+      "evaluation": {
+        "title": "Évaluation",
+        "description": "Votre dossier est examiné par un comité d'experts dans un délai de 30 jours."
+      },
+      "labeling": {
+        "title": "Labellisation",
+        "description": "Recevez votre label et accédez à tous les avantages du programme."
+      }
+    },
+    "cta": "Commencer maintenant",
+    "processInfo": "Processus 100% en ligne • Réponse sous 30 jours"
+  },
+  "stats": {
+    "title": "L'écosystème en chiffres",
+    "subtitle": "Un réseau dynamique de startups innovantes"
+  },
+  "testimonials": {
+    "title": "Ils ont obtenu le Label",
+    "subtitle": "Découvrez les témoignages de startups labellisées"
+  },
+  "news": {
+    "title": "Actualités",
+    "subtitle": "Restez informé des dernières nouvelles de l'écosystème startup",
+    "viewAll": "Voir toutes les actualités"
+  },
+  "cta": {
+    "title": "Prêt à rejoindre l'écosystème ?",
+    "subtitle": "Testez votre éligibilité en moins de 5 minutes et découvrez si vous pouvez bénéficier du Label Startup Numérique.",
+    "button": "Tester mon éligibilité",
+    "trustIndicators": {
+      "online": "Processus 100% en ligne",
+      "response": "Réponse sous 30 jours",
+      "free": "Accompagnement gratuit"
+    }
+  },
+  "comparison": {
+    "title": "Pourquoi obtenir le Label ?",
+    "subtitle": "Comparez les avantages entre startups labellisées et non labellisées",
+    "without": "Sans Label",
+    "with": "Avec Label ✓"
+  }
+}

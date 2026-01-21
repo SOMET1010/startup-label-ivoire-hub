@@ -1,0 +1,116 @@
+{
+  "sidebar": {
+    "dashboard": "Tableau de bord",
+    "application": "Ma candidature",
+    "messages": "Messages",
+    "events": "Événements",
+    "network": "Réseau",
+    "opportunities": "Opportunités",
+    "resources": "Ressources",
+    "renewal": "Renouvellement",
+    "profile": "Mon profil",
+    "settings": "Paramètres",
+    "support": "Support",
+    "status": {
+      "labeled": "Labellisée",
+      "inProgress": "En cours"
+    }
+  },
+  "header": {
+    "welcome": "Bienvenue",
+    "breadcrumb": {
+      "startup": "Espace Startup"
+    }
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "welcomeMessage": "Bienvenue dans votre espace startup",
+    "noStartup": {
+      "title": "Commencez votre aventure",
+      "subtitle": "Déposez votre candidature pour obtenir le Label Startup Numérique",
+      "cta": "Postuler maintenant"
+    },
+    "status": {
+      "title": "Statut de votre candidature",
+      "trackingId": "ID de suivi",
+      "submitted": "Soumise le",
+      "lastUpdate": "Dernière mise à jour"
+    },
+    "documents": {
+      "title": "Documents",
+      "complete": "Complet",
+      "incomplete": "Incomplet",
+      "missing": "document(s) manquant(s)"
+    },
+    "messages": {
+      "title": "Messages institutionnels",
+      "noMessages": "Aucun nouveau message",
+      "unread": "non lu(s)"
+    },
+    "nextActions": {
+      "title": "Prochaines étapes",
+      "noActions": "Aucune action requise"
+    },
+    "quickActions": {
+      "title": "Actions rapides",
+      "application": {
+        "title": "Ma candidature",
+        "description": "Consultez et modifiez votre dossier"
+      },
+      "network": {
+        "title": "Réseau",
+        "description": "Connectez-vous avec d'autres startups"
+      },
+      "opportunities": {
+        "title": "Opportunités",
+        "description": "Découvrez les opportunités disponibles"
+      }
+    }
+  },
+  "application": {
+    "title": "Ma candidature",
+    "status": {
+      "draft": "Brouillon",
+      "pending": "En attente",
+      "underReview": "En cours d'examen",
+      "approved": "Approuvée",
+      "rejected": "Rejetée"
+    }
+  },
+  "messages": {
+    "title": "Messages",
+    "noMessages": "Aucun message",
+    "from": "De",
+    "date": "Date"
+  },
+  "events": {
+    "title": "Événements",
+    "noEvents": "Aucun événement à venir",
+    "upcoming": "À venir",
+    "past": "Passés"
+  },
+  "network": {
+    "title": "Réseau",
+    "subtitle": "Connectez-vous avec d'autres startups labellisées"
+  },
+  "opportunities": {
+    "title": "Opportunités",
+    "subtitle": "Découvrez les opportunités exclusives pour les startups labellisées"
+  },
+  "resources": {
+    "title": "Ressources",
+    "subtitle": "Accédez aux ressources et outils pour développer votre startup"
+  },
+  "renewal": {
+    "title": "Renouvellement",
+    "subtitle": "Gérez le renouvellement de votre label"
+  },
+  "profile": {
+    "title": "Mon profil",
+    "subtitle": "Gérez les informations de votre startup"
+  },
+  "support": {
+    "title": "Support",
+    "subtitle": "Besoin d'aide ? Contactez-nous"
+  }
+}

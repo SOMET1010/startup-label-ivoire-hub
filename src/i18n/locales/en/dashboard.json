@@ -1,0 +1,116 @@
+{
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "application": "My application",
+    "messages": "Messages",
+    "events": "Events",
+    "network": "Network",
+    "opportunities": "Opportunities",
+    "resources": "Resources",
+    "renewal": "Renewal",
+    "profile": "My profile",
+    "settings": "Settings",
+    "support": "Support",
+    "status": {
+      "labeled": "Labeled",
+      "inProgress": "In progress"
+    }
+  },
+  "header": {
+    "welcome": "Welcome",
+    "breadcrumb": {
+      "startup": "Startup Space"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcomeMessage": "Welcome to your startup space",
+    "noStartup": {
+      "title": "Start your journey",
+      "subtitle": "Submit your application to get the Digital Startup Label",
+      "cta": "Apply now"
+    },
+    "status": {
+      "title": "Application status",
+      "trackingId": "Tracking ID",
+      "submitted": "Submitted on",
+      "lastUpdate": "Last update"
+    },
+    "documents": {
+      "title": "Documents",
+      "complete": "Complete",
+      "incomplete": "Incomplete",
+      "missing": "missing document(s)"
+    },
+    "messages": {
+      "title": "Institutional messages",
+      "noMessages": "No new messages",
+      "unread": "unread"
+    },
+    "nextActions": {
+      "title": "Next steps",
+      "noActions": "No action required"
+    },
+    "quickActions": {
+      "title": "Quick actions",
+      "application": {
+        "title": "My application",
+        "description": "View and edit your application"
+      },
+      "network": {
+        "title": "Network",
+        "description": "Connect with other startups"
+      },
+      "opportunities": {
+        "title": "Opportunities",
+        "description": "Discover available opportunities"
+      }
+    }
+  },
+  "application": {
+    "title": "My application",
+    "status": {
+      "draft": "Draft",
+      "pending": "Pending",
+      "underReview": "Under review",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    }
+  },
+  "messages": {
+    "title": "Messages",
+    "noMessages": "No messages",
+    "from": "From",
+    "date": "Date"
+  },
+  "events": {
+    "title": "Events",
+    "noEvents": "No upcoming events",
+    "upcoming": "Upcoming",
+    "past": "Past"
+  },
+  "network": {
+    "title": "Network",
+    "subtitle": "Connect with other labeled startups"
+  },
+  "opportunities": {
+    "title": "Opportunities",
+    "subtitle": "Discover exclusive opportunities for labeled startups"
+  },
+  "resources": {
+    "title": "Resources",
+    "subtitle": "Access resources and tools to grow your startup"
+  },
+  "renewal": {
+    "title": "Renewal",
+    "subtitle": "Manage your label renewal"
+  },
+  "profile": {
+    "title": "My profile",
+    "subtitle": "Manage your startup information"
+  },
+  "support": {
+    "title": "Support",
+    "subtitle": "Need help? Contact us"
+  }
+}

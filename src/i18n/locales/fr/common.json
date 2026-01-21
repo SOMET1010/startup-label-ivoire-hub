@@ -1,0 +1,64 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "labeling": "Labellisation",
+    "criteria": "Critères",
+    "apply": "Postuler",
+    "directory": "Annuaire",
+    "news": "Actualités",
+    "login": "Connexion",
+    "register": "Inscription",
+    "logout": "Déconnexion",
+    "dashboard": "Dashboard",
+    "profile": "Mon profil",
+    "settings": "Paramètres",
+    "support": "Accompagnement",
+    "aiCompanies": "Entreprises IA",
+    "faq": "FAQ"
+  },
+  "footer": {
+    "rights": "Tous droits réservés",
+    "legal": "Mentions légales",
+    "privacy": "Politique de confidentialité",
+    "terms": "CGU",
+    "faq": "FAQ",
+    "contact": "Contact",
+    "description": "La plateforme officielle de labellisation des startups numériques en Côte d'Ivoire.",
+    "quickLinks": "Liens rapides",
+    "information": "Informations",
+    "contactUs": "Nous contacter",
+    "address": "Abidjan, Côte d'Ivoire",
+    "phone": "+225 27 22 XX XX XX",
+    "email": "contact@labelstartup.ci"
+  },
+  "actions": {
+    "save": "Enregistrer",
+    "saving": "Enregistrement...",
+    "cancel": "Annuler",
+    "submit": "Soumettre",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "back": "Retour",
+    "continue": "Continuer",
+    "seeMore": "Voir plus",
+    "seeAll": "Voir tout",
+    "loading": "Chargement...",
+    "retry": "Réessayer",
+    "close": "Fermer",
+    "confirm": "Confirmer"
+  },
+  "status": {
+    "success": "Succès",
+    "error": "Erreur",
+    "pending": "En attente",
+    "approved": "Approuvé",
+    "rejected": "Rejeté",
+    "inProgress": "En cours",
+    "labeled": "Labellisée"
+  },
+  "theme": {
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
+  }
+}
