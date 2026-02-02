@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { LanguageToggle } from "@/components/settings/LanguageToggle";
 import { useAuth } from "@/contexts/AuthContext";
 
 const ROUTE_KEYS: Record<string, string> = {
@@ -148,6 +149,8 @@ export function StartupHeader() {
               <Settings className="mr-2 h-4 w-4" />
               <span>{t('header.userMenu.settings')}</span>
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <LanguageToggle />
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
               <LogOut className="mr-2 h-4 w-4" />
