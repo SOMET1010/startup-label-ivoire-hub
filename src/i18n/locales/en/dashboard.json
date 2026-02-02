@@ -40,6 +40,7 @@
       "defaultUser": "User",
       "profile": "My profile",
       "settings": "Settings",
+      "language": "Language",
       "logout": "Log out"
     }
   },
