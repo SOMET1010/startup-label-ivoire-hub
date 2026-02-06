@@ -152,5 +152,103 @@
   "support": {
     "title": "Support",
     "subtitle": "Besoin d'aide ? Contactez-nous"
+  },
+  "structure": {
+    "sidebar": {
+      "dashboard": "Tableau de bord",
+      "startups": "Startups accompagnées",
+      "programs": "Programmes",
+      "profile": "Profil structure",
+      "settings": "Paramètres",
+      "backToHome": "Retour à l'accueil",
+      "subtitle": "Structure d'accompagnement",
+      "structureLabel": "Ma structure",
+      "active": "Active"
+    },
+    "header": {
+      "breadcrumb": "Espace Structure",
+      "routes": {
+        "dashboard": "Tableau de bord",
+        "startups": "Startups accompagnées",
+        "programs": "Programmes",
+        "profile": "Profil structure",
+        "settings": "Paramètres"
+      }
+    },
+    "dashboard": {
+      "welcome": "Bienvenue, {{name}} !",
+      "subtitle": "Gérez vos startups accompagnées et suivez leurs progrès.",
+      "kpi": {
+        "totalStartups": "Startups accompagnées",
+        "labeledStartups": "Startups labellisées",
+        "activePrograms": "Programmes actifs",
+        "successRate": "Taux de réussite"
+      },
+      "recentStartups": "Dernières startups accompagnées",
+      "viewAll": "Voir tout",
+      "noStartups": "Aucune startup accompagnée pour l'instant.",
+      "noStartupsHint": "Les administrateurs peuvent vous assigner des startups à accompagner.",
+      "quickActions": "Actions rapides",
+      "action": {
+        "programs": "Mes programmes",
+        "programsDesc": "Gérer les programmes d'accompagnement",
+        "profile": "Mon profil",
+        "profileDesc": "Modifier les informations de la structure",
+        "startups": "Toutes les startups",
+        "startupsDesc": "Voir la liste complète des startups"
+      }
+    },
+    "startups": {
+      "title": "Startups accompagnées",
+      "searchPlaceholder": "Rechercher par nom ou secteur...",
+      "filterStatus": "Filtrer par statut",
+      "allStatuses": "Tous les statuts",
+      "noResults": "Aucune startup trouvée.",
+      "col": {
+        "name": "Nom",
+        "sector": "Secteur",
+        "program": "Programme",
+        "status": "Statut labellisation",
+        "startDate": "Date début"
+      }
+    },
+    "programs": {
+      "title": "Programmes d'accompagnement",
+      "add": "Nouveau programme",
+      "addTitle": "Ajouter un programme",
+      "editTitle": "Modifier le programme",
+      "empty": "Aucun programme créé. Ajoutez votre premier programme.",
+      "created": "Programme créé avec succès",
+      "updated": "Programme mis à jour",
+      "deleted": "Programme supprimé",
+      "form": {
+        "name": "Nom du programme",
+        "namePlaceholder": "Ex: Incubation IA 2025",
+        "description": "Description",
+        "descriptionPlaceholder": "Décrivez le programme...",
+        "duration": "Durée",
+        "durationPlaceholder": "Ex: 6 mois",
+        "save": "Enregistrer",
+        "create": "Créer le programme"
+      }
+    },
+    "profile": {
+      "title": "Profil de la structure",
+      "cardTitle": "Informations de la structure",
+      "saved": "Profil mis à jour avec succès",
+      "error": "Erreur lors de la mise à jour",
+      "form": {
+        "name": "Nom de la structure",
+        "type": "Type de structure",
+        "typePlaceholder": "Sélectionnez un type",
+        "description": "Description",
+        "location": "Localisation",
+        "website": "Site web",
+        "sectors": "Secteurs d'activité",
+        "sectorsPlaceholder": "IA, Fintech, AgriTech...",
+        "sectorsHint": "Séparez les secteurs par des virgules",
+        "save": "Enregistrer les modifications"
+      }
+    }
   }
 }

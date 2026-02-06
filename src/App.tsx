@@ -16,6 +16,7 @@ import PageLoader from "./components/PageLoader";
 import { SkipLink } from "./components/shared/SkipLink";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { StartupLayout } from "./components/startup/StartupLayout";
+import { StructureLayout } from "./components/structure/StructureLayout";
 import { useLanguageSync } from "./hooks/useLanguageSync";
 // Pages critiques - import statique pour chargement instantané
 import Index from "./pages/Index";
@@ -63,6 +64,13 @@ const Network = lazy(() => import("./pages/startup/Network"));
 const Renewal = lazy(() => import("./pages/startup/Renewal"));
 const StartupProfile = lazy(() => import("./pages/startup/Profile"));
 const StartupSettings = lazy(() => import("./pages/startup/Settings"));
+
+// Pages structure - lazy loading
+const StructureDashboard = lazy(() => import("./pages/structure/Dashboard"));
+const StructureStartups = lazy(() => import("./pages/structure/Startups"));
+const StructurePrograms = lazy(() => import("./pages/structure/Programs"));
+const StructureProfile = lazy(() => import("./pages/structure/Profile"));
+const StructureSettings = lazy(() => import("./pages/structure/Settings"));
 
 // Page de test - à supprimer en production
 const TestPush = lazy(() => import("./pages/TestPush"));
@@ -117,6 +125,23 @@ const StartupRoutes = () => (
   </ProtectedRoute>
 );
 
+// Structure routes wrapper component
+const StructureRoutes = () => (
+  <ProtectedRoute>
+    <RoleGate allowedRoles={['structure']}>
+      <StructureLayout>
+        <Routes>
+          <Route index element={<StructureDashboard />} />
+          <Route path="startups" element={<StructureStartups />} />
+          <Route path="programmes" element={<StructurePrograms />} />
+          <Route path="profil" element={<StructureProfile />} />
+          <Route path="settings" element={<StructureSettings />} />
+        </Routes>
+      </StructureLayout>
+    </RoleGate>
+  </ProtectedRoute>
+);
+
 // Inner component that can use hooks requiring AuthProvider
 const AppContent = () => {
   // Synchronize i18n language with user profile preference
@@ -159,6 +184,9 @@ const AppContent = () => {
             
             {/* Startup routes with dedicated layout */}
             <Route path="/startup/*" element={<StartupRoutes />} />
+            
+            {/* Structure routes with dedicated layout */}
+            <Route path="/structure/*" element={<StructureRoutes />} />
             
             <Route path="/suivi-candidature" element={<SuiviCandidature />} />
             

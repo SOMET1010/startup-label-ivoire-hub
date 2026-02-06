@@ -52,15 +52,21 @@ export default function Auth() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showSignup, setShowSignup] = useState(false);
-  const { user, signIn, signUp } = useAuth();
+  const { user, userRole, signIn, signUp } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect if already logged in
+  // Redirect if already logged in based on role
   useEffect(() => {
-    if (user) {
-      navigate("/", { replace: true });
+    if (user && userRole) {
+      const redirectMap: Record<string, string> = {
+        admin: "/admin",
+        startup: "/startup",
+        structure: "/structure",
+        evaluator: "/admin",
+      };
+      navigate(redirectMap[userRole] || "/", { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, userRole, navigate]);
 
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -92,7 +98,7 @@ export default function Auth() {
     
     try {
       await signIn(data.email, data.password);
-      navigate("/");
+      // Redirect handled by useEffect watching userRole
     } catch (err: any) {
       const errorMessage = getErrorMessage(err);
       setError(errorMessage);
