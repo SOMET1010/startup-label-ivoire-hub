@@ -1,58 +1,118 @@
 
+# Correction du clustering OpenStreetMap - React 18 / react-leaflet-cluster v4
 
-# Correction du clustering carte OpenStreetMap
+## Diagnostic approfondi
 
-## Diagnostic
+Le test en navigateur confirme que cliquer sur l'onglet "Carte" provoque un crash avec l'erreur :
 
-Le probleme vient de la chaine de dependances entre Vite et les librairies Leaflet :
+```
+TypeError: render2 is not a function
+    at updateContextConsumer
+```
+
+### Cause racine
+`react-leaflet-cluster` v4.0.0 declare `"react": "^19.0.0"` dans ses `peerDependencies`. Il utilise `createPathComponent` de `@react-leaflet/core` v3.0.0, qui repose sur l'API de contexte React 19 (nouvelle signature `Context.Provider` / consumer). Or ce projet utilise **React 18**, dont l'API de contexte est differente, ce qui fait echouer l'appel interne `render2()`.
+
+La chaine de dependances problematique :
 
 ```text
-react-leaflet-cluster (ESM, v4.0.0)
-  --> import "leaflet.markercluster" (UMD/CJS, v1.5.3)
-      --> Utilise le pattern IIFE : (function(global, factory){...}(this, ...))
+react-leaflet-cluster v4.0.0 (React 19 requis)
+  -> @react-leaflet/core v3.0.0 (React 19 requis)
+    -> createPathComponent() utilise React 19 Context API
+      -> CRASH sur React 18 : "render2 is not a function"
 ```
 
-`leaflet.markercluster` est un module UMD ancien qui utilise `this` comme reference globale. Vite, en mode ESM, ne pre-bundle pas automatiquement ce type de dependance transitive, ce qui provoque des erreurs au runtime (reference `this` undefined en mode strict ESM, ou echec d'import CJS).
+Les composants de base (`MapContainer`, `TileLayer`, `Marker`, `Popup`) fonctionnent car ils n'utilisent pas `createPathComponent` de la meme maniere.
 
-De plus, la version 4.0.0 de `react-leaflet-cluster` exige desormais un **import manuel des fichiers CSS** pour le styling des clusters (changement de rupture depuis v3.0.0).
+### Bug secondaire detecte
+Les imports CSS dans `MapView.tsx` sont en double (lignes 11-14), probablement dus a une edition precedente.
 
-## Corrections a appliquer
+## Solution retenue
 
-### 1. Forcer le pre-bundling dans vite.config.ts
+**Creer un composant wrapper imperatif** qui utilise directement `leaflet.markercluster` via le hook `useMap()` de react-leaflet, sans passer par `createPathComponent`. Cela contourne entierement l'incompatibilite React 18/19.
 
-Ajouter `leaflet.markercluster` dans `optimizeDeps.include` pour que Vite le convertisse en ESM lors du pre-bundling. Cela resout l'incompatibilite CJS/ESM :
+Cette approche :
+- Ne necessite pas de changer la version de React (risque eleve)
+- Ne necessite pas de downgrader react-leaflet (casserait d'autres composants)
+- Preserve toute la fonctionnalite existante (icones custom, popups, clustering)
+
+## Plan d'implementation
+
+### Etape 1 : Creer le composant wrapper `CustomMarkerClusterGroup`
+
+Creer un nouveau fichier `src/components/ai-companies/CustomMarkerClusterGroup.tsx` qui :
+
+- Utilise `useMap()` pour acceder a l'instance Leaflet
+- Cree un `L.MarkerClusterGroup` dans un `useEffect`
+- Detecte les enfants `Marker` via `React.Children` et `createPortal` OU, plus simplement, accepte les markers comme donnees (props) et les cree imperativement
+- Gere le nettoyage (cleanup) a la destruction du composant
+
+Architecture du composant :
 
 ```typescript
-// vite.config.ts
-optimizeDeps: {
-  include: ['leaflet.markercluster'],
-},
+// Approche imperative : les markers sont crees directement via Leaflet
+// au lieu de passer par des composants React enfants
+const CustomMarkerClusterGroup = ({
+  companies,
+  iconCreateFunction,
+  maxClusterRadius,
+  onMarkerClick,
+  createMarkerIcon,
+  renderPopupContent,
+}: Props) => {
+  const map = useMap();
+
+  useEffect(() => {
+    const clusterGroup = L.markerClusterGroup({
+      iconCreateFunction,
+      maxClusterRadius,
+      chunkedLoading: true,
+      spiderfyOnMaxZoom: true,
+      showCoverageOnHover: false,
+      zoomToBoundsOnClick: true,
+    });
+
+    companies.forEach(company => {
+      const marker = L.marker(
+        [company.coordinates.lat, company.coordinates.lng],
+        { icon: createMarkerIcon(company.isLabeled) }
+      );
+      marker.bindPopup(renderPopupContent(company));
+      clusterGroup.addLayer(marker);
+    });
+
+    map.addLayer(clusterGroup);
+    return () => { map.removeLayer(clusterGroup); };
+  }, [companies, map]);
+
+  return null;
+};
 ```
 
-### 2. Importer les CSS de clustering dans MapView.tsx
+### Etape 2 : Mettre a jour MapView.tsx
 
-Ajouter les imports CSS requis par react-leaflet-cluster v4 :
+- Supprimer l'import de `react-leaflet-cluster`
+- Supprimer les imports CSS en double
+- Importer le CSS de `leaflet.markercluster` directement
+- Remplacer `<MarkerClusterGroup>` par le nouveau composant imperatif
+- Deplacer le contenu des popups dans une fonction `renderPopupContent` qui retourne du HTML string (requis par l'API Leaflet native `bindPopup`)
+- Conserver les fonctions `createCustomIcon` et `createClusterCustomIcon` existantes
 
-```typescript
-import 'react-leaflet-cluster/dist/assets/MarkerCluster.css';
-import 'react-leaflet-cluster/dist/assets/MarkerCluster.Default.css';
-```
+### Etape 3 : Nettoyer les dependances dans vite.config.ts
 
-Ces CSS fournissent les styles de base pour les icones de cluster (animation, z-index, positionnement). Sans eux, les clusters s'affichent mais sans style.
+Garder `leaflet.markercluster` dans `optimizeDeps.include` car il reste necessaire pour le pre-bundling.
 
-### 3. Nettoyer le commentaire @ts-ignore
+---
 
-Le commentaire `// @ts-ignore - CJS module` peut etre conserve car le package n'exporte pas de types parfaitement compatibles, mais l'import lui-meme fonctionnera correctement apres le fix Vite.
-
-## Fichiers modifies
+## Fichiers impactes
 
 | Fichier | Modification |
 |---|---|
-| `vite.config.ts` | Ajouter `optimizeDeps.include: ['leaflet.markercluster']` |
-| `src/components/ai-companies/MapView.tsx` | Ajouter les 2 imports CSS pour le clustering |
+| `src/components/ai-companies/CustomMarkerClusterGroup.tsx` | Nouveau fichier - wrapper imperatif |
+| `src/components/ai-companies/MapView.tsx` | Remplacer react-leaflet-cluster par le wrapper custom, supprimer imports en double, ajouter CSS leaflet.markercluster |
 
-## Risques
+## Considerations techniques
 
-- **Aucun risque de regression** : `optimizeDeps.include` affecte uniquement le pre-bundling de developpement et le build de production
-- Le reste du composant MapView (markers, popups, legende) reste inchange
-
+- **Popups** : L'API native Leaflet `bindPopup()` accepte du HTML string ou un element DOM, pas du JSX. Le contenu des popups sera donc genere en HTML string. Cela signifie que les boutons "Voir les details" utiliseront `window.location.href` au lieu de `navigate()` de React Router. L'alternative serait d'utiliser `ReactDOM.createRoot` pour monter du JSX dans chaque popup, mais cela ajoute de la complexite.
+- **Performance** : L'approche imperative est en fait plus performante que la version React car les markers sont geres directement par Leaflet sans passer par le cycle de rendu React.
+- **Styles de cluster** : Les CSS de `leaflet.markercluster` (`MarkerCluster.css` et `MarkerCluster.Default.css`) seront importes depuis `leaflet.markercluster/dist/` au lieu de `react-leaflet-cluster/dist/assets/`.
