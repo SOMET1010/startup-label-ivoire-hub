@@ -20,6 +20,6 @@ export default defineConfig(({ mode }) => ({
     },
   },
   optimizeDeps: {
-    include: ['leaflet.markercluster'],
+    include: ['leaflet.markercluster', 'react-leaflet', '@react-leaflet/core'],
   },
 }));
