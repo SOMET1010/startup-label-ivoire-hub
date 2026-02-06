@@ -98,6 +98,11 @@
           }
         }
       }
+    },
+    "contact": {
+      "text": "Vous n'avez pas trouvé la réponse à votre question ?",
+      "contactButton": "Nous contacter",
+      "eligibilityButton": "Tester mon éligibilité"
     }
   },
   "criteria": {

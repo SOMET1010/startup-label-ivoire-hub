@@ -7,9 +7,11 @@ import { faqPageJsonLd } from "@/lib/seo/jsonld";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, HelpCircle, MessageCircle } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const FAQ = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -139,6 +141,28 @@ const FAQ = () => {
               </div>
             </div>
           )}
+        </div>
+
+        <div className="text-center py-12 bg-muted/30 border-t border-border">
+          <div className="container mx-auto px-4">
+            <p className="text-muted-foreground mb-4">
+              {t('faq.contact.text')}
+            </p>
+            <div className="flex gap-3 justify-center">
+              <Button variant="outline" asChild>
+                <Link to="/eligibilite">
+                  <HelpCircle className="mr-2 h-4 w-4" />
+                  {t('faq.contact.eligibilityButton')}
+                </Link>
+              </Button>
+              <Button asChild>
+                <Link to="/#contact">
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  {t('faq.contact.contactButton')}
+                </Link>
+              </Button>
+            </div>
+          </div>
         </div>
       </main>
       <Footer />
