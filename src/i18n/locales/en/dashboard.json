@@ -250,5 +250,109 @@
         "save": "Save changes"
       }
     }
+  },
+  "investor": {
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "startups": "Labeled Startups",
+      "interests": "My Interests",
+      "messages": "Messages",
+      "profile": "My Profile",
+      "settings": "Settings",
+      "backToHome": "Back to home",
+      "subtitle": "Investor Space",
+      "investorLabel": "My fund",
+      "active": "Active"
+    },
+    "header": {
+      "breadcrumb": "Investor Space",
+      "routes": {
+        "dashboard": "Dashboard",
+        "startups": "Labeled Startups",
+        "interests": "My Interests",
+        "messages": "Messages",
+        "profile": "My Profile",
+        "settings": "Settings"
+      }
+    },
+    "dashboard": {
+      "title": "Investor Dashboard",
+      "welcome": "Welcome, {{name}}!",
+      "subtitle": "Explore labeled startups and manage your investment opportunities.",
+      "kpi": {
+        "availableStartups": "Available startups",
+        "markedInterests": "Marked interests",
+        "contacted": "Contacted",
+        "sectors": "Sectors covered"
+      },
+      "recentStartups": "Recent labeled startups",
+      "viewAll": "View all",
+      "noStartups": "No labeled startups available at the moment.",
+      "action": {
+        "startups": "Startup catalog",
+        "startupsDesc": "Browse labeled startups",
+        "interests": "My interests",
+        "interestsDesc": "Manage marked startups",
+        "profile": "My profile",
+        "profileDesc": "Edit my investment thesis"
+      }
+    },
+    "startups": {
+      "title": "Labeled Startups",
+      "subtitle": "Discover startups certified by the Digital Startup Label",
+      "searchPlaceholder": "Search by name or sector...",
+      "filterSector": "Filter by sector",
+      "allSectors": "All sectors",
+      "noResults": "No startups found.",
+      "noDescription": "No description available.",
+      "members": "members",
+      "markInterest": "Mark interest",
+      "interested": "Interested"
+    },
+    "interests": {
+      "title": "My Interests",
+      "subtitle": "Track the startups you're interested in",
+      "empty": "No interests marked yet. Explore the startup catalog to get started.",
+      "notesPlaceholder": "Add private notes...",
+      "addNotes": "Click to add notes...",
+      "save": "Save",
+      "cancel": "Cancel",
+      "status": {
+        "interested": "Interested",
+        "contacted": "Contacted",
+        "meeting": "Meeting planned",
+        "passed": "Passed"
+      }
+    },
+    "messages": {
+      "title": "Messages",
+      "subtitle": "Your conversations with startups",
+      "noMessages": "No messages yet.",
+      "hint": "Messages will appear here when you contact startups."
+    },
+    "profile": {
+      "title": "Investor Profile",
+      "subtitle": "Manage your information and investment thesis",
+      "cardTitle": "Investor information",
+      "form": {
+        "name": "Name / Company",
+        "description": "Description / Investment thesis",
+        "type": "Investor type",
+        "typePlaceholder": "Select a type",
+        "stages": "Investment stages",
+        "ticketMin": "Minimum ticket (FCFA)",
+        "ticketMax": "Maximum ticket (FCFA)",
+        "sectors": "Target sectors",
+        "sectorsPlaceholder": "AI, Fintech, AgriTech...",
+        "sectorsHint": "Separate sectors with commas",
+        "location": "Location",
+        "website": "Website",
+        "save": "Save changes"
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "subtitle": "Manage your account preferences"
+    }
   }
 }

@@ -17,6 +17,7 @@ import { SkipLink } from "./components/shared/SkipLink";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { StartupLayout } from "./components/startup/StartupLayout";
 import { StructureLayout } from "./components/structure/StructureLayout";
+import { InvestorLayout } from "./components/investor/InvestorLayout";
 import { useLanguageSync } from "./hooks/useLanguageSync";
 // Pages critiques - import statique pour chargement instantané
 import Index from "./pages/Index";
@@ -71,6 +72,14 @@ const StructureStartups = lazy(() => import("./pages/structure/Startups"));
 const StructurePrograms = lazy(() => import("./pages/structure/Programs"));
 const StructureProfile = lazy(() => import("./pages/structure/Profile"));
 const StructureSettings = lazy(() => import("./pages/structure/Settings"));
+
+// Pages investor - lazy loading
+const InvestorDashboard = lazy(() => import("./pages/investor/Dashboard"));
+const InvestorStartups = lazy(() => import("./pages/investor/Startups"));
+const InvestorInterests = lazy(() => import("./pages/investor/Interests"));
+const InvestorMessages = lazy(() => import("./pages/investor/Messages"));
+const InvestorProfile = lazy(() => import("./pages/investor/Profile"));
+const InvestorSettings = lazy(() => import("./pages/investor/Settings"));
 
 // Page de test - à supprimer en production
 const TestPush = lazy(() => import("./pages/TestPush"));
@@ -142,6 +151,24 @@ const StructureRoutes = () => (
   </ProtectedRoute>
 );
 
+// Investor routes wrapper component
+const InvestorRoutes = () => (
+  <ProtectedRoute>
+    <RoleGate allowedRoles={['investor']}>
+      <InvestorLayout>
+        <Routes>
+          <Route index element={<InvestorDashboard />} />
+          <Route path="startups" element={<InvestorStartups />} />
+          <Route path="interests" element={<InvestorInterests />} />
+          <Route path="messages" element={<InvestorMessages />} />
+          <Route path="profil" element={<InvestorProfile />} />
+          <Route path="settings" element={<InvestorSettings />} />
+        </Routes>
+      </InvestorLayout>
+    </RoleGate>
+  </ProtectedRoute>
+);
+
 // Inner component that can use hooks requiring AuthProvider
 const AppContent = () => {
   // Synchronize i18n language with user profile preference
@@ -187,6 +214,9 @@ const AppContent = () => {
             
             {/* Structure routes with dedicated layout */}
             <Route path="/structure/*" element={<StructureRoutes />} />
+            
+            {/* Investor routes with dedicated layout */}
+            <Route path="/investor/*" element={<InvestorRoutes />} />
             
             <Route path="/suivi-candidature" element={<SuiviCandidature />} />
             

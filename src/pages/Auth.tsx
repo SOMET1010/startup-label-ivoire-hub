@@ -62,6 +62,7 @@ export default function Auth() {
         admin: "/admin",
         startup: "/startup",
         structure: "/structure",
+        investor: "/investor",
         evaluator: "/admin",
       };
       navigate(redirectMap[userRole] || "/", { replace: true });
