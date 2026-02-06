@@ -250,5 +250,109 @@
         "save": "Enregistrer les modifications"
       }
     }
+  },
+  "investor": {
+    "sidebar": {
+      "dashboard": "Tableau de bord",
+      "startups": "Startups labellisées",
+      "interests": "Mes intérêts",
+      "messages": "Messages",
+      "profile": "Mon profil",
+      "settings": "Paramètres",
+      "backToHome": "Retour à l'accueil",
+      "subtitle": "Espace Investisseur",
+      "investorLabel": "Mon fonds",
+      "active": "Actif"
+    },
+    "header": {
+      "breadcrumb": "Espace Investisseur",
+      "routes": {
+        "dashboard": "Tableau de bord",
+        "startups": "Startups labellisées",
+        "interests": "Mes intérêts",
+        "messages": "Messages",
+        "profile": "Mon profil",
+        "settings": "Paramètres"
+      }
+    },
+    "dashboard": {
+      "title": "Tableau de bord Investisseur",
+      "welcome": "Bienvenue, {{name}} !",
+      "subtitle": "Explorez les startups labellisées et gérez vos opportunités d'investissement.",
+      "kpi": {
+        "availableStartups": "Startups disponibles",
+        "markedInterests": "Intérêts marqués",
+        "contacted": "Contactées",
+        "sectors": "Secteurs couverts"
+      },
+      "recentStartups": "Dernières startups labellisées",
+      "viewAll": "Voir tout",
+      "noStartups": "Aucune startup labellisée disponible pour le moment.",
+      "action": {
+        "startups": "Catalogue startups",
+        "startupsDesc": "Parcourir les startups labellisées",
+        "interests": "Mes intérêts",
+        "interestsDesc": "Gérer les startups marquées",
+        "profile": "Mon profil",
+        "profileDesc": "Modifier ma thèse d'investissement"
+      }
+    },
+    "startups": {
+      "title": "Startups labellisées",
+      "subtitle": "Découvrez les startups certifiées par le Label Startup Numérique",
+      "searchPlaceholder": "Rechercher par nom ou secteur...",
+      "filterSector": "Filtrer par secteur",
+      "allSectors": "Tous les secteurs",
+      "noResults": "Aucune startup trouvée.",
+      "noDescription": "Pas de description disponible.",
+      "members": "membres",
+      "markInterest": "Marquer mon intérêt",
+      "interested": "Intéressé"
+    },
+    "interests": {
+      "title": "Mes intérêts",
+      "subtitle": "Suivez les startups qui vous intéressent",
+      "empty": "Aucun intérêt marqué. Explorez le catalogue de startups pour commencer.",
+      "notesPlaceholder": "Ajouter des notes privées...",
+      "addNotes": "Cliquer pour ajouter des notes...",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "status": {
+        "interested": "Intéressé",
+        "contacted": "Contacté",
+        "meeting": "RDV planifié",
+        "passed": "Passé"
+      }
+    },
+    "messages": {
+      "title": "Messages",
+      "subtitle": "Vos échanges avec les startups",
+      "noMessages": "Aucun message pour le moment.",
+      "hint": "Les messages apparaîtront ici lorsque vous contacterez des startups."
+    },
+    "profile": {
+      "title": "Profil investisseur",
+      "subtitle": "Gérez vos informations et votre thèse d'investissement",
+      "cardTitle": "Informations de l'investisseur",
+      "form": {
+        "name": "Nom / Raison sociale",
+        "description": "Description / Thèse d'investissement",
+        "type": "Type d'investisseur",
+        "typePlaceholder": "Sélectionnez un type",
+        "stages": "Stades d'investissement",
+        "ticketMin": "Ticket minimum (FCFA)",
+        "ticketMax": "Ticket maximum (FCFA)",
+        "sectors": "Secteurs cibles",
+        "sectorsPlaceholder": "IA, Fintech, AgriTech...",
+        "sectorsHint": "Séparez les secteurs par des virgules",
+        "location": "Localisation",
+        "website": "Site web",
+        "save": "Enregistrer les modifications"
+      }
+    },
+    "settings": {
+      "title": "Paramètres",
+      "subtitle": "Gérez vos préférences de compte"
+    }
   }
 }

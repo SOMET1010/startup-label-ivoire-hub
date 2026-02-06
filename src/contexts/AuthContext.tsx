@@ -3,7 +3,7 @@ import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-type UserRole = 'admin' | 'startup' | 'evaluator' | 'structure' | 'public';
+type UserRole = 'admin' | 'startup' | 'evaluator' | 'structure' | 'investor' | 'public';
 
 export type ThemePreference = 'light' | 'dark' | 'system';
 export type LanguagePreference = 'fr' | 'en';
@@ -42,6 +42,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isStartup: boolean;
   isStructure: boolean;
+  isInvestor: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -231,6 +232,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isAdmin = userRole === 'admin';
   const isStartup = userRole === 'startup';
   const isStructure = userRole === 'structure';
+  const isInvestor = userRole === 'investor';
 
   const value = {
     user,
@@ -244,6 +246,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAdmin,
     isStartup,
     isStructure,
+    isInvestor,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

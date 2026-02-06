@@ -1,7 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
-type UserRole = 'admin' | 'startup' | 'evaluator' | 'structure' | 'public';
+type UserRole = 'admin' | 'startup' | 'evaluator' | 'structure' | 'investor' | 'public';
 
 interface RoleGateProps {
   allowedRoles: UserRole[];

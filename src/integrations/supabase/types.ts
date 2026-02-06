@@ -318,6 +318,108 @@ export type Database = {
         }
         Relationships: []
       }
+      investor_interests: {
+        Row: {
+          created_at: string
+          id: string
+          investor_id: string
+          notes: string | null
+          startup_id: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          investor_id: string
+          notes?: string | null
+          startup_id: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          investor_id?: string
+          notes?: string | null
+          startup_id?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investor_interests_investor_id_fkey"
+            columns: ["investor_id"]
+            isOneToOne: false
+            referencedRelation: "investors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "investor_interests_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      investors: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          investment_stages: string[] | null
+          location: string | null
+          logo_url: string | null
+          name: string
+          portfolio_count: number | null
+          status: string | null
+          target_sectors: string[] | null
+          ticket_max: number | null
+          ticket_min: number | null
+          type: string | null
+          updated_at: string
+          user_id: string
+          website: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          investment_stages?: string[] | null
+          location?: string | null
+          logo_url?: string | null
+          name: string
+          portfolio_count?: number | null
+          status?: string | null
+          target_sectors?: string[] | null
+          ticket_max?: number | null
+          ticket_min?: number | null
+          type?: string | null
+          updated_at?: string
+          user_id: string
+          website?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          investment_stages?: string[] | null
+          location?: string | null
+          logo_url?: string | null
+          name?: string
+          portfolio_count?: number | null
+          status?: string | null
+          target_sectors?: string[] | null
+          ticket_max?: number | null
+          ticket_min?: number | null
+          type?: string | null
+          updated_at?: string
+          user_id?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       label_events: {
         Row: {
           created_at: string | null
@@ -1029,7 +1131,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "startup" | "evaluator" | "structure"
+      app_role: "admin" | "startup" | "evaluator" | "structure" | "investor"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1157,7 +1259,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "startup", "evaluator", "structure"],
+      app_role: ["admin", "startup", "evaluator", "structure", "investor"],
     },
   },
 } as const
