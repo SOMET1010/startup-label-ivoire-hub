@@ -32,16 +32,16 @@ import type { Tables } from "@/integrations/supabase/types";
 type LegalDocument = Tables<"legal_documents">;
 
 const DOC_TYPE_LABELS: Record<string, string> = {
-  loi: "Loi",
-  decret: "Décret",
-  arrete: "Arrêté",
-  circulaire: "Circulaire",
+  law: "Loi",
+  decree: "Décret",
+  order: "Arrêté",
+  circular: "Circulaire",
 };
 
 const EMPTY_FORM = {
   title: "",
   description: "",
-  document_type: "loi",
+  document_type: "law",
   official_number: "",
   published_date: "",
   external_url: "",
@@ -271,10 +271,10 @@ export default function AdminLegalDocuments() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tous les types</SelectItem>
-              <SelectItem value="loi">Loi</SelectItem>
-              <SelectItem value="decret">Décret</SelectItem>
-              <SelectItem value="arrete">Arrêté</SelectItem>
-              <SelectItem value="circulaire">Circulaire</SelectItem>
+              <SelectItem value="law">Loi</SelectItem>
+              <SelectItem value="decree">Décret</SelectItem>
+              <SelectItem value="order">Arrêté</SelectItem>
+              <SelectItem value="circular">Circulaire</SelectItem>
             </SelectContent>
           </Select>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -436,10 +436,10 @@ export default function AdminLegalDocuments() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="loi">Loi</SelectItem>
-                    <SelectItem value="decret">Décret</SelectItem>
-                    <SelectItem value="arrete">Arrêté</SelectItem>
-                    <SelectItem value="circulaire">Circulaire</SelectItem>
+                    <SelectItem value="law">Loi</SelectItem>
+                    <SelectItem value="decree">Décret</SelectItem>
+                    <SelectItem value="order">Arrêté</SelectItem>
+                    <SelectItem value="circular">Circulaire</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
