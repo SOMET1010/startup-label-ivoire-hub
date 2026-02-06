@@ -27,6 +27,8 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { SEOHead } from "@/components/shared/SEOHead";
+import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
 import { QuizProgress } from "@/components/eligibility/QuizProgress";
 import { QuizQuestion } from "@/components/eligibility/QuizQuestion";
 import { EligibilityResult } from "@/components/eligibility/EligibilityResult";
@@ -131,10 +133,16 @@ export default function EligibiliteQuiz() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Test d'éligibilité au Label Startup"
+        description="Vérifiez en quelques minutes si votre startup est éligible au Label Startup Numérique de Côte d'Ivoire."
+        path="/eligibilite"
+      />
       <Navbar />
       
-      <main className="pt-24 pb-16 px-4">
+      <main id="main-content" className="pt-24 pb-16 px-4">
         <div className="container max-w-2xl mx-auto">
+          <PageBreadcrumb />
           {/* Header */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary mb-4">

@@ -11,6 +11,8 @@ import CompanyContact from "@/components/ai-companies/CompanyContact";
 import CompanyStats from "@/components/ai-companies/CompanyStats";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { SEOHead } from "@/components/shared/SEOHead";
+import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
 
 const EntrepriseIADetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -45,12 +47,21 @@ const EntrepriseIADetail = () => {
   
   return (
     <div className="min-h-screen flex flex-col">
+      <SEOHead
+        title={company.name}
+        description={company.description || `Découvrez ${company.name}, entreprise IA labellisée en Côte d'Ivoire.`}
+        path={`/entreprises-ia/${company.id}`}
+      />
       <Navbar />
       
       <main className="flex-grow">
         <CompanyHeader company={company} />
         
         <div className="container mx-auto px-4 py-12 space-y-16">
+          <PageBreadcrumb
+            currentLabel={company.name}
+            parents={[{ label: "Entreprises IA", href: "/entreprises-ia" }]}
+          />
           <CompanyOverview company={company} />
           
           {company.keyStats && <CompanyStats company={company} />}

@@ -10,6 +10,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, Building2, MapPin, Globe, Users, ExternalLink, Award } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { SEOHead } from "@/components/shared/SEOHead";
+import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
 
 interface Startup {
   id: string;
@@ -173,9 +175,15 @@ const Annuaire = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEOHead
+        title="Annuaire des Startups Labellisées"
+        description="Explorez l'annuaire des startups labellisées en Côte d'Ivoire. Trouvez des entreprises innovantes par secteur, ville et stade de développement."
+        path="/annuaire"
+      />
       <Navbar />
-      <main className="flex-grow py-12 bg-muted/30">
+      <main id="main-content" className="flex-grow py-12 bg-muted/30">
         <div className="container mx-auto px-4">
+          <PageBreadcrumb />
           {/* Header */}
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-medium text-sm mb-4">

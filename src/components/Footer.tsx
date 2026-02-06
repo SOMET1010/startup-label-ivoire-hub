@@ -157,6 +157,11 @@ const Footer = () => {
                   {t('footer.privacy')}
                 </Link>
               </li>
+              <li>
+                <Link to="/cgu" className="text-gray-300 hover:text-white transition-colors">
+                  {t('footer.terms')}
+                </Link>
+              </li>
               {isInstitutional && (
                 <li>
                   <Link to="/accessibilite" className="text-gray-300 hover:text-white transition-colors">
