@@ -118,6 +118,48 @@ export type Database = {
           },
         ]
       }
+      committee_members: {
+        Row: {
+          bio: string | null
+          created_at: string
+          display_order: number | null
+          full_name: string
+          id: string
+          is_active: boolean | null
+          organization: string | null
+          photo_url: string | null
+          role_in_committee: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          display_order?: number | null
+          full_name: string
+          id?: string
+          is_active?: boolean | null
+          organization?: string | null
+          photo_url?: string | null
+          role_in_committee?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          display_order?: number | null
+          full_name?: string
+          id?: string
+          is_active?: boolean | null
+          organization?: string | null
+          photo_url?: string | null
+          role_in_committee?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contact_messages: {
         Row: {
           created_at: string
@@ -585,6 +627,51 @@ export type Database = {
         }
         Relationships: []
       }
+      legal_documents: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number | null
+          document_type: string
+          external_url: string | null
+          file_url: string | null
+          id: string
+          is_active: boolean | null
+          official_number: string | null
+          published_date: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          document_type: string
+          external_url?: string | null
+          file_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          official_number?: string | null
+          published_date?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          document_type?: string
+          external_url?: string | null
+          file_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          official_number?: string | null
+          published_date?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       news: {
         Row: {
           author_id: string | null
@@ -627,6 +714,27 @@ export type Database = {
           tags?: string[] | null
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      platform_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: string
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value: string
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: string
         }
         Relationships: []
       }

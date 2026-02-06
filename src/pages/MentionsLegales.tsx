@@ -2,8 +2,11 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
 import { SEOHead } from "@/components/shared/SEOHead";
+import { usePlatformSettings } from "@/hooks/usePlatformSettings";
 
 const MentionsLegales = () => {
+  const { settings } = usePlatformSettings();
+
   return (
     <div className="min-h-screen flex flex-col">
       <SEOHead
@@ -20,18 +23,17 @@ const MentionsLegales = () => {
 
           <h2>Éditeur du site</h2>
           <p>
-            <strong>Ivoire Hub</strong> est une plateforme éditée par le Ministère de la Communication
-            et de l'Économie Numérique de la République de Côte d'Ivoire, en partenariat avec Etudesk.
+            <strong>{settings.platform_name}</strong> est une plateforme éditée par le {settings.ministry_name} de la République de Côte d'Ivoire, en partenariat avec Etudesk.
           </p>
           <ul>
-            <li><strong>Raison sociale :</strong> Ministère de la Communication et de l'Économie Numérique</li>
-            <li><strong>Adresse :</strong> Abidjan, Plateau, Côte d'Ivoire</li>
-            <li><strong>Email :</strong> contact@ivoirehub.ci</li>
-            <li><strong>Téléphone :</strong> +225 27 22 XX XX XX</li>
+            <li><strong>Raison sociale :</strong> {settings.ministry_name}</li>
+            <li><strong>Adresse :</strong> {settings.ministry_address}</li>
+            <li><strong>Email :</strong> {settings.platform_email}</li>
+            <li><strong>Téléphone :</strong> {settings.ministry_phone}</li>
           </ul>
 
           <h2>Directeur de la publication</h2>
-          <p>Le directeur de la publication est le Ministre de la Communication et de l'Économie Numérique.</p>
+          <p>Le directeur de la publication est le {settings.minister_title}.</p>
 
           <h2>Hébergement</h2>
           <p>

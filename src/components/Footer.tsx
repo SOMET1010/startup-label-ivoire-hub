@@ -2,12 +2,14 @@ import { Link } from "react-router-dom";
 import { ExternalLink, Facebook, Twitter, Linkedin } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useBrand } from "@/hooks/useBrand";
+import { usePlatformSettings } from "@/hooks/usePlatformSettings";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   const { brand } = useBrand();
   const isInstitutional = brand === "ansut";
   const { t } = useTranslation('common');
+  const { settings } = usePlatformSettings();
 
   return (
     <footer className={isInstitutional ? "footer-institutional text-white" : "bg-gray-900 text-white"}>
@@ -138,6 +140,16 @@ const Footer = () => {
             <h3 className="text-lg font-bold mb-4">{t('footer.information')}</h3>
             <ul className="space-y-2">
               <li>
+                <Link to="/cadre-juridique" className="text-gray-300 hover:text-white transition-colors">
+                  {t('nav.legalFramework')}
+                </Link>
+              </li>
+              <li>
+                <Link to="/comite" className="text-gray-300 hover:text-white transition-colors">
+                  {t('nav.committee')}
+                </Link>
+              </li>
+              <li>
                 <Link to="/faq" className="text-gray-300 hover:text-white transition-colors">
                   {t('footer.faq')}
                 </Link>
@@ -182,8 +194,8 @@ const Footer = () => {
                   <p>Côte d'Ivoire</p>
                 </>
               ) : (
-                <>
-                  <p>Ministère de la Communication et de l'Économie Numérique</p>
+              <>
+                  <p>{settings.ministry_name}</p>
                   <p>{t('footer.address')}</p>
                 </>
               )}

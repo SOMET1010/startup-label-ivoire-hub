@@ -2,7 +2,9 @@
   "nav": {
     "home": "Home",
     "labeling": "Labeling",
+    "legalFramework": "Legal Framework",
     "criteria": "Criteria",
+    "committee": "Committee",
     "apply": "Apply",
     "directory": "Directory",
     "news": "News",
@@ -77,7 +79,9 @@
     "entreprises": "AI Companies",
     "eligibilite": "Eligibility Test",
     "postuler": "Apply",
-    "annuaire": "Directory"
+    "annuaire": "Directory",
+    "cadreJuridique": "Legal Framework",
+    "comite": "Labeling Committee"
   },
   "skipLink": "Skip to main content"
 }
