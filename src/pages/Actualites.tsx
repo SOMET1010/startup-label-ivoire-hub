@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
+import { SEOHead } from "@/components/shared/SEOHead";
 import NewsHero from "@/components/news/NewsHero";
 import NewsFiltersLive from "@/components/news/NewsFiltersLive";
 import NewsGridLive from "@/components/news/NewsGridLive";
@@ -68,6 +69,11 @@ const Actualites = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEOHead
+        title="Actualités"
+        description="Toutes les actualités de l'écosystème startup et innovation numérique en Côte d'Ivoire."
+        path="/actualites"
+      />
       <Navbar />
       <PageBreadcrumb className="py-3 bg-muted/30 border-b border-border" />
       <main id="main-content" className="flex-grow">

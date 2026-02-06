@@ -2,6 +2,8 @@ import { useState, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
+import { SEOHead } from "@/components/shared/SEOHead";
+import { faqPageJsonLd } from "@/lib/seo/jsonld";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -52,8 +54,20 @@ const FAQ = () => {
     })).filter(category => category.questions.length > 0);
   }, [faqCategories, searchTerm]);
 
+  // Build flat FAQ list for JSON-LD
+  const allFaqItems = useMemo(() => 
+    faqCategories.flatMap(cat => cat.questions),
+    [faqCategories]
+  );
+
   return (
     <div className="min-h-screen flex flex-col">
+      <SEOHead
+        title="FAQ"
+        description="Questions fréquentes sur la labellisation des startups en Côte d'Ivoire : critères, processus, avantages et accompagnement."
+        path="/faq"
+        jsonLd={faqPageJsonLd(allFaqItems)}
+      />
       <Navbar />
       <PageBreadcrumb className="py-3 bg-muted/30 border-b border-border" />
       <main id="main-content" className="flex-grow">

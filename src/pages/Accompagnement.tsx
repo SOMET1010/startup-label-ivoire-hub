@@ -2,6 +2,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
+import { SEOHead } from "@/components/shared/SEOHead";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -113,6 +114,11 @@ const Accompagnement = () => {
   
   return (
     <div className="min-h-screen flex flex-col">
+      <SEOHead
+        title="Accompagnement"
+        description="Structures d'accompagnement partenaires du programme de labellisation : incubateurs, accélérateurs et studios d'innovation en Côte d'Ivoire."
+        path="/accompagnement"
+      />
       <Navbar />
       <PageBreadcrumb className="py-3 bg-muted/30 border-b border-border" />
       <main id="main-content" className="flex-grow">

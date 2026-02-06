@@ -12,3 +12,5 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://startup-label-ivoire-hub.lovable.app/sitemap.xml

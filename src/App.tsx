@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -39,6 +40,11 @@ const EntreprisesIA = lazy(() => import("./pages/EntreprisesIA"));
 const EntrepriseIADetail = lazy(() => import("./pages/EntrepriseIADetail"));
 const Annuaire = lazy(() => import("./pages/Annuaire"));
 const SuiviCandidature = lazy(() => import("./pages/SuiviCandidature"));
+
+// Pages légales - lazy loading
+const MentionsLegales = lazy(() => import("./pages/MentionsLegales"));
+const Confidentialite = lazy(() => import("./pages/Confidentialite"));
+const CGU = lazy(() => import("./pages/CGU"));
 
 // Pages admin - lazy loading
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
@@ -139,6 +145,11 @@ const AppContent = () => {
             <Route path="/actualites" element={<Actualites />} />
             <Route path="/test-push" element={<TestPush />} />
             
+            {/* Legal pages */}
+            <Route path="/mentions-legales" element={<MentionsLegales />} />
+            <Route path="/confidentialite" element={<Confidentialite />} />
+            <Route path="/cgu" element={<CGU />} />
+            
             {/* Auth routes */}
             <Route path="/auth" element={<Auth />} />
             <Route path="/connexion" element={<Auth />} />
@@ -183,19 +194,21 @@ const AppContent = () => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AuthProvider>
-            <AppContent />
-          </AuthProvider>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
+  <HelmetProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AuthProvider>
+              <AppContent />
+            </AuthProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  </HelmetProvider>
 );
 
 export default App;
