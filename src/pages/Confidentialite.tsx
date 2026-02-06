@@ -2,8 +2,11 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
 import { SEOHead } from "@/components/shared/SEOHead";
+import { usePlatformSettings } from "@/hooks/usePlatformSettings";
 
 const Confidentialite = () => {
+  const { settings } = usePlatformSettings();
+
   return (
     <div className="min-h-screen flex flex-col">
       <SEOHead
@@ -23,8 +26,8 @@ const Confidentialite = () => {
 
           <h2>1. Responsable du traitement</h2>
           <p>
-            Le responsable du traitement des données collectées sur la plateforme Ivoire Hub est
-            le Ministère de la Communication et de l'Économie Numérique de la République de Côte d'Ivoire.
+            Le responsable du traitement des données collectées sur la plateforme {settings.platform_name} est
+            le {settings.ministry_name} de la République de Côte d'Ivoire.
           </p>
 
           <h2>2. Données collectées</h2>

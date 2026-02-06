@@ -15,7 +15,9 @@ export const MAIN_NAV_ITEMS: NavItem[] = [
     label: "Labellisation", 
     href: "#",
     children: [
+      { label: "Cadre juridique", href: "/cadre-juridique" },
       { label: "Critères", href: "/criteres" },
+      { label: "Comité", href: "/comite" },
       { label: "Postuler", href: "/postuler" },
     ]
   },
@@ -38,6 +40,8 @@ export const FOOTER_LINKS = {
   resources: [
     { label: "FAQ", href: "/faq" },
     { label: "Contact", href: "/contact" },
+    { label: "Cadre juridique", href: "/cadre-juridique" },
+    { label: "Comité", href: "/comite" },
     { label: "Actualités", href: "/actualites" },
   ],
 } as const;

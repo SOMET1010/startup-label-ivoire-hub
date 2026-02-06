@@ -2,7 +2,9 @@
   "nav": {
     "home": "Accueil",
     "labeling": "Labellisation",
+    "legalFramework": "Cadre juridique",
     "criteria": "Critères",
+    "committee": "Comité",
     "apply": "Postuler",
     "directory": "Annuaire",
     "news": "Actualités",
@@ -77,7 +79,9 @@
     "entreprises": "Entreprises IA",
     "eligibilite": "Test d'éligibilité",
     "postuler": "Postuler",
-    "annuaire": "Annuaire"
+    "annuaire": "Annuaire",
+    "cadreJuridique": "Cadre juridique",
+    "comite": "Comité de labellisation"
   },
   "skipLink": "Aller au contenu principal"
 }

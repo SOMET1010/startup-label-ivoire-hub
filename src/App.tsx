@@ -47,6 +47,8 @@ const SuiviCandidature = lazy(() => import("./pages/SuiviCandidature"));
 const MentionsLegales = lazy(() => import("./pages/MentionsLegales"));
 const Confidentialite = lazy(() => import("./pages/Confidentialite"));
 const CGU = lazy(() => import("./pages/CGU"));
+const CadreJuridique = lazy(() => import("./pages/CadreJuridique"));
+const Comite = lazy(() => import("./pages/Comite"));
 
 // Pages admin - lazy loading
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
@@ -201,6 +203,8 @@ const AppContent = () => {
             <Route path="/mentions-legales" element={<MentionsLegales />} />
             <Route path="/confidentialite" element={<Confidentialite />} />
             <Route path="/cgu" element={<CGU />} />
+            <Route path="/cadre-juridique" element={<CadreJuridique />} />
+            <Route path="/comite" element={<Comite />} />
             
             {/* Auth routes */}
             <Route path="/auth" element={<Auth />} />

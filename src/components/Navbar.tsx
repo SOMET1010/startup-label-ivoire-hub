@@ -55,6 +55,12 @@ const Navbar = () => {
     if (userRole === "admin" || userRole === "evaluator") {
       return "/admin";
     }
+    if (userRole === "investor") {
+      return "/investor";
+    }
+    if (userRole === "structure") {
+      return "/structure";
+    }
     return "/startup";
   };
 
@@ -93,11 +99,25 @@ const Navbar = () => {
                 role="menu"
               >
                 <Link 
-                  to="/criteres" 
+                  to="/cadre-juridique" 
                   className="block px-4 py-2.5 text-sm text-foreground hover:bg-accent rounded-t-lg focus-visible:bg-accent focus-visible:outline-none"
                   role="menuitem"
                 >
+                  {t('nav.legalFramework')}
+                </Link>
+                <Link 
+                  to="/criteres" 
+                  className="block px-4 py-2.5 text-sm text-foreground hover:bg-accent focus-visible:bg-accent focus-visible:outline-none"
+                  role="menuitem"
+                >
                   {t('nav.criteria')}
+                </Link>
+                <Link 
+                  to="/comite" 
+                  className="block px-4 py-2.5 text-sm text-foreground hover:bg-accent focus-visible:bg-accent focus-visible:outline-none"
+                  role="menuitem"
+                >
+                  {t('nav.committee')}
                 </Link>
                 <Link 
                   to="/postuler" 
@@ -270,11 +290,25 @@ const Navbar = () => {
                 </summary>
                 <div className="mt-2 ml-4 flex flex-col space-y-2">
                   <Link 
+                    to="/cadre-juridique" 
+                    className="text-muted-foreground hover:text-primary transition-colors py-1"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {t('nav.legalFramework')}
+                  </Link>
+                  <Link 
                     to="/criteres" 
                     className="text-muted-foreground hover:text-primary transition-colors py-1"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {t('nav.criteria')}
+                  </Link>
+                  <Link 
+                    to="/comite" 
+                    className="text-muted-foreground hover:text-primary transition-colors py-1"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {t('nav.committee')}
                   </Link>
                   <Link 
                     to="/postuler" 
