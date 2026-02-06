@@ -4,6 +4,9 @@ import { allNews } from "@/data/mockNews";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { CalendarDays } from "lucide-react";
+import { SEOHead } from "@/components/shared/SEOHead";
+import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
+import { articleJsonLd } from "@/lib/seo/jsonld";
 
 const ActualiteDetail = () => {
   const { id } = useParams();
@@ -27,11 +30,31 @@ const ActualiteDetail = () => {
     year: 'numeric'
   });
 
+  const jsonLd = articleJsonLd({
+    title: news.title,
+    description: news.excerpt,
+    image: news.imageUrl,
+    datePublished: news.date,
+    url: `https://startup-label-ivoire-hub.lovable.app/actualites/${news.id}`,
+  });
+
   return (
     <div className="min-h-screen flex flex-col">
+      <SEOHead
+        title={news.title}
+        description={news.excerpt}
+        path={`/actualites/${news.id}`}
+        ogImage={news.imageUrl}
+        ogType="article"
+        jsonLd={jsonLd}
+      />
       <Navbar />
-      <main className="flex-grow">
+      <main id="main-content" className="flex-grow">
         <div className="container mx-auto px-4 py-8">
+          <PageBreadcrumb
+            currentLabel={news.title}
+            parents={[{ label: "Actualités", href: "/actualites" }]}
+          />
           <article className="max-w-3xl mx-auto">
             {news.imageUrl && (
               <div className="rounded-xl overflow-hidden mb-8 aspect-video">

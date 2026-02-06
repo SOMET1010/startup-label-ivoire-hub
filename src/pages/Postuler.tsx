@@ -23,6 +23,8 @@ import DraftResumeBanner from "@/components/forms/DraftResumeBanner";
 import useDraftApplication from "@/hooks/useDraftApplication";
 import { FormErrorSummary } from "@/components/forms/FormErrorSummary";
 import { DocumentsChecklist } from "@/components/forms/DocumentsChecklist";
+import { SEOHead } from "@/components/shared/SEOHead";
+import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
 
 // File validation helper - returns undefined if valid file or no file for optional, or File
 const fileSchema = (required: boolean = false) => {
@@ -558,9 +560,16 @@ const Postuler = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEOHead
+        title="Postuler au Label Startup Numérique"
+        description="Soumettez votre candidature pour obtenir le Label Startup Numérique en Côte d'Ivoire. Formulaire officiel de demande de labellisation."
+        path="/postuler"
+        noindex
+      />
       <Navbar />
-      <main className="flex-grow py-12 bg-muted/30">
+      <main id="main-content" className="flex-grow py-12 bg-muted/30">
         <div className="container mx-auto px-4">
+          <PageBreadcrumb />
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold mb-2">Demande de labellisation</h1>
