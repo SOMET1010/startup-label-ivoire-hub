@@ -172,6 +172,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         emailRedirectTo: redirectUrl,
         data: {
           full_name: `${data.firstName || ''} ${data.lastName || ''}`.trim(),
+          user_profile: data.userProfile || 'startup',
+          organization_name: data.organizationName || '',
         },
       },
     });
