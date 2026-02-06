@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  FileText, Plus, Pencil, Trash2, Loader2, Upload, ExternalLink,
+  FileText, Plus, Pencil, Trash2, Loader2, Upload, ExternalLink, Search, X,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -60,6 +60,11 @@ export default function AdminLegalDocuments() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+
   const { data: documents = [], isLoading } = useQuery({
     queryKey: ["legal-documents"],
     queryFn: async () => {
@@ -72,6 +77,22 @@ export default function AdminLegalDocuments() {
       return data as LegalDocument[];
     },
   });
+
+  const filteredDocuments = useMemo(() => {
+    return documents.filter((doc) => {
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const matchesTitle = doc.title.toLowerCase().includes(q);
+        const matchesNumber = doc.official_number?.toLowerCase().includes(q);
+        const matchesDesc = doc.description?.toLowerCase().includes(q);
+        if (!matchesTitle && !matchesNumber && !matchesDesc) return false;
+      }
+      if (typeFilter !== "all" && doc.document_type !== typeFilter) return false;
+      if (statusFilter === "active" && !doc.is_active) return false;
+      if (statusFilter === "inactive" && doc.is_active) return false;
+      return true;
+    });
+  }, [documents, searchQuery, typeFilter, statusFilter]);
 
   const openCreateDialog = () => {
     setEditingDoc(null);
@@ -223,79 +244,152 @@ export default function AdminLegalDocuments() {
         </div>
       </CardHeader>
       <CardContent>
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Rechercher par titre, n° officiel..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+            {searchQuery && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+                onClick={() => setSearchQuery("")}
+              >
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            )}
+          </div>
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className="w-full sm:w-[160px]">
+              <SelectValue placeholder="Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous les types</SelectItem>
+              <SelectItem value="loi">Loi</SelectItem>
+              <SelectItem value="decret">Décret</SelectItem>
+              <SelectItem value="arrete">Arrêté</SelectItem>
+              <SelectItem value="circulaire">Circulaire</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-full sm:w-[140px]">
+              <SelectValue placeholder="Statut" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tous</SelectItem>
+              <SelectItem value="active">Actifs</SelectItem>
+              <SelectItem value="inactive">Inactifs</SelectItem>
+            </SelectContent>
+          </Select>
+          {(searchQuery || typeFilter !== "all" || statusFilter !== "all") && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setSearchQuery("");
+                setTypeFilter("all");
+                setStatusFilter("all");
+              }}
+              className="whitespace-nowrap"
+            >
+              <X className="h-3.5 w-3.5 mr-1" />
+              Réinitialiser
+            </Button>
+          )}
+        </div>
+
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
-        ) : documents.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">Aucun document juridique.</p>
+        ) : filteredDocuments.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">
+              {documents.length === 0
+                ? "Aucun document juridique."
+                : `Aucun résultat pour les filtres appliqués (${documents.length} document${documents.length > 1 ? "s" : ""} au total).`}
+            </p>
+          </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Titre</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>N° officiel</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {documents.map((doc) => (
-                <TableRow key={doc.id}>
-                  <TableCell className="font-medium max-w-[250px] truncate">{doc.title}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{DOC_TYPE_LABELS[doc.document_type] || doc.document_type}</Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{doc.official_number || "-"}</TableCell>
-                  <TableCell>
-                    {doc.published_date
-                      ? format(new Date(doc.published_date), "dd MMM yyyy", { locale: fr })
-                      : "-"}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={doc.is_active ? "default" : "secondary"}>
-                      {doc.is_active ? "Actif" : "Inactif"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      {(doc.file_url || doc.external_url) && (
+          <>
+            {documents.length !== filteredDocuments.length && (
+              <p className="text-sm text-muted-foreground mb-2">
+                {filteredDocuments.length} sur {documents.length} document{documents.length > 1 ? "s" : ""}
+              </p>
+            )}
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Titre</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>N° officiel</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Statut</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredDocuments.map((doc) => (
+                  <TableRow key={doc.id}>
+                    <TableCell className="font-medium max-w-[250px] truncate">{doc.title}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{DOC_TYPE_LABELS[doc.document_type] || doc.document_type}</Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{doc.official_number || "-"}</TableCell>
+                    <TableCell>
+                      {doc.published_date
+                        ? format(new Date(doc.published_date), "dd MMM yyyy", { locale: fr })
+                        : "-"}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={doc.is_active ? "default" : "secondary"}>
+                        {doc.is_active ? "Actif" : "Inactif"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        {(doc.file_url || doc.external_url) && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            asChild
+                          >
+                            <a
+                              href={doc.file_url || doc.external_url || "#"}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                          </Button>
+                        )}
+                        <Button variant="ghost" size="sm" onClick={() => openEditDialog(doc)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="sm"
-                          asChild
+                          className="text-destructive hover:text-destructive"
+                          onClick={() => {
+                            setDocToDelete(doc);
+                            setDeleteDialogOpen(true);
+                          }}
                         >
-                          <a
-                            href={doc.file_url || doc.external_url || "#"}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                          </a>
+                          <Trash2 className="h-4 w-4" />
                         </Button>
-                      )}
-                      <Button variant="ghost" size="sm" onClick={() => openEditDialog(doc)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive hover:text-destructive"
-                        onClick={() => {
-                          setDocToDelete(doc);
-                          setDeleteDialogOpen(true);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </>
         )}
       </CardContent>
 
