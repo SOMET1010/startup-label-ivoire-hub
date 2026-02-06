@@ -9,10 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Lock, AlertCircle, CheckCircle2, ArrowLeft, Rocket } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2, Lock, AlertCircle, CheckCircle2, ArrowLeft, Rocket, Building2, Briefcase, Users } from "lucide-react";
 import { motion } from "framer-motion";
+
+type UserProfile = "startup" | "structure" | "investisseur";
 
 // Validation schemas
 const loginSchema = z.object({
@@ -22,9 +25,13 @@ const loginSchema = z.object({
 });
 
 const signupSchema = z.object({
+  userProfile: z.enum(["startup", "structure", "investisseur"], {
+    required_error: "Veuillez sélectionner votre profil",
+  }),
   firstName: z.string().min(2, "Le prénom doit contenir au moins 2 caractères").max(50, "Le prénom est trop long"),
   lastName: z.string().min(2, "Le nom doit contenir au moins 2 caractères").max(50, "Le nom est trop long"),
   email: z.string().email("Adresse email invalide").min(1, "L'email est requis"),
+  organizationName: z.string().optional(),
   password: z.string()
     .min(8, "Le mot de passe doit contenir au moins 8 caractères")
     .regex(/[A-Z]/, "Le mot de passe doit contenir au moins une majuscule")
@@ -67,13 +74,17 @@ export default function Auth() {
   const signupForm = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
+      userProfile: "startup",
       firstName: "",
       lastName: "",
       email: "",
+      organizationName: "",
       password: "",
       confirmPassword: "",
     },
   });
+
+  const selectedProfile = signupForm.watch("userProfile");
 
   const handleLogin = async (data: LoginFormData) => {
     setIsLoading(true);
@@ -99,6 +110,8 @@ export default function Auth() {
       await signUp(data.email, data.password, {
         firstName: data.firstName,
         lastName: data.lastName,
+        userProfile: data.userProfile,
+        organizationName: data.organizationName,
       });
       setSuccess(t('signup.successMessage'));
       setShowSignup(false);
@@ -291,6 +304,40 @@ export default function Auth() {
                 <>
                   <Form {...signupForm}>
                     <form onSubmit={signupForm.handleSubmit(handleSignup)} className="space-y-4">
+                      {/* Profile selector */}
+                      <FormField
+                        control={signupForm.control}
+                        name="userProfile"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-sm font-medium">{t('signup.profileSelect')}</FormLabel>
+                            <div className="grid grid-cols-3 gap-2">
+                              {[
+                                { value: "startup" as const, icon: Rocket, label: t('signup.profileStartup'), desc: t('signup.profileStartupDesc') },
+                                { value: "structure" as const, icon: Building2, label: t('signup.profileStructure'), desc: t('signup.profileStructureDesc') },
+                                { value: "investisseur" as const, icon: Briefcase, label: t('signup.profileInvestisseur'), desc: t('signup.profileInvestisseurDesc') },
+                              ].map((profile) => (
+                                <button
+                                  key={profile.value}
+                                  type="button"
+                                  onClick={() => field.onChange(profile.value)}
+                                  disabled={isLoading}
+                                  className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 text-center transition-all ${
+                                    field.value === profile.value
+                                      ? "border-primary bg-primary/5 text-primary"
+                                      : "border-border bg-background hover:border-muted-foreground/30"
+                                  }`}
+                                >
+                                  <profile.icon className="h-5 w-5" />
+                                  <span className="text-xs font-medium leading-tight">{profile.label}</span>
+                                </button>
+                              ))}
+                            </div>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
                       <div className="grid grid-cols-2 gap-3">
                         <FormField
                           control={signupForm.control}
@@ -328,6 +375,27 @@ export default function Auth() {
                           )}
                         />
                       </div>
+
+                      {/* Organization name for structures and investors */}
+                      {(selectedProfile === "structure" || selectedProfile === "investisseur") && (
+                        <FormField
+                          control={signupForm.control}
+                          name="organizationName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input 
+                                  {...field} 
+                                  placeholder={t('signup.organizationNamePlaceholder')}
+                                  className="h-12 bg-background border-border"
+                                  disabled={isLoading}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
                       
                       <FormField
                         control={signupForm.control}
@@ -418,23 +486,25 @@ export default function Auth() {
             </CardContent>
           </Card>
 
-          {/* Startup CTA Card */}
-          <Card className="mt-4 border shadow-lg bg-card">
-            <CardContent className="py-6 px-8 text-center">
-              <h2 className="text-lg font-semibold text-foreground mb-2">
-                {t('startupCTA.title')}
-              </h2>
-              <p className="text-sm text-muted-foreground mb-4">
-                {t('startupCTA.description')}
-              </p>
-              <Button 
-                className="bg-accent hover:bg-accent/90 text-accent-foreground font-medium px-6"
-                onClick={() => { setShowSignup(true); setError(null); }}
-              >
-                {t('startupCTA.button')}
-              </Button>
-            </CardContent>
-          </Card>
+          {/* CTA Card */}
+          {!showSignup && (
+            <Card className="mt-4 border shadow-lg bg-card">
+              <CardContent className="py-6 px-8 text-center">
+                <h2 className="text-lg font-semibold text-foreground mb-2">
+                  {t('startupCTA.title')}
+                </h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {t('startupCTA.description')}
+                </p>
+                <Button 
+                  className="bg-accent hover:bg-accent/90 text-accent-foreground font-medium px-6"
+                  onClick={() => { setShowSignup(true); setError(null); }}
+                >
+                  {t('startupCTA.button')}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Footer Links */}
           <div className="text-center mt-6 text-sm text-muted-foreground">

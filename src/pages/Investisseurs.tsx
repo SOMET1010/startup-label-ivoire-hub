@@ -1,9 +1,12 @@
+import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import CTA from "@/components/CTA";
+import { InvestorContactDialog } from "@/components/investors/InvestorContactDialog";
+import { InvestorSuccessStories } from "@/components/investors/InvestorSuccessStories";
 
 // Mock data for investors with Ivorian context
 const investors = [
@@ -76,6 +79,14 @@ const investors = [
 ];
 
 const Investisseurs = () => {
+  const [contactOpen, setContactOpen] = useState(false);
+  const [selectedInvestor, setSelectedInvestor] = useState("");
+
+  const handleContact = (investorName: string) => {
+    setSelectedInvestor(investorName);
+    setContactOpen(true);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -161,7 +172,7 @@ const Investisseurs = () => {
                         Visiter le site web
                       </a>
                       
-                      <Button size="sm">
+                      <Button size="sm" onClick={() => handleContact(investor.name)}>
                         Contacter
                       </Button>
                     </div>
@@ -171,9 +182,12 @@ const Investisseurs = () => {
             </div>
           </div>
         </section>
+
+        {/* Success Stories */}
+        <InvestorSuccessStories />
         
         {/* Process section */}
-        <section className="py-16 bg-background">
+        <section className="py-16 bg-muted/50">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold mb-4">Comment obtenir un financement ?</h2>
@@ -183,7 +197,7 @@ const Investisseurs = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="bg-muted/50 rounded-xl p-6 text-center">
+              <div className="bg-card rounded-xl p-6 text-center">
                 <div className="w-16 h-16 bg-investor-light rounded-full flex items-center justify-center text-investor-DEFAULT text-2xl font-bold mx-auto mb-4">1</div>
                 <h3 className="text-xl font-bold mb-2">Préparez votre pitch</h3>
                 <p className="text-muted-foreground">
@@ -191,7 +205,7 @@ const Investisseurs = () => {
                 </p>
               </div>
               
-              <div className="bg-muted/50 rounded-xl p-6 text-center">
+              <div className="bg-card rounded-xl p-6 text-center">
                 <div className="w-16 h-16 bg-investor-light rounded-full flex items-center justify-center text-investor-DEFAULT text-2xl font-bold mx-auto mb-4">2</div>
                 <h3 className="text-xl font-bold mb-2">Identifiez les investisseurs adaptés</h3>
                 <p className="text-muted-foreground">
@@ -199,7 +213,7 @@ const Investisseurs = () => {
                 </p>
               </div>
               
-              <div className="bg-muted/50 rounded-xl p-6 text-center">
+              <div className="bg-card rounded-xl p-6 text-center">
                 <div className="w-16 h-16 bg-investor-light rounded-full flex items-center justify-center text-investor-DEFAULT text-2xl font-bold mx-auto mb-4">3</div>
                 <h3 className="text-xl font-bold mb-2">Entrez en contact</h3>
                 <p className="text-muted-foreground">
@@ -213,6 +227,12 @@ const Investisseurs = () => {
         <CTA />
       </main>
       <Footer />
+
+      <InvestorContactDialog
+        open={contactOpen}
+        onOpenChange={setContactOpen}
+        investorName={selectedInvestor}
+      />
     </div>
   );
 };
