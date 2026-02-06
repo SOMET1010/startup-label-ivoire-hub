@@ -56,6 +56,8 @@ import {
   FileQuestion,
   Trash2,
   BarChart3,
+  Settings,
+  FileText,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -73,6 +75,9 @@ import DocumentViewer from "@/components/admin/DocumentViewer";
 import RequestDocumentDialog, { DOCUMENT_TYPES } from "@/components/admin/RequestDocumentDialog";
 import VotingStatsDashboard from "@/components/admin/VotingStatsDashboard";
 import { ApplicationCard } from "@/components/admin/ApplicationCard";
+import AdminPlatformSettings from "@/components/admin/AdminPlatformSettings";
+import AdminLegalDocuments from "@/components/admin/AdminLegalDocuments";
+import AdminCommitteeMembers from "@/components/admin/AdminCommitteeMembers";
 
 interface StartupDocuments {
   doc_rccm: string | null;
@@ -169,7 +174,7 @@ const STAGE_LABELS: Record<string, string> = {
 };
 
 export default function AdminDashboard() {
-  const { user, profile } = useAuth();
+  const { user, profile, isAdmin } = useAuth();
   const [applications, setApplications] = useState<ApplicationWithStartup[]>([]);
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [stats, setStats] = useState<Stats>({ total: 0, pending: 0, approved: 0, rejected: 0, users: 0 });
@@ -854,7 +859,7 @@ export default function AdminDashboard() {
 
           {/* Tabs */}
           <Tabs defaultValue="applications" className="space-y-4">
-            <TabsList>
+            <TabsList className="flex-wrap">
               <TabsTrigger value="applications">Candidatures</TabsTrigger>
               <TabsTrigger value="evaluations" className="flex items-center gap-1">
                 <Star className="h-4 w-4" />
@@ -865,7 +870,22 @@ export default function AdminDashboard() {
                 Statistiques
               </TabsTrigger>
               <TabsTrigger value="users">Utilisateurs & Rôles</TabsTrigger>
-            </TabsList>
+              {isAdmin && (
+                <>
+                  <TabsTrigger value="settings" className="flex items-center gap-1">
+                    <Settings className="h-4 w-4" />
+                    Paramètres
+                  </TabsTrigger>
+                  <TabsTrigger value="documents" className="flex items-center gap-1">
+                    <FileText className="h-4 w-4" />
+                    Documents
+                  </TabsTrigger>
+                  <TabsTrigger value="comite" className="flex items-center gap-1">
+                    <Users className="h-4 w-4" />
+                    Comité
+                  </TabsTrigger>
+                </>
+              )}</TabsList>
 
             {/* Applications Tab */}
             <TabsContent value="applications">
@@ -1144,6 +1164,21 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
             </TabsContent>
+
+            {/* Admin-only tabs */}
+            {isAdmin && (
+              <>
+                <TabsContent value="settings">
+                  <AdminPlatformSettings />
+                </TabsContent>
+                <TabsContent value="documents">
+                  <AdminLegalDocuments />
+                </TabsContent>
+                <TabsContent value="comite">
+                  <AdminCommitteeMembers />
+                </TabsContent>
+              </>
+            )}
           </Tabs>
         </div>
       </main>
