@@ -12,6 +12,7 @@ import { LabelGate } from "./components/auth/LabelGate";
 import CloudStatusBanner from "./components/CloudStatusBanner";
 import LabelCoach from "./components/LabelCoach";
 import PageLoader from "./components/PageLoader";
+import { SkipLink } from "./components/shared/SkipLink";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { StartupLayout } from "./components/startup/StartupLayout";
 import { useLanguageSync } from "./hooks/useLanguageSync";
@@ -117,6 +118,7 @@ const AppContent = () => {
 
   return (
     <>
+      <SkipLink />
       <CloudStatusBanner />
       <LabelCoach />
       <ErrorBoundary>

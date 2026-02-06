@@ -1,6 +1,7 @@
 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -113,7 +114,8 @@ const Accompagnement = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-grow">
+      <PageBreadcrumb className="py-3 bg-muted/30 border-b border-border" />
+      <main id="main-content" className="flex-grow">
         <section className="py-12 bg-muted/50">
           <div className="container mx-auto px-4">
             <div className="text-center mb-8">

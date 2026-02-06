@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
 import NewsHero from "@/components/news/NewsHero";
 import NewsFiltersLive from "@/components/news/NewsFiltersLive";
 import NewsGridLive from "@/components/news/NewsGridLive";
@@ -68,7 +69,8 @@ const Actualites = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-grow">
+      <PageBreadcrumb className="py-3 bg-muted/30 border-b border-border" />
+      <main id="main-content" className="flex-grow">
         <NewsHero />
         <div className={`transition-all duration-300 ${isMobile ? 'sticky top-16 z-10 bg-background shadow-md' : ''}`}>
           <NewsFiltersLive

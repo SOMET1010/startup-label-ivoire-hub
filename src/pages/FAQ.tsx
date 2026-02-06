@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -54,7 +55,8 @@ const FAQ = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-grow">
+      <PageBreadcrumb className="py-3 bg-muted/30 border-b border-border" />
+      <main id="main-content" className="flex-grow">
         <div className="bg-gradient-to-r from-ivoire-orange to-ivoire-green py-16 text-white">
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-3xl md:text-4xl font-bold mb-4">{t('faq.hero.title')}</h1>

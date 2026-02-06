@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { PageBreadcrumb } from '@/components/shared/PageBreadcrumb';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -62,8 +63,9 @@ const EntreprisesIA = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
+      <PageBreadcrumb className="py-3 bg-muted/30 border-b border-border" />
       
-      <main className="flex-grow">
+      <main id="main-content" className="flex-grow">
         {/* Header */}
         <div className="bg-gradient-to-br from-primary/10 via-background to-accent/10 py-16">
           <div className="container mx-auto px-4">
