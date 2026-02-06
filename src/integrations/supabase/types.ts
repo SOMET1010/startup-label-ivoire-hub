@@ -821,6 +821,108 @@ export type Database = {
         }
         Relationships: []
       }
+      structure_startups: {
+        Row: {
+          created_at: string
+          ended_at: string | null
+          id: string
+          notes: string | null
+          program_name: string | null
+          started_at: string | null
+          startup_id: string
+          status: string | null
+          structure_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          notes?: string | null
+          program_name?: string | null
+          started_at?: string | null
+          startup_id: string
+          status?: string | null
+          structure_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          notes?: string | null
+          program_name?: string | null
+          started_at?: string | null
+          startup_id?: string
+          status?: string | null
+          structure_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "structure_startups_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "structure_startups_structure_id_fkey"
+            columns: ["structure_id"]
+            isOneToOne: false
+            referencedRelation: "structures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      structures: {
+        Row: {
+          created_at: string
+          description: string | null
+          focus_sectors: string[] | null
+          id: string
+          location: string | null
+          logo_url: string | null
+          name: string
+          programs: Json | null
+          status: string | null
+          type: string | null
+          updated_at: string
+          user_id: string
+          website: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          focus_sectors?: string[] | null
+          id?: string
+          location?: string | null
+          logo_url?: string | null
+          name: string
+          programs?: Json | null
+          status?: string | null
+          type?: string | null
+          updated_at?: string
+          user_id: string
+          website?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          focus_sectors?: string[] | null
+          id?: string
+          location?: string | null
+          logo_url?: string | null
+          name?: string
+          programs?: Json | null
+          status?: string | null
+          type?: string | null
+          updated_at?: string
+          user_id?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -927,7 +1029,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "startup" | "evaluator"
+      app_role: "admin" | "startup" | "evaluator" | "structure"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1055,7 +1157,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "startup", "evaluator"],
+      app_role: ["admin", "startup", "evaluator", "structure"],
     },
   },
 } as const

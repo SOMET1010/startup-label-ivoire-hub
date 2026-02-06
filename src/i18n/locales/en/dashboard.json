@@ -152,5 +152,103 @@
   "support": {
     "title": "Support",
     "subtitle": "Need help? Contact us"
+  },
+  "structure": {
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "startups": "Accompanied startups",
+      "programs": "Programs",
+      "profile": "Structure profile",
+      "settings": "Settings",
+      "backToHome": "Back to home",
+      "subtitle": "Support structure",
+      "structureLabel": "My structure",
+      "active": "Active"
+    },
+    "header": {
+      "breadcrumb": "Structure Space",
+      "routes": {
+        "dashboard": "Dashboard",
+        "startups": "Accompanied startups",
+        "programs": "Programs",
+        "profile": "Structure profile",
+        "settings": "Settings"
+      }
+    },
+    "dashboard": {
+      "welcome": "Welcome, {{name}}!",
+      "subtitle": "Manage your accompanied startups and track their progress.",
+      "kpi": {
+        "totalStartups": "Accompanied startups",
+        "labeledStartups": "Labeled startups",
+        "activePrograms": "Active programs",
+        "successRate": "Success rate"
+      },
+      "recentStartups": "Recent accompanied startups",
+      "viewAll": "View all",
+      "noStartups": "No accompanied startups yet.",
+      "noStartupsHint": "Administrators can assign startups to your structure.",
+      "quickActions": "Quick actions",
+      "action": {
+        "programs": "My programs",
+        "programsDesc": "Manage support programs",
+        "profile": "My profile",
+        "profileDesc": "Edit structure information",
+        "startups": "All startups",
+        "startupsDesc": "View the complete startup list"
+      }
+    },
+    "startups": {
+      "title": "Accompanied startups",
+      "searchPlaceholder": "Search by name or sector...",
+      "filterStatus": "Filter by status",
+      "allStatuses": "All statuses",
+      "noResults": "No startups found.",
+      "col": {
+        "name": "Name",
+        "sector": "Sector",
+        "program": "Program",
+        "status": "Label status",
+        "startDate": "Start date"
+      }
+    },
+    "programs": {
+      "title": "Support programs",
+      "add": "New program",
+      "addTitle": "Add a program",
+      "editTitle": "Edit program",
+      "empty": "No programs created. Add your first program.",
+      "created": "Program created successfully",
+      "updated": "Program updated",
+      "deleted": "Program deleted",
+      "form": {
+        "name": "Program name",
+        "namePlaceholder": "e.g. AI Incubation 2025",
+        "description": "Description",
+        "descriptionPlaceholder": "Describe the program...",
+        "duration": "Duration",
+        "durationPlaceholder": "e.g. 6 months",
+        "save": "Save",
+        "create": "Create program"
+      }
+    },
+    "profile": {
+      "title": "Structure profile",
+      "cardTitle": "Structure information",
+      "saved": "Profile updated successfully",
+      "error": "Error updating profile",
+      "form": {
+        "name": "Structure name",
+        "type": "Structure type",
+        "typePlaceholder": "Select a type",
+        "description": "Description",
+        "location": "Location",
+        "website": "Website",
+        "sectors": "Focus sectors",
+        "sectorsPlaceholder": "AI, Fintech, AgriTech...",
+        "sectorsHint": "Separate sectors with commas",
+        "save": "Save changes"
+      }
+    }
   }
 }
