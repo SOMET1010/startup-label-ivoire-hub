@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+// @ts-ignore - CJS module
+import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
 import { useNavigate } from 'react-router-dom';
 import { Building2, MapPin, Users, ExternalLink, Award } from 'lucide-react';
@@ -70,6 +72,40 @@ const createCustomIcon = (isLabeled: boolean) => {
   });
 };
 
+// Custom cluster icon creator
+const createClusterCustomIcon = (cluster: any) => {
+  const count = cluster.getChildCount();
+  let size = 'small';
+  let diameter = 40;
+
+  if (count >= 50) {
+    size = 'large';
+    diameter = 56;
+  } else if (count >= 10) {
+    size = 'medium';
+    diameter = 48;
+  }
+
+  return L.divIcon({
+    html: `<div style="
+      background: hsl(var(--primary));
+      width: ${diameter}px;
+      height: ${diameter}px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: ${size === 'large' ? '16px' : size === 'medium' ? '14px' : '13px'};
+      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+      border: 3px solid white;
+    ">${count}</div>`,
+    className: 'custom-cluster-icon',
+    iconSize: L.point(diameter, diameter),
+  });
+};
+
 // Component to fit bounds to all markers
 const FitBounds = ({ companies }: { companies: Company[] }) => {
   const map = useMap();
@@ -109,90 +145,99 @@ const MapView = ({ companies }: MapViewProps) => {
         
         <FitBounds companies={companies} />
         
-        {companies.map((company) => (
-          <Marker
-            key={company.id}
-            position={[company.coordinates.lat, company.coordinates.lng]}
-            icon={createCustomIcon(company.isLabeled ?? false)}
-          >
-            <Popup className="leaflet-custom-popup" maxWidth={320} minWidth={280}>
-              <div className="p-1">
-                {/* Header with logo and name */}
-                <div className="flex items-start gap-3 mb-3">
-                  <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0">
-                    {company.logo ? (
-                      <img 
-                        src={company.logo} 
-                        alt={company.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none';
-                          (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                        }}
-                      />
-                    ) : null}
-                    <Building2 className={`w-6 h-6 text-gray-500 ${company.logo ? 'hidden' : ''}`} />
+        <MarkerClusterGroup
+          chunkedLoading
+          iconCreateFunction={createClusterCustomIcon}
+          maxClusterRadius={50}
+          spiderfyOnMaxZoom
+          showCoverageOnHover={false}
+          zoomToBoundsOnClick
+        >
+          {companies.map((company) => (
+            <Marker
+              key={company.id}
+              position={[company.coordinates.lat, company.coordinates.lng]}
+              icon={createCustomIcon(company.isLabeled ?? false)}
+            >
+              <Popup className="leaflet-custom-popup" maxWidth={320} minWidth={280}>
+                <div className="p-1">
+                  {/* Header with logo and name */}
+                  <div className="flex items-start gap-3 mb-3">
+                    <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+                      {company.logo ? (
+                        <img 
+                          src={company.logo} 
+                          alt={company.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                            (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                      ) : null}
+                      <Building2 className={`w-6 h-6 text-gray-500 ${company.logo ? 'hidden' : ''}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-gray-900 text-base leading-tight mb-1">
+                        {company.name}
+                      </h3>
+                      {company.isLabeled && (
+                        <Badge className="bg-green-100 text-green-700 text-xs">
+                          <Award className="w-3 h-3 mr-1" />
+                          Labellisée
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 text-base leading-tight mb-1">
-                      {company.name}
-                    </h3>
-                    {company.isLabeled && (
-                      <Badge className="bg-green-100 text-green-700 text-xs">
-                        <Award className="w-3 h-3 mr-1" />
-                        Labellisée
-                      </Badge>
+                  
+                  {/* Description */}
+                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                    {company.description}
+                  </p>
+                  
+                  {/* Info badges */}
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <div className="flex items-center gap-1 text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
+                      <MapPin className="w-3 h-3" />
+                      {company.location}
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
+                      <Users className="w-3 h-3" />
+                      {company.employees}
+                    </div>
+                  </div>
+                  
+                  {/* Specialization */}
+                  <div className="mb-3">
+                    <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-700">
+                      {company.specialization}
+                    </Badge>
+                  </div>
+                  
+                  {/* Actions */}
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => navigate(`/entreprises-ia/${company.id}`)}
+                    >
+                      Voir les détails
+                    </Button>
+                    {company.website && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => window.open(company.website, '_blank')}
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </Button>
                     )}
                   </div>
                 </div>
-                
-                {/* Description */}
-                <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                  {company.description}
-                </p>
-                
-                {/* Info badges */}
-                <div className="flex flex-wrap gap-2 mb-3">
-                  <div className="flex items-center gap-1 text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
-                    <MapPin className="w-3 h-3" />
-                    {company.location}
-                  </div>
-                  <div className="flex items-center gap-1 text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
-                    <Users className="w-3 h-3" />
-                    {company.employees}
-                  </div>
-                </div>
-                
-                {/* Specialization */}
-                <div className="mb-3">
-                  <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-700">
-                    {company.specialization}
-                  </Badge>
-                </div>
-                
-                {/* Actions */}
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    className="flex-1"
-                    onClick={() => navigate(`/entreprises-ia/${company.id}`)}
-                  >
-                    Voir les détails
-                  </Button>
-                  {company.website && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => window.open(company.website, '_blank')}
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+              </Popup>
+            </Marker>
+          ))}
+        </MarkerClusterGroup>
       </MapContainer>
       
       {/* Overlay - Company count */}
@@ -214,6 +259,12 @@ const MapView = ({ companies }: MapViewProps) => {
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-gray-500" />
             <span className="text-xs text-muted-foreground">Non labellisée</span>
+          </div>
+          <div className="flex items-center gap-2 mt-1 pt-1 border-t border-border">
+            <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+              <span className="text-[9px] font-bold text-primary-foreground">n</span>
+            </div>
+            <span className="text-xs text-muted-foreground">Cluster (n entreprises)</span>
           </div>
         </div>
       </div>

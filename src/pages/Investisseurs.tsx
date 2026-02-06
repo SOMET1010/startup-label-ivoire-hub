@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -90,7 +91,8 @@ const Investisseurs = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-grow">
+      <PageBreadcrumb className="py-3 bg-muted/30 border-b border-border" />
+      <main id="main-content" className="flex-grow">
         {/* Hero section */}
         <section className="bg-gradient-to-r from-investor-dark to-investor-DEFAULT text-white py-16">
           <div className="container mx-auto px-4 text-center">

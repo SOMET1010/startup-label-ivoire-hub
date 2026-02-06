@@ -65,5 +65,19 @@
     "label": "Langue",
     "french": "Français",
     "english": "English"
-  }
+  },
+  "breadcrumb": {
+    "home": "Accueil",
+    "faq": "FAQ",
+    "criteres": "Critères d'éligibilité",
+    "avantages": "Avantages du label",
+    "accompagnement": "Accompagnement",
+    "investisseurs": "Investisseurs",
+    "actualites": "Actualités",
+    "entreprises": "Entreprises IA",
+    "eligibilite": "Test d'éligibilité",
+    "postuler": "Postuler",
+    "annuaire": "Annuaire"
+  },
+  "skipLink": "Aller au contenu principal"
 }

@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CTA from "@/components/CTA";
+import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
 import { Link } from "react-router-dom";
 import { useBrand } from "@/hooks/useBrand";
 import { InstitutionalHero, InstitutionalCard, OfficialBadge } from "@/components/gov";
@@ -70,7 +71,8 @@ const Avantages = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-grow">
+      <PageBreadcrumb className="py-3 bg-muted/30 border-b border-border" />
+      <main id="main-content" className="flex-grow">
         {/* Hero section */}
         {isInstitutional ? (
           <InstitutionalHero>

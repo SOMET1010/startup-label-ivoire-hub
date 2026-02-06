@@ -65,5 +65,19 @@
     "label": "Language",
     "french": "Français",
     "english": "English"
-  }
+  },
+  "breadcrumb": {
+    "home": "Home",
+    "faq": "FAQ",
+    "criteres": "Eligibility Criteria",
+    "avantages": "Label Benefits",
+    "accompagnement": "Support Structures",
+    "investisseurs": "Investors",
+    "actualites": "News",
+    "entreprises": "AI Companies",
+    "eligibilite": "Eligibility Test",
+    "postuler": "Apply",
+    "annuaire": "Directory"
+  },
+  "skipLink": "Skip to main content"
 }
