@@ -6,6 +6,8 @@ import Testimonials from "@/components/Testimonials";
 import CTA from "@/components/CTA";
 import Footer from "@/components/Footer";
 import StartupJourney from "@/components/StartupJourney";
+import { SEOHead } from "@/components/shared/SEOHead";
+import { organizationJsonLd, websiteJsonLd } from "@/lib/seo/jsonld";
 
 /**
  * Page d'accueil restructurée - 6 sections (vs 10 avant)
@@ -28,8 +30,14 @@ import StartupJourney from "@/components/StartupJourney";
 const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <SEOHead
+        title="Ivoire Hub — Plateforme de labellisation des startups"
+        description="Plateforme officielle de labellisation et d'accompagnement des startups numériques en Côte d'Ivoire. Obtenez le label, accédez au financement et à l'accompagnement."
+        path="/"
+        jsonLd={[organizationJsonLd(), websiteJsonLd()]}
+      />
       <Navbar />
-      <main className="flex-grow">
+      <main id="main-content" className="flex-grow">
         {/* 1. Hero - Positionnement & CTA unique */}
         <Hero />
         

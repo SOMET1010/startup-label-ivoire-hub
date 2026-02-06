@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { PageBreadcrumb } from '@/components/shared/PageBreadcrumb';
+import { SEOHead } from '@/components/shared/SEOHead';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -62,6 +63,11 @@ const EntreprisesIA = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      <SEOHead
+        title="Entreprises IA"
+        description="Annuaire des entreprises d'intelligence artificielle en Côte d'Ivoire. Découvrez l'écosystème IA ivoirien."
+        path="/entreprises-ia"
+      />
       <Navbar />
       <PageBreadcrumb className="py-3 bg-muted/30 border-b border-border" />
       
