@@ -1,161 +1,92 @@
 
-# Dashboard Investisseur
 
-## Contexte
+# Enrichissement de la plateforme : Cadre juridique, Comite de labellisation et Configuration dynamique
 
-Le profil "Investisseur" est selectionnable a l'inscription (`Auth.tsx` - valeur `investisseur`) mais :
-- L'enum `app_role` ne contient pas `investor` -- il n'y a que `admin`, `startup`, `evaluator`, `structure`
-- Le trigger `handle_new_user` attribue le role `startup` par defaut aux investisseurs (branche `ELSE`)
-- Aucun dashboard ni route dedie n'existe
-- Le redirect post-connexion dans `Auth.tsx` ne gere pas le role investisseur
-- La page publique `/investisseurs` et le composant `InvestorContactDialog` existent deja (ecriture dans `contact_messages`)
+## Constat
 
-## Architecture de la solution
+L'analyse du code revele trois manquements importants :
 
-On suit exactement le pattern Structure : enum + table + trigger + Layout/Sidebar/Header + pages + hook + traductions.
+1. **Aucune page ne presente le cadre juridique** : la Loi n 2023-901 du 23 novembre 2023 est mentionnee dans le cahier des charges (`kickoff-meeting-label-startup.md`) mais n'apparait nulle part sur le site public. Il n'y a aucun moyen de telecharger la loi ni les decrets d'application.
 
----
+2. **Aucune presentation du comite de labellisation** : les evaluateurs/membres du comite sont mentionnes dans le processus mais jamais presentes publiquement.
 
-## Etape 1 : Migration base de donnees
+3. **Le nom du ministere est faux et code en dur** a 4 endroits :
+   - `Footer.tsx` (ligne 186) : "Ministere de la Communication et de l'Economie Numerique"
+   - `MentionsLegales.tsx` (lignes 23-24, 27, 34)
+   - `Confidentialite.tsx` (ligne 27)
+   - `jsonld.ts` : pas de reference au ministere mais devrait en avoir
 
-### 1a. Ajouter le role `investor` a l'enum `app_role`
-
-```sql
-ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'investor';
-```
-
-### 1b. Creer la table `investors`
-
-| Colonne | Type | Description |
-|---|---|---|
-| id | uuid PK | Identifiant unique |
-| user_id | uuid NOT NULL UNIQUE | Reference au proprietaire |
-| name | text NOT NULL | Nom / raison sociale |
-| description | text | Description / these d'investissement |
-| type | text | Business Angel / VC / Corporate / Fonds public |
-| investment_stages | text[] | Pre-seed, Seed, Series A... |
-| ticket_min | bigint | Ticket minimum (FCFA) |
-| ticket_max | bigint | Ticket maximum (FCFA) |
-| target_sectors | text[] | Secteurs cibles |
-| location | text | Localisation |
-| website | text | Site web |
-| logo_url | text | Logo |
-| portfolio_count | int DEFAULT 0 | Nombre de startups en portefeuille |
-| status | text DEFAULT 'active' | Statut |
-| created_at / updated_at | timestamptz | Dates |
-
-### 1c. RLS policies sur `investors`
-
-- L'investisseur voit et modifie ses propres donnees (`user_id = auth.uid()`)
-- Les admins voient tout (via `has_role()`)
-- Les utilisateurs authentifies peuvent voir les investisseurs actifs (pour la page publique)
-
-### 1d. Creer la table `investor_interests`
-
-Table de liaison investisseur <-> startups labellisees qui l'interessent.
-
-| Colonne | Type | Description |
-|---|---|---|
-| id | uuid PK | Identifiant unique |
-| investor_id | uuid FK -> investors | Reference investisseur |
-| startup_id | uuid FK -> startups | Reference startup |
-| status | text DEFAULT 'interested' | interested / contacted / meeting / passed |
-| notes | text | Notes privees |
-| created_at | timestamptz | Date |
-
-### 1e. Mettre a jour le trigger `handle_new_user`
-
-Ajouter le cas `'investisseur'` (valeur envoyee depuis le formulaire Auth.tsx) :
-
-```text
-WHEN 'investisseur' THEN
-  assigned_role := 'investor';
-  INSERT INTO public.investors (user_id, name)
-  VALUES (NEW.id, COALESCE(...organization_name, ...full_name, 'Mon fonds'));
-```
+   Le nom correct est : **Ministere de la Transition Numerique et de l'Innovation Technologique**
 
 ---
 
-## Etape 2 : Frontend Auth
+## Solution proposee
 
-### 2a. `AuthContext.tsx`
-- Ajouter `'investor'` au type `UserRole`
-- Ajouter `isInvestor` au contexte et a l'interface
+### A. Table de configuration `platform_settings` (parametrage dynamique)
 
-### 2b. `Auth.tsx` -- Redirection post-connexion
-- Ajouter `investor: "/investor"` dans le `redirectMap`
+Creer une table dans la base de donnees pour stocker les informations institutionnelles parametrables, afin qu'un admin puisse les modifier sans toucher au code.
 
-### 2c. `RoleGate.tsx`
-- Ajouter `'investor'` au type `UserRole` (deja dynamique via AuthContext)
+Donnees stockees :
+- Nom du ministere
+- Acronyme du ministere
+- Nom du ministre (directeur de publication)
+- Adresse
+- Telephone
+- Email de contact
+- URL du site du ministere
+- Nom de la plateforme
 
----
+**Politique RLS** : lecture publique, ecriture reservee aux admins.
 
-## Etape 3 : Layout et navigation
+### B. Nouvelle page `/cadre-juridique` (Cadre legal)
 
-### 3a. `InvestorLayout.tsx` (calque de StructureLayout)
-- SidebarProvider + InvestorSidebar + InvestorHeader
+Une page publique dediee qui presentera :
 
-### 3b. `InvestorSidebar.tsx`
+**Section 1 -- La Loi**
+- Titre complet de la loi (Loi n 2023-901 du 23 novembre 2023 portant promotion des startups)
+- Resume des principaux articles
+- Bouton de telechargement du PDF de la loi
 
-Elements de navigation :
-- Tableau de bord (`/investor`)
-- Startups labellisees (`/investor/startups`) -- catalogue des startups approuvees
-- Mes interets (`/investor/interests`) -- startups marquees
-- Messages (`/investor/messages`) -- messages de contact recus/envoyes via `contact_messages`
-- Profil (`/investor/profil`)
-- Parametres (`/investor/settings`)
-- Retour a l'accueil
+**Section 2 -- Decrets d'application**
+- Liste des decrets avec dates, numeros et descriptions
+- Boutons de telechargement pour chaque decret (si disponibles)
+- Indication "A paraitre" si pas encore publies
 
-### 3c. `InvestorHeader.tsx`
-- Fil d'ariane, menu utilisateur, notification bell (meme structure que StructureHeader)
+**Section 3 -- Textes complementaires**
+- Arretes ministeriels et circulaires eventuels
 
----
+Les textes juridiques seront stockes dans une table `legal_documents` en base de donnees (titre, description, type, URL du fichier dans le storage, date de publication, numero officiel). Les admins pourront ajouter/modifier ces documents.
 
-## Etape 4 : Pages du dashboard
+### C. Nouvelle page `/comite` (Comite de labellisation)
 
-### 4a. Dashboard principal (`/investor`)
+Une page publique qui presentera :
 
-Contenu :
-- Carte de bienvenue avec nom de l'investisseur
-- KPIs : startups labellisees disponibles, startups marquees, messages recus, secteurs couverts
-- Dernieres startups labellisees (apercu des plus recentes)
-- Actions rapides
+**Section 1 -- Presentation du comite**
+- Role et mission du comite
+- Composition reglementaire (selon la loi)
+- Fonctionnement (quorum, deliberation)
 
-### 4b. Catalogue startups (`/investor/startups`)
+**Section 2 -- Membres du comite**
+- Liste des membres avec photo, nom, titre/fonction, organisme
+- Possibilite de distinguer president, vice-president, membres
 
-- Grille de cartes des startups avec le statut `approved` (labellisees)
-- Filtres par secteur, stade, taille d'equipe
-- Bouton "Marquer mon interet" qui insere dans `investor_interests`
-- Clic pour voir le detail
+Les membres seront stockes dans une table `committee_members` en base (nom, titre, organisation, photo URL, role dans le comite, ordre d'affichage, statut actif/inactif). Modifiable par les admins.
 
-### 4c. Mes interets (`/investor/interests`)
+### D. Hook `usePlatformSettings` et remplacement des valeurs en dur
 
-- Liste des startups pour lesquelles l'investisseur a manifeste un interet
-- Colonnes : Nom, Secteur, Statut (interesse / contacte / RDV / passe), Date
-- Possibilite de changer le statut et d'ajouter des notes
+Un hook React qui charge les parametres de la table `platform_settings` et les rend disponibles partout dans l'application. Les composants suivants seront mis a jour :
+- `Footer.tsx` : nom du ministere dynamique
+- `MentionsLegales.tsx` : toutes les references au ministere
+- `Confidentialite.tsx` : reference au ministere
+- `jsonld.ts` : organisation name
 
-### 4d. Messages (`/investor/messages`)
+### E. Navigation mise a jour
 
-- Liste des messages envoyes/recus via `contact_messages` (filtres par sujet contenant "[Investisseur:]")
-- Vue en lecture seule des echanges
-
-### 4e. Profil investisseur (`/investor/profil`)
-
-- Formulaire d'edition : nom, description, type, stades d'investissement, ticket min/max, secteurs cibles, site web, logo
-
-### 4f. Parametres (`/investor/settings`)
-
-- Reutilise les composants existants (theme, langue, notifications)
-
----
-
-## Etape 5 : Hook et donnees
-
-### `useInvestorData.ts`
-- Charge les donnees de l'investisseur connecte depuis `investors`
-- Charge les startups labellisees depuis `startups` JOIN `applications` (status = 'approved')
-- Charge les interets depuis `investor_interests`
-- Calcule les statistiques
+Ajouter les nouvelles pages dans :
+- La Navbar (sous-menu "Labellisation" : Cadre juridique, Criteres, Comite, Postuler)
+- Le Footer (section Informations)
+- Le fichier de navigation centralise `navigation.ts`
+- Les traductions i18n
 
 ---
 
@@ -163,36 +94,84 @@ Contenu :
 
 | Fichier | Action | Description |
 |---|---|---|
-| Migration SQL | Creer | Enum + tables + RLS + trigger |
-| `src/contexts/AuthContext.tsx` | Modifier | Ajouter role `investor` |
-| `src/components/auth/RoleGate.tsx` | Modifier | Ajouter `investor` au type |
-| `src/App.tsx` | Modifier | Routes `/investor/*` |
-| `src/pages/Auth.tsx` | Modifier | Redirection par role |
-| `src/components/investor/InvestorLayout.tsx` | Creer | Layout sidebar |
-| `src/components/investor/InvestorSidebar.tsx` | Creer | Navigation laterale |
-| `src/components/investor/InvestorHeader.tsx` | Creer | En-tete avec breadcrumb |
-| `src/pages/investor/Dashboard.tsx` | Creer | Tableau de bord principal |
-| `src/pages/investor/Startups.tsx` | Creer | Catalogue startups labellisees |
-| `src/pages/investor/Interests.tsx` | Creer | Suivi des interets |
-| `src/pages/investor/Messages.tsx` | Creer | Messages de contact |
-| `src/pages/investor/Profile.tsx` | Creer | Profil investisseur |
-| `src/pages/investor/Settings.tsx` | Creer | Parametres |
-| `src/hooks/useInvestorData.ts` | Creer | Hook donnees investisseur |
-| `src/i18n/locales/fr/dashboard.json` | Modifier | Traductions FR section `investor` |
-| `src/i18n/locales/en/dashboard.json` | Modifier | Traductions EN section `investor` |
+| Migration SQL | Creer | Tables `platform_settings`, `legal_documents`, `committee_members` + RLS + donnees initiales |
+| `src/hooks/usePlatformSettings.ts` | Creer | Hook pour charger les parametres dynamiques |
+| `src/pages/CadreJuridique.tsx` | Creer | Page cadre legal avec telechargement |
+| `src/pages/Comite.tsx` | Creer | Page presentation du comite |
+| `src/components/Footer.tsx` | Modifier | Nom du ministere dynamique |
+| `src/pages/MentionsLegales.tsx` | Modifier | References au ministere dynamiques |
+| `src/pages/Confidentialite.tsx` | Modifier | Reference au ministere dynamique |
+| `src/lib/seo/jsonld.ts` | Modifier | Organisation dynamique |
+| `src/App.tsx` | Modifier | Ajouter routes `/cadre-juridique` et `/comite` |
+| `src/components/Navbar.tsx` | Modifier | Sous-menu labellisation enrichi |
+| `src/lib/constants/navigation.ts` | Modifier | Nouveaux liens |
+| `src/i18n/locales/fr/pages.json` | Modifier | Traductions FR pour les nouvelles pages |
+| `src/i18n/locales/en/pages.json` | Modifier | Traductions EN |
+| `src/i18n/locales/fr/common.json` | Modifier | Nouveaux liens de navigation |
+| `src/i18n/locales/en/common.json` | Modifier | Nouveaux liens de navigation |
+
+---
+
+## Detail technique
+
+### Table `platform_settings`
+
+```text
+key (text, PK)  |  value (text)  |  updated_at  |  updated_by
+```
+
+Donnees initiales inserees :
+- `ministry_name` = "Ministere de la Transition Numerique et de l'Innovation Technologique"
+- `ministry_acronym` = "MTNI"
+- `minister_title` = "Ministre de la Transition Numerique et de l'Innovation Technologique"
+- `ministry_address` = "Abidjan, Plateau, Cote d'Ivoire"
+- `ministry_phone` = "+225 27 22 XX XX XX"
+- `ministry_email` = "contact@mtni.gouv.ci"
+- `ministry_website` = "https://www.mtni.gouv.ci"
+- `platform_name` = "Ivoire Hub"
+- `platform_email` = "contact@ivoirehub.ci"
+
+### Table `legal_documents`
+
+```text
+id | title | description | document_type | official_number
+file_url | external_url | published_date | display_order | is_active
+created_at | updated_at
+```
+
+Types : `law`, `decree`, `order`, `circular`
+
+### Table `committee_members`
+
+```text
+id | full_name | title | organization | photo_url
+role_in_committee | bio | display_order | is_active
+created_at | updated_at
+```
+
+Roles : `president`, `vice_president`, `member`, `secretary`
+
+### RLS pour les 3 tables
+
+- Lecture : publique (tout le monde peut voir)
+- Ecriture : admins uniquement (`has_role(auth.uid(), 'admin')`)
 
 ---
 
 ## Securite
 
-- RLS strictes : les investisseurs ne voient que leurs propres donnees privees et les startups publiques labellisees
-- Le role `investor` est stocke dans `user_roles` (table separee, jamais dans `profiles`)
-- La fonction `has_role()` existante (SECURITY DEFINER) est reutilisee pour les policies
-- `RoleGate` protege les routes cote frontend
-- Les admins conservent un acces total
-- La table `investor_interests` n'est lisible que par l'investisseur proprietaire et les admins
+- Les fichiers PDF des lois seront stockes dans un bucket de stockage `legal-documents` (pas en base de donnees)
+- Seule l'URL du fichier est stockee en base
+- Les photos des membres du comite iront dans un bucket `committee-photos`
+- RLS strictes : seuls les admins peuvent modifier les donnees
+- Lecture publique necessaire car ces informations sont institutionnelles
 
-## Considerations
+## Ordre d'implementation
 
-- Les utilisateurs qui se sont deja inscrits en tant qu'investisseur ont actuellement le role `startup` : une correction manuelle sera necessaire via requete SQL
-- La page publique `/investisseurs` reste accessible a tous (non-authentifies inclus) et ne change pas
+1. Migration base de donnees (tables + RLS + donnees initiales)
+2. Hook `usePlatformSettings`
+3. Remplacement des valeurs en dur (Footer, MentionsLegales, Confidentialite)
+4. Page `/cadre-juridique`
+5. Page `/comite`
+6. Mise a jour navigation (Navbar, routes, traductions)
+
