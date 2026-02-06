@@ -1,17 +1,8 @@
-import { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-// @ts-ignore - CJS module
-import MarkerClusterGroup from 'react-leaflet-cluster';
+import { useEffect, useCallback } from 'react';
+import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { useNavigate } from 'react-router-dom';
-import { Building2, MapPin, Users, ExternalLink, Award } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import 'leaflet/dist/leaflet.css';
-import 'react-leaflet-cluster/dist/assets/MarkerCluster.css';
-import 'react-leaflet-cluster/dist/assets/MarkerCluster.Default.css';
-import 'react-leaflet-cluster/dist/assets/MarkerCluster.css';
-import 'react-leaflet-cluster/dist/assets/MarkerCluster.Default.css';
+import CustomMarkerClusterGroup from './CustomMarkerClusterGroup';
 
 interface Company {
   id: string | number;
@@ -42,7 +33,7 @@ L.Icon.Default.mergeOptions({
 // Custom marker icon creator
 const createCustomIcon = (isLabeled: boolean) => {
   const color = isLabeled ? 'hsl(142, 76%, 36%)' : 'hsl(215, 16%, 47%)';
-  
+
   return L.divIcon({
     className: 'custom-leaflet-marker',
     html: `
@@ -110,6 +101,59 @@ const createClusterCustomIcon = (cluster: any) => {
   });
 };
 
+// Render popup content as HTML string (required by native Leaflet bindPopup)
+const renderPopupContent = (company: Company): string => {
+  const labelBadge = company.isLabeled
+    ? `<span style="display:inline-flex;align-items:center;gap:4px;background:#dcfce7;color:#15803d;font-size:12px;padding:2px 8px;border-radius:9999px;font-weight:500;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+        Labellisée
+      </span>`
+    : '';
+
+  const websiteBtn = company.website
+    ? `<a href="${company.website}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;justify-content:center;padding:6px 12px;border:1px solid #d1d5db;border-radius:6px;background:white;color:#374151;font-size:13px;cursor:pointer;text-decoration:none;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+      </a>`
+    : '';
+
+  return `
+    <div style="padding:4px;">
+      <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;">
+        <div style="width:48px;height:48px;border-radius:8px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
+          ${company.logo
+      ? `<img src="${company.logo}" alt="${company.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />`
+      : ''}
+          <div style="${company.logo ? 'display:none;' : 'display:flex;'}align-items:center;justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>
+          </div>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <h3 style="font-weight:600;color:#111827;font-size:15px;line-height:1.3;margin:0 0 4px 0;">${company.name}</h3>
+          ${labelBadge}
+        </div>
+      </div>
+      <p style="font-size:13px;color:#4b5563;margin:0 0 12px 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${company.description}</p>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+        <span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#4b5563;background:#f3f4f6;padding:4px 8px;border-radius:9999px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          ${company.location}
+        </span>
+        <span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:#4b5563;background:#f3f4f6;padding:4px 8px;border-radius:9999px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          ${company.employees}
+        </span>
+      </div>
+      <div style="margin-bottom:12px;">
+        <span style="font-size:12px;background:#f3f4f6;color:#374151;padding:4px 10px;border-radius:6px;">${company.specialization}</span>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <a href="/entreprises-ia/${company.id}" style="flex:1;display:inline-flex;align-items:center;justify-content:center;padding:6px 16px;background:hsl(var(--primary));color:white;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;text-decoration:none;">Voir les détails</a>
+        ${websiteBtn}
+      </div>
+    </div>
+  `;
+};
+
 // Component to fit bounds to all markers
 const FitBounds = ({ companies }: { companies: Company[] }) => {
   const map = useMap();
@@ -128,11 +172,12 @@ const FitBounds = ({ companies }: { companies: Company[] }) => {
 };
 
 const MapView = ({ companies }: MapViewProps) => {
-  const navigate = useNavigate();
-
   // Center on Côte d'Ivoire
   const defaultCenter: [number, number] = [7.54, -5.55];
   const defaultZoom = 7;
+
+  const memoizedCreateIcon = useCallback(createCustomIcon, []);
+  const memoizedRenderPopup = useCallback(renderPopupContent, []);
 
   return (
     <div className="relative w-full h-[600px] rounded-xl overflow-hidden border border-border shadow-lg">
@@ -146,104 +191,18 @@ const MapView = ({ companies }: MapViewProps) => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        
+
         <FitBounds companies={companies} />
-        
-        <MarkerClusterGroup
-          chunkedLoading
+
+        <CustomMarkerClusterGroup
+          companies={companies}
           iconCreateFunction={createClusterCustomIcon}
           maxClusterRadius={50}
-          spiderfyOnMaxZoom
-          showCoverageOnHover={false}
-          zoomToBoundsOnClick
-        >
-          {companies.map((company) => (
-            <Marker
-              key={company.id}
-              position={[company.coordinates.lat, company.coordinates.lng]}
-              icon={createCustomIcon(company.isLabeled ?? false)}
-            >
-              <Popup className="leaflet-custom-popup" maxWidth={320} minWidth={280}>
-                <div className="p-1">
-                  {/* Header with logo and name */}
-                  <div className="flex items-start gap-3 mb-3">
-                    <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0">
-                      {company.logo ? (
-                        <img 
-                          src={company.logo} 
-                          alt={company.name}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                            (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                          }}
-                        />
-                      ) : null}
-                      <Building2 className={`w-6 h-6 text-gray-500 ${company.logo ? 'hidden' : ''}`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-900 text-base leading-tight mb-1">
-                        {company.name}
-                      </h3>
-                      {company.isLabeled && (
-                        <Badge className="bg-green-100 text-green-700 text-xs">
-                          <Award className="w-3 h-3 mr-1" />
-                          Labellisée
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Description */}
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                    {company.description}
-                  </p>
-                  
-                  {/* Info badges */}
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    <div className="flex items-center gap-1 text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
-                      <MapPin className="w-3 h-3" />
-                      {company.location}
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
-                      <Users className="w-3 h-3" />
-                      {company.employees}
-                    </div>
-                  </div>
-                  
-                  {/* Specialization */}
-                  <div className="mb-3">
-                    <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-700">
-                      {company.specialization}
-                    </Badge>
-                  </div>
-                  
-                  {/* Actions */}
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => navigate(`/entreprises-ia/${company.id}`)}
-                    >
-                      Voir les détails
-                    </Button>
-                    {company.website && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => window.open(company.website, '_blank')}
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </Popup>
-            </Marker>
-          ))}
-        </MarkerClusterGroup>
+          createMarkerIcon={memoizedCreateIcon}
+          renderPopupContent={memoizedRenderPopup}
+        />
       </MapContainer>
-      
+
       {/* Overlay - Company count */}
       <div className="absolute top-4 left-4 z-[1000] bg-background/95 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg border border-border">
         <span className="font-semibold text-foreground">{companies.length}</span>
@@ -251,7 +210,7 @@ const MapView = ({ companies }: MapViewProps) => {
           entreprise{companies.length !== 1 ? 's' : ''}
         </span>
       </div>
-      
+
       {/* Legend */}
       <div className="absolute bottom-4 left-4 z-[1000] bg-background/95 backdrop-blur-sm rounded-lg px-4 py-3 shadow-lg border border-border">
         <p className="text-xs font-medium text-foreground mb-2">Légende</p>
