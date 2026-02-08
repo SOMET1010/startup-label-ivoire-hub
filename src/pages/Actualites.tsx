@@ -3,9 +3,10 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
 import { SEOHead } from "@/components/shared/SEOHead";
-import NewsHero from "@/components/news/NewsHero";
+import NewsHeroCarousel from "@/components/news/NewsHeroCarousel";
 import NewsFiltersLive from "@/components/news/NewsFiltersLive";
 import NewsGridLive from "@/components/news/NewsGridLive";
+import NewsletterBanner from "@/components/news/NewsletterBanner";
 import { allNews, categories } from "@/data/mockNews";
 import { usePerplexityNews } from "@/hooks/usePerplexityNews";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -21,46 +22,65 @@ const Actualites = () => {
     isLoading,
     isLive,
     lastUpdated,
-    refetch
+    refetch,
   } = usePerplexityNews({
     searchQuery: searchTerm,
     category: selectedCategory,
-    enabled: useRealtime
+    enabled: useRealtime,
   });
 
   // Merge live news with mock data for fallback
   const displayNews = useMemo(() => {
     if (!useRealtime) {
-      // Filter mock news by category and search
-      return allNews.filter(item => {
-        const matchesCategory = selectedCategory === "Toutes" || item.category === selectedCategory;
-        const matchesSearch = !searchTerm || 
-          item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
-        return matchesCategory && matchesSearch;
-      }).map(item => ({ ...item, isLive: false }));
+      return allNews
+        .filter((item) => {
+          const matchesCategory =
+            selectedCategory === "Toutes" || item.category === selectedCategory;
+          const matchesSearch =
+            !searchTerm ||
+            item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
+          return matchesCategory && matchesSearch;
+        })
+        .map((item) => ({ ...item, isLive: false }));
     }
 
     if (liveNews.length > 0) {
-      // Filter live news by category (search is already done via API)
-      const filteredLive = selectedCategory === "Toutes" 
-        ? liveNews 
-        : liveNews.filter(item => item.category === selectedCategory);
-      
+      const filteredLive =
+        selectedCategory === "Toutes"
+          ? liveNews
+          : liveNews.filter((item) => item.category === selectedCategory);
       return filteredLive;
     }
 
-    // Fallback to mock data if no live news
     return allNews
-      .filter(item => {
-        const matchesCategory = selectedCategory === "Toutes" || item.category === selectedCategory;
-        const matchesSearch = !searchTerm || 
+      .filter((item) => {
+        const matchesCategory =
+          selectedCategory === "Toutes" || item.category === selectedCategory;
+        const matchesSearch =
+          !searchTerm ||
           item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
           item.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
         return matchesCategory && matchesSearch;
       })
-      .map(item => ({ ...item, isLive: false }));
+      .map((item) => ({ ...item, isLive: false }));
   }, [useRealtime, liveNews, allNews, selectedCategory, searchTerm]);
+
+  // Category counts for pill badges
+  const categoryCounts = useMemo(() => {
+    const sourceData = useRealtime && liveNews.length > 0 ? liveNews : allNews;
+    const counts: Record<string, number> = { Toutes: sourceData.length };
+    sourceData.forEach((item) => {
+      counts[item.category] = (counts[item.category] || 0) + 1;
+    });
+    return counts;
+  }, [useRealtime, liveNews, allNews]);
+
+  // Hero items: first 3 from source data (unfiltered)
+  const heroItems = useMemo(() => {
+    const source = useRealtime && liveNews.length > 0 ? liveNews : allNews;
+    return source.slice(0, 3);
+  }, [useRealtime, liveNews, allNews]);
 
   const resetFilters = () => {
     setSearchTerm("");
@@ -77,8 +97,12 @@ const Actualites = () => {
       <Navbar />
       <PageBreadcrumb className="py-3 bg-muted/30 border-b border-border" />
       <main id="main-content" className="flex-grow">
-        <NewsHero />
-        <div className={`transition-all duration-300 ${isMobile ? 'sticky top-16 z-10 bg-background shadow-md' : ''}`}>
+        <NewsHeroCarousel news={heroItems} />
+        <div
+          className={`transition-all duration-300 ${
+            isMobile ? "sticky top-16 z-10 bg-background shadow-md" : ""
+          }`}
+        >
           <NewsFiltersLive
             searchTerm={searchTerm}
             setSearchTerm={setSearchTerm}
@@ -91,13 +115,15 @@ const Actualites = () => {
             setUseRealtime={setUseRealtime}
             onRefresh={refetch}
             lastUpdated={lastUpdated}
+            categoryCounts={categoryCounts}
           />
         </div>
-        <NewsGridLive 
-          news={displayNews} 
+        <NewsGridLive
+          news={displayNews}
           isLoading={isLoading && useRealtime}
-          onResetFilters={resetFilters} 
+          onResetFilters={resetFilters}
         />
+        <NewsletterBanner />
       </main>
       <Footer />
     </div>
