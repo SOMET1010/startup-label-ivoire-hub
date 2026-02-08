@@ -67,6 +67,7 @@ export default function VotingStatsDashboard() {
         approvalRate={stats.approvalRate}
         averageDecisionDays={stats.averageDecisionDays}
         quorumReachRate={stats.quorumReachRate}
+        trends={stats.trends}
       />
 
       {/* Charts Grid */}

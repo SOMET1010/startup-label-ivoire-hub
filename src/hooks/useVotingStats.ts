@@ -29,6 +29,11 @@ export interface EvaluatorPerformance {
   approveRate: number;
 }
 
+export interface KPITrend {
+  current: number;
+  previous: number;
+}
+
 export interface VotingStats {
   // KPIs
   totalEvaluations: number;
@@ -38,6 +43,16 @@ export interface VotingStats {
   rejectionRate: number;
   averageDecisionDays: number;
   quorumReachRate: number;
+  
+  // Trends (current vs previous period)
+  trends: {
+    submittedEvaluations: KPITrend;
+    averageScore: KPITrend;
+    approvalRate: KPITrend;
+    averageDecisionDays: KPITrend;
+    quorumReachRate: KPITrend;
+    completionRate: KPITrend;
+  };
   
   // Chart data
   monthlyVotes: MonthlyVoteData[];
@@ -62,6 +77,7 @@ function filterByDate<T>(items: T[], dateField: keyof T, startDate: Date | null)
 }
 
 export function useVotingStats(period: TimePeriod = '90d') {
+  const defaultTrend: KPITrend = { current: 0, previous: 0 };
   const [stats, setStats] = useState<VotingStats>({
     totalEvaluations: 0,
     submittedEvaluations: 0,
@@ -70,6 +86,14 @@ export function useVotingStats(period: TimePeriod = '90d') {
     rejectionRate: 0,
     averageDecisionDays: 0,
     quorumReachRate: 0,
+    trends: {
+      submittedEvaluations: defaultTrend,
+      averageScore: defaultTrend,
+      approvalRate: defaultTrend,
+      averageDecisionDays: defaultTrend,
+      quorumReachRate: defaultTrend,
+      completionRate: defaultTrend,
+    },
     monthlyVotes: [],
     decisionDistribution: [],
     decisionTimeTrend: [],
@@ -80,6 +104,14 @@ export function useVotingStats(period: TimePeriod = '90d') {
 
   const startDate = getStartDate(period);
   const monthsToShow = getMonthsToShow(period);
+
+  // Calculate the previous period start date for trend comparison
+  const getPreviousPeriodStartDate = (): Date | null => {
+    if (!startDate) return null;
+    const periodMs = Date.now() - startDate.getTime();
+    return new Date(startDate.getTime() - periodMs);
+  };
+  const previousPeriodStartDate = getPreviousPeriodStartDate();
 
   useEffect(() => {
     fetchStats();
@@ -113,10 +145,26 @@ export function useVotingStats(period: TimePeriod = '90d') {
       
       if (appsError) throw appsError;
 
-      // Filter data by period
+      // Filter data by current period
       const evaluations = filterByDate(allEvaluations || [], 'created_at', startDate);
       const votingDecisions = filterByDate(allVotingDecisions || [], 'created_at', startDate);
       const applications = filterByDate(allApplications || [], 'submitted_at', startDate);
+
+      // Filter data by previous period (for trends)
+      const prevEvaluations = previousPeriodStartDate
+        ? filterByDate(allEvaluations || [], 'created_at', previousPeriodStartDate).filter(e => {
+            if (!startDate) return true;
+            const d = new Date(e.created_at);
+            return d < startDate;
+          })
+        : [];
+      const prevVotingDecisions = previousPeriodStartDate
+        ? filterByDate(allVotingDecisions || [], 'created_at', previousPeriodStartDate).filter(v => {
+            if (!startDate) return true;
+            const d = new Date(v.created_at);
+            return d < startDate;
+          })
+        : [];
 
       // Fetch evaluator profiles
       const evaluatorIds = [...new Set(evaluations?.map(e => e.evaluator_id) || [])];
@@ -125,7 +173,7 @@ export function useVotingStats(period: TimePeriod = '90d') {
         .select("user_id, full_name")
         .in("user_id", evaluatorIds);
 
-      // Calculate KPIs
+      // === Current period KPIs ===
       const submittedEvals = evaluations?.filter(e => e.is_submitted) || [];
       const totalEvaluations = evaluations?.length || 0;
       const submittedEvaluations = submittedEvals.length;
@@ -144,6 +192,9 @@ export function useVotingStats(period: TimePeriod = '90d') {
       const totalVotingDecisions = votingDecisions?.length || 0;
       const quorumReachRate = totalVotingDecisions > 0 ? (quorumReached / totalVotingDecisions) * 100 : 0;
 
+      // Completion rate
+      const completionRate = totalEvaluations > 0 ? (submittedEvaluations / totalEvaluations) * 100 : 0;
+
       // Average decision time (in days)
       const decisionsWithTime = votingDecisions?.filter(v => v.decided_at && v.final_decision) || [];
       let avgDecisionDays = 0;
@@ -160,6 +211,38 @@ export function useVotingStats(period: TimePeriod = '90d') {
         
         if (times.length > 0) {
           avgDecisionDays = times.reduce((a, b) => a + b, 0) / times.length;
+        }
+      }
+
+      // === Previous period KPIs (for trends) ===
+      const prevSubmittedEvals = prevEvaluations.filter(e => e.is_submitted);
+      const prevTotalEvaluations = prevEvaluations.length;
+      const prevSubmittedEvaluations = prevSubmittedEvals.length;
+      const prevAvgScore = prevSubmittedEvals.length > 0
+        ? prevSubmittedEvals.reduce((sum, e) => sum + (e.total_score || 0), 0) / prevSubmittedEvals.length
+        : 0;
+      const prevApproveCount = prevSubmittedEvals.filter(e => e.recommendation === "approve").length;
+      const prevApprovalRate = prevSubmittedEvals.length > 0 ? (prevApproveCount / prevSubmittedEvals.length) * 100 : 0;
+      const prevQuorumReached = prevVotingDecisions.filter(v => v.quorum_reached).length;
+      const prevTotalVD = prevVotingDecisions.length;
+      const prevQuorumReachRate = prevTotalVD > 0 ? (prevQuorumReached / prevTotalVD) * 100 : 0;
+      const prevCompletionRate = prevTotalEvaluations > 0 ? (prevSubmittedEvaluations / prevTotalEvaluations) * 100 : 0;
+      
+      // Previous average decision days
+      const prevDecisionsWithTime = prevVotingDecisions.filter(v => v.decided_at && v.final_decision);
+      let prevAvgDecisionDays = 0;
+      if (prevDecisionsWithTime.length > 0) {
+        const prevTimes = prevDecisionsWithTime.map(vd => {
+          const app = (allApplications || []).find(a => a.id === vd.application_id);
+          if (app?.submitted_at && vd.decided_at) {
+            const submitted = new Date(app.submitted_at);
+            const decided = new Date(vd.decided_at);
+            return (decided.getTime() - submitted.getTime()) / (1000 * 60 * 60 * 24);
+          }
+          return null;
+        }).filter(Boolean) as number[];
+        if (prevTimes.length > 0) {
+          prevAvgDecisionDays = prevTimes.reduce((a, b) => a + b, 0) / prevTimes.length;
         }
       }
 
@@ -191,6 +274,14 @@ export function useVotingStats(period: TimePeriod = '90d') {
         rejectionRate: Math.round(rejectionRate * 10) / 10,
         averageDecisionDays: Math.round(avgDecisionDays * 10) / 10,
         quorumReachRate: Math.round(quorumReachRate * 10) / 10,
+        trends: {
+          submittedEvaluations: { current: submittedEvaluations, previous: prevSubmittedEvaluations },
+          averageScore: { current: Math.round(avgScore * 10) / 10, previous: Math.round(prevAvgScore * 10) / 10 },
+          approvalRate: { current: Math.round(approvalRate * 10) / 10, previous: Math.round(prevApprovalRate * 10) / 10 },
+          averageDecisionDays: { current: Math.round(avgDecisionDays * 10) / 10, previous: Math.round(prevAvgDecisionDays * 10) / 10 },
+          quorumReachRate: { current: Math.round(quorumReachRate * 10) / 10, previous: Math.round(prevQuorumReachRate * 10) / 10 },
+          completionRate: { current: Math.round(completionRate * 10) / 10, previous: Math.round(prevCompletionRate * 10) / 10 },
+        },
         monthlyVotes,
         decisionDistribution,
         decisionTimeTrend,

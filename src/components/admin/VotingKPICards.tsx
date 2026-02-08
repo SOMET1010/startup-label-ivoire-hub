@@ -1,5 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { FileCheck, Target, Clock, TrendingUp, Users, Star } from "lucide-react";
+import { FileCheck, Target, Clock, TrendingUp, TrendingDown, Users, Star, Minus } from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { KPITrend } from "@/hooks/useVotingStats";
 
 interface VotingKPICardsProps {
   totalEvaluations: number;
@@ -8,6 +10,43 @@ interface VotingKPICardsProps {
   approvalRate: number;
   averageDecisionDays: number;
   quorumReachRate: number;
+  trends?: {
+    submittedEvaluations: KPITrend;
+    averageScore: KPITrend;
+    approvalRate: KPITrend;
+    averageDecisionDays: KPITrend;
+    quorumReachRate: KPITrend;
+    completionRate: KPITrend;
+  };
+}
+
+function TrendBadge({ trend, invertColor = false }: { trend?: KPITrend; invertColor?: boolean }) {
+  if (!trend || (trend.current === 0 && trend.previous === 0)) return null;
+
+  const change = trend.previous === 0
+    ? (trend.current > 0 ? 100 : 0)
+    : Math.round(((trend.current - trend.previous) / trend.previous) * 100);
+
+  if (change === 0) {
+    return (
+      <span className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground ml-1">
+        <Minus className="h-2.5 w-2.5" /> 0%
+      </span>
+    );
+  }
+
+  const isPositive = change > 0;
+  const isGood = invertColor ? !isPositive : isPositive;
+
+  return (
+    <span className={cn(
+      'inline-flex items-center gap-0.5 text-[10px] font-semibold ml-1',
+      isGood ? 'text-green-600' : 'text-red-600'
+    )}>
+      {isPositive ? <TrendingUp className="h-2.5 w-2.5" /> : <TrendingDown className="h-2.5 w-2.5" />}
+      {isPositive ? '+' : ''}{change}%
+    </span>
+  );
 }
 
 export default function VotingKPICards({
@@ -17,6 +56,7 @@ export default function VotingKPICards({
   approvalRate,
   averageDecisionDays,
   quorumReachRate,
+  trends,
 }: VotingKPICardsProps) {
   const kpis = [
     {
@@ -25,7 +65,8 @@ export default function VotingKPICards({
       subtitle: `sur ${totalEvaluations} total`,
       icon: FileCheck,
       color: "text-blue-600",
-      bgColor: "bg-blue-50",
+      bgColor: "bg-blue-50 dark:bg-blue-950/30",
+      trend: trends?.submittedEvaluations,
     },
     {
       title: "Score Moyen",
@@ -33,7 +74,8 @@ export default function VotingKPICards({
       subtitle: "sur 100 points",
       icon: Star,
       color: "text-amber-600",
-      bgColor: "bg-amber-50",
+      bgColor: "bg-amber-50 dark:bg-amber-950/30",
+      trend: trends?.averageScore,
     },
     {
       title: "Taux d'Approbation",
@@ -41,7 +83,8 @@ export default function VotingKPICards({
       subtitle: "des évaluations",
       icon: Target,
       color: "text-green-600",
-      bgColor: "bg-green-50",
+      bgColor: "bg-green-50 dark:bg-green-950/30",
+      trend: trends?.approvalRate,
     },
     {
       title: "Temps de Décision",
@@ -49,7 +92,9 @@ export default function VotingKPICards({
       subtitle: "en moyenne",
       icon: Clock,
       color: "text-purple-600",
-      bgColor: "bg-purple-50",
+      bgColor: "bg-purple-50 dark:bg-purple-950/30",
+      trend: trends?.averageDecisionDays,
+      invertTrend: true,
     },
     {
       title: "Quorum Atteint",
@@ -57,7 +102,8 @@ export default function VotingKPICards({
       subtitle: "des candidatures",
       icon: Users,
       color: "text-indigo-600",
-      bgColor: "bg-indigo-50",
+      bgColor: "bg-indigo-50 dark:bg-indigo-950/30",
+      trend: trends?.quorumReachRate,
     },
     {
       title: "Taux de Complétion",
@@ -65,7 +111,8 @@ export default function VotingKPICards({
       subtitle: "évaluations finalisées",
       icon: TrendingUp,
       color: "text-teal-600",
-      bgColor: "bg-teal-50",
+      bgColor: "bg-teal-50 dark:bg-teal-950/30",
+      trend: trends?.completionRate,
     },
   ];
 
@@ -79,7 +126,10 @@ export default function VotingKPICards({
                 <p className="text-xs font-medium text-muted-foreground truncate">
                   {kpi.title}
                 </p>
-                <p className="text-2xl font-bold mt-1">{kpi.value}</p>
+                <div className="flex items-center mt-1">
+                  <p className="text-2xl font-bold">{kpi.value}</p>
+                  <TrendBadge trend={kpi.trend} invertColor={kpi.invertTrend} />
+                </div>
                 <p className="text-xs text-muted-foreground mt-1 truncate">
                   {kpi.subtitle}
                 </p>
