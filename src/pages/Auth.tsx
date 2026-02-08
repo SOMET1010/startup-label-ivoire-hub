@@ -14,6 +14,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Lock, AlertCircle, CheckCircle2, ArrowLeft, Rocket, Building2, Briefcase, Users } from "lucide-react";
 import { motion } from "framer-motion";
+import DevQuickLogin from "@/components/auth/DevQuickLogin";
 
 type UserProfile = "startup" | "structure" | "investisseur";
 
@@ -495,22 +496,41 @@ export default function Auth() {
 
           {/* CTA Card */}
           {!showSignup && (
-            <Card className="mt-4 border shadow-lg bg-card">
-              <CardContent className="py-6 px-8 text-center">
-                <h2 className="text-lg font-semibold text-foreground mb-2">
-                  {t('startupCTA.title')}
-                </h2>
-                <p className="text-sm text-muted-foreground mb-4">
-                  {t('startupCTA.description')}
-                </p>
-                <Button 
-                  className="bg-accent hover:bg-accent/90 text-accent-foreground font-medium px-6"
-                  onClick={() => { setShowSignup(true); setError(null); }}
-                >
-                  {t('startupCTA.button')}
-                </Button>
-              </CardContent>
-            </Card>
+            <>
+              <Card className="mt-4 border shadow-lg bg-card">
+                <CardContent className="py-6 px-8 text-center">
+                  <h2 className="text-lg font-semibold text-foreground mb-2">
+                    {t('startupCTA.title')}
+                  </h2>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {t('startupCTA.description')}
+                  </p>
+                  <Button 
+                    className="bg-accent hover:bg-accent/90 text-accent-foreground font-medium px-6"
+                    onClick={() => { setShowSignup(true); setError(null); }}
+                  >
+                    {t('startupCTA.button')}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {import.meta.env.DEV && (
+                <DevQuickLogin
+                  onQuickLogin={async (email, password) => {
+                    setError(null);
+                    setIsLoading(true);
+                    try {
+                      await signIn(email, password);
+                    } catch (err: any) {
+                      setError(getErrorMessage(err));
+                    } finally {
+                      setIsLoading(false);
+                    }
+                  }}
+                  isLoading={isLoading}
+                />
+              )}
+            </>
           )}
 
           {/* Footer Links */}
