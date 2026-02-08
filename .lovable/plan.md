@@ -1,86 +1,102 @@
 
+## Refonte UX/UI de la page Actualites
 
-## Improve the Admin Dashboard with Real-Time Charts and KPIs
+Transformation de la page `/actualites` en une experience editoriale dynamique et engageante, avec un Hero carousel immersif, des cartes enrichies, du partage social, des micro-interactions, et une section newsletter.
 
-### Current State
+### 1. Hero Carousel immersif
 
-The admin dashboard already has:
-- **5 basic stat cards** at the top (total, pending, approved, rejected, users) -- static counters without trends
-- **A "Statistiques" tab** with voting-specific KPIs and 4 charts (votes evolution, decision distribution, decision time, evaluator performance)
-- **An `AdminKPIs` component** that exists but is NOT currently used in the dashboard
-- **Realtime** already enabled for `applications`, `application_comments`, and `startup_notifications` tables
+Remplacement du header statique (gradient plat avec titre/sous-titre) par un carousel plein ecran mettant en avant les 3 articles les plus recents avec leurs images reelles.
 
-### What Will Be Improved
+- Utilisation du composant `Carousel` existant (embla-carousel-react deja installe)
+- Chaque slide affiche : image en fond, badge categorie, titre, extrait tronque, bouton "Lire l'article"
+- Overlay gradient sombre pour lisibilite du texte sur les images
+- Indicateurs de navigation (dots) + boutons fleches
+- Auto-play avec pause au survol
+- Motifs geometriques en filigrane (CSS `background-image` avec pattern SVG subtil) sur l'overlay pour ajouter de la profondeur culturelle
 
-#### 1. Replace the static top-level KPI cards with enhanced animated cards
-The current 5 static cards will be replaced with richer KPI cards featuring:
-- Trend indicators (percentage change vs previous period, with colored arrows)
-- Animated number transitions using Framer Motion
-- Contextual colors (green for positive trends, red for negative)
-- Micro-sparkline charts inline showing 7-day trends
-- Processing time KPI (currently only in the unused `AdminKPIs` component)
-- Pending documents KPI with orange alert styling (from `AdminKPIs`)
+### 2. Cartes (NewsCardLive) enrichies
 
-#### 2. Add a real-time overview section below KPIs
-A new "Vue d'ensemble" section on the main dashboard (not buried in the Statistiques tab) with:
-- **Application funnel chart**: Visual funnel showing Draft -> Submitted -> Under Review -> Approved/Rejected
-- **Monthly trends bar chart**: Compact version of the monthly evolution (submitted vs approved vs rejected)
-- **Status distribution donut**: Real-time pie/donut showing current status breakdown
-These will be visible directly on the main dashboard, giving admins an immediate overview without navigating to the Statistiques tab.
+Ameliorations des cartes d'actualites existantes :
 
-#### 3. Real-time data refresh using Supabase Realtime
-Subscribe to the `applications` table changes so that:
-- KPI counters update automatically when a new application is submitted or status changes
-- Charts refresh without manual "Actualiser" click
-- A subtle animation plays when data updates
-- The manual refresh button remains as a fallback
+- **Date relative** : Afficher "Publie il y a 3 jours" en plus de la date absolue, via `date-fns` (deja installe) avec `formatDistanceToNow`
+- **Temps de lecture estime** : Calcul base sur la longueur de l'extrait (environ 200 mots/min), affiche avec une icone `Clock`
+- **Badges categorie colores** : Les couleurs par categorie existent deja dans `getCategoryColor()` -- on les rendra plus visibles avec un fond opaque
+- **Partage social** : Ajout d'icones WhatsApp, LinkedIn, X (Twitter) en overlay au survol de la carte, avec liens `share` pre-remplis
+- **Micro-interactions ameliorees** : Zoom image plus prononce au hover, elevation de la carte avec ombre portee, transition sur le titre
 
-#### 4. Improve the existing Statistiques tab
-- Add trend comparison badges to each VotingKPICard (current period vs previous period)
-- Add a "Secteur" breakdown chart (horizontal bar chart showing applications by sector)
-- Add a conversion funnel visualization
+### 3. Filtres "pill-shaped" modernises
 
-### Files to Create
+Transformation des badges de filtre actuels en pills plus larges et contrastees :
 
-| File | Purpose |
-|------|---------|
-| `src/components/admin/EnhancedKPICards.tsx` | New animated KPI cards with trends and sparklines |
-| `src/components/admin/DashboardOverview.tsx` | Overview section with funnel + mini charts |
-| `src/components/admin/charts/StatusFunnelChart.tsx` | Application status funnel visualization |
-| `src/components/admin/charts/SectorBreakdownChart.tsx` | Breakdown by sector chart |
-| `src/hooks/useRealtimeAdminStats.ts` | Hook combining `useAdminMetrics` with realtime subscriptions |
+- Forme `rounded-full` avec padding genereux (deja le cas)
+- Etat actif : fond plein avec la couleur de la categorie (pas juste orange generique)
+- Etat inactif : contour fin, fond transparent, hover avec teinte de la couleur
+- Compteur de resultats par categorie entre parentheses
 
-### Files to Modify
+### 4. Section Newsletter
 
-| File | Changes |
-|------|---------|
-| `src/pages/admin/Dashboard.tsx` | Replace static KPI cards with `EnhancedKPICards`, add `DashboardOverview` section, integrate realtime hook |
-| `src/components/admin/VotingKPICards.tsx` | Add trend indicators (percentage badges with arrows) |
-| `src/hooks/useAdminMetrics.ts` | Add sector breakdown data and funnel data to the metrics |
+Ajout d'un bandeau entre la grille et la pagination :
 
-### Technical Details
+- Fond gradient subtil (primary/secondary)
+- Titre accrocheur : "Ne manquez rien de l'actu Tech CI"
+- Champ email + bouton "S'inscrire"
+- Stockage des inscriptions dans une nouvelle table `newsletter_subscribers` en base de donnees
+- Validation email cote client
 
-**Real-time subscription** (in `useRealtimeAdminStats.ts`):
+### 5. Dark mode
+
+Le dark mode est deja entierement implemente dans le projet (via `next-themes`). Toutes les couleurs utilisent les CSS custom properties qui s'adaptent automatiquement. Aucun travail supplementaire necessaire -- on verifiera juste que les nouveaux elements (carousel overlay, newsletter banner) utilisent bien les variables semantiques.
+
+---
+
+### Details techniques
+
+**Fichiers a creer :**
+
+| Fichier | Description |
+|---------|-------------|
+| `src/components/news/NewsHeroCarousel.tsx` | Nouveau Hero avec carousel d'articles vedettes (remplace `NewsHero.tsx`) |
+| `src/components/news/SocialShareButtons.tsx` | Composant reutilisable d'icones de partage (WhatsApp, LinkedIn, X) |
+| `src/components/news/NewsletterBanner.tsx` | Bandeau d'inscription a la newsletter |
+
+**Fichiers a modifier :**
+
+| Fichier | Modifications |
+|---------|---------------|
+| `src/pages/Actualites.tsx` | Remplacer `NewsHero` par `NewsHeroCarousel`, ajouter `NewsletterBanner` |
+| `src/components/news/NewsCardLive.tsx` | Ajouter date relative, temps de lecture, boutons de partage au hover |
+| `src/components/news/NewsFiltersLive.tsx` | Pill-shaped plus contrastes avec compteurs par categorie |
+| `src/types/news.ts` | Ajouter champ optionnel `readingTime` |
+
+**Base de donnees :**
+
+Une migration pour creer la table `newsletter_subscribers` :
 ```text
-supabase.channel('admin-dashboard')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, callback)
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'evaluations' }, callback)
-  .subscribe()
+CREATE TABLE public.newsletter_subscribers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email TEXT NOT NULL UNIQUE,
+  subscribed_at TIMESTAMPTZ DEFAULT now(),
+  source TEXT DEFAULT 'actualites'
+);
+
+-- RLS : insertion publique, lecture admin uniquement
+ALTER TABLE public.newsletter_subscribers ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can subscribe"
+  ON public.newsletter_subscribers FOR INSERT
+  TO anon, authenticated
+  WITH CHECK (true);
+
+CREATE POLICY "Admins can read subscribers"
+  ON public.newsletter_subscribers FOR SELECT
+  TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.user_roles
+      WHERE user_roles.user_id = auth.uid()
+      AND user_roles.role = 'admin'
+    )
+  );
 ```
-On each change event, the hook will re-fetch metrics and update the state with animation triggers.
 
-**Enhanced KPI Cards** will use:
-- `framer-motion` for number counting animations (AnimatedNumber component)
-- Recharts `Sparkline` (tiny inline area chart) for 7-day trend visualization
-- Trend calculation: compare current period metrics to the equivalent previous period
-
-**Funnel Chart** will use Recharts `BarChart` with custom rendering to create a funnel shape showing:
-- Total applications -> Submitted -> Under Review -> Decided -> Approved
-
-**No new database tables or migrations are needed** -- all data comes from existing tables (`applications`, `evaluations`, `voting_decisions`, `document_requests`, `startups`).
-
-The `evaluations` table needs to be added to Supabase Realtime for live KPI updates. A migration will be needed:
-```sql
-ALTER PUBLICATION supabase_realtime ADD TABLE public.evaluations;
-```
-
+**Dependances :** Aucune nouvelle -- `embla-carousel-react`, `date-fns`, `framer-motion`, `lucide-react` sont deja installes.
