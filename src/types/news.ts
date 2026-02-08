@@ -6,4 +6,5 @@ export interface NewsItem {
   date: string;
   category: string;
   imageUrl?: string;
+  readingTime?: number;
 }
