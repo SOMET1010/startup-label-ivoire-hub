@@ -78,6 +78,9 @@ import { ApplicationCard } from "@/components/admin/ApplicationCard";
 import AdminPlatformSettings from "@/components/admin/AdminPlatformSettings";
 import AdminLegalDocuments from "@/components/admin/AdminLegalDocuments";
 import AdminCommitteeMembers from "@/components/admin/AdminCommitteeMembers";
+import EnhancedKPICards from "@/components/admin/EnhancedKPICards";
+import DashboardOverview from "@/components/admin/DashboardOverview";
+import { useRealtimeAdminStats } from "@/hooks/useRealtimeAdminStats";
 
 interface StartupDocuments {
   doc_rccm: string | null;
@@ -180,6 +183,9 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats>({ total: 0, pending: 0, approved: 0, rejected: 0, users: 0 });
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+
+  // Realtime admin metrics
+  const { metrics: realtimeMetrics, animationKey, lastUpdate } = useRealtimeAdminStats();
   
   // Dialog states
   const [selectedApplication, setSelectedApplication] = useState<ApplicationWithStartup | null>(null);
@@ -804,58 +810,37 @@ export default function AdminDashboard() {
             </Button>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Candidatures totales</CardTitle>
-                <FileCheck className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.total}</div>
-              </CardContent>
-            </Card>
+          {/* Enhanced KPI Cards */}
+          {realtimeMetrics ? (
+            <EnhancedKPICards
+              metrics={realtimeMetrics}
+              usersCount={stats.users}
+              animationKey={animationKey}
+            />
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-8">
+              {[...Array(8)].map((_, i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardContent className="p-3">
+                    <div className="h-4 bg-muted rounded w-16 mb-2" />
+                    <div className="h-6 bg-muted rounded w-10" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">En attente</CardTitle>
-                <Clock className="h-4 w-4 text-yellow-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.pending}</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Approuvées</CardTitle>
-                <CheckCircle className="h-4 w-4 text-green-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.approved}</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Rejetées</CardTitle>
-                <XCircle className="h-4 w-4 text-red-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.rejected}</div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Utilisateurs</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.users}</div>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Dashboard Overview Charts */}
+          {realtimeMetrics && (
+            <div className="my-8">
+              <DashboardOverview
+                monthlyStats={realtimeMetrics.monthlyStats}
+                statusCounts={realtimeMetrics.statusCounts}
+                sectorBreakdown={realtimeMetrics.sectorBreakdown}
+                animationKey={animationKey}
+              />
+            </div>
+          )}
 
           {/* Tabs */}
           <Tabs defaultValue="applications" className="space-y-4">
