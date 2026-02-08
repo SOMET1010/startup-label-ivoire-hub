@@ -8,6 +8,7 @@ interface ApplicationMetrics {
   submitted_at: string | null;
   reviewed_at: string | null;
   created_at: string;
+  startup_id: string;
 }
 
 interface MonthlyStats {
@@ -15,6 +16,20 @@ interface MonthlyStats {
   submitted: number;
   approved: number;
   rejected: number;
+}
+
+interface SectorData {
+  sector: string;
+  count: number;
+}
+
+interface StatusCounts {
+  draft: number;
+  pending: number;
+  under_review: number;
+  approved: number;
+  rejected: number;
+  incomplete: number;
 }
 
 interface AdminMetrics {
@@ -41,6 +56,12 @@ interface AdminMetrics {
   pendingDocumentRequests: number;
   applicationsWithPendingDocs: number;
   averageRoundTrips: number;
+
+  // Status breakdown for funnel/donut
+  statusCounts: StatusCounts;
+  
+  // Sector breakdown
+  sectorBreakdown: SectorData[];
 }
 
 export function useAdminMetrics() {
@@ -50,10 +71,10 @@ export function useAdminMetrics() {
 
   const fetchMetrics = async () => {
     try {
-      // Fetch all applications
+      // Fetch all applications with startup_id for sector breakdown
       const { data: applications, error: appsError } = await supabase
         .from('applications')
-        .select('id, status, submitted_at, reviewed_at, created_at');
+        .select('id, status, submitted_at, reviewed_at, created_at, startup_id');
 
       if (appsError) throw appsError;
 
@@ -117,6 +138,40 @@ export function useAdminMetrics() {
         });
       }
 
+      // Calculate status counts for funnel/donut
+      const statusCounts: StatusCounts = {
+        draft: apps.filter(a => a.status === 'draft').length,
+        pending: apps.filter(a => a.status === 'pending').length,
+        under_review: apps.filter(a => a.status === 'under_review').length,
+        approved: approvedApplications,
+        rejected: rejectedApplications,
+        incomplete: apps.filter(a => a.status === 'incomplete').length,
+      };
+
+      // Fetch startups for sector breakdown
+      const startupIds = [...new Set(apps.map(a => a.startup_id).filter(Boolean))];
+      let sectorBreakdown: SectorData[] = [];
+      if (startupIds.length > 0) {
+        const { data: startups } = await supabase
+          .from('startups')
+          .select('id, sector')
+          .in('id', startupIds);
+
+        const sectorMap: Record<string, number> = {};
+        const SECTOR_LABELS: Record<string, string> = {
+          fintech: 'FinTech', edtech: 'EdTech', healthtech: 'HealthTech',
+          agritech: 'AgriTech', ecommerce: 'E-commerce', mobility: 'Mobilité',
+          cleantech: 'CleanTech', proptech: 'PropTech', other: 'Autre',
+        };
+        (startups || []).forEach(s => {
+          const label = SECTOR_LABELS[s.sector || 'other'] || s.sector || 'Autre';
+          sectorMap[label] = (sectorMap[label] || 0) + 1;
+        });
+        sectorBreakdown = Object.entries(sectorMap)
+          .map(([sector, count]) => ({ sector, count }))
+          .sort((a, b) => b.count - a.count);
+      }
+
       // Fetch document requests
       const { data: docRequests, error: docError } = await supabase
         .from('document_requests')
@@ -158,6 +213,8 @@ export function useAdminMetrics() {
         pendingDocumentRequests,
         applicationsWithPendingDocs,
         averageRoundTrips,
+        statusCounts,
+        sectorBreakdown,
       });
     } catch (err: any) {
       console.error('Error fetching metrics:', err);
