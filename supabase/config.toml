@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.notify-voting-decision]
 verify_jwt = false
+
+[functions.create-test-admin]
+verify_jwt = false
