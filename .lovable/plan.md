@@ -1,254 +1,178 @@
 
 
-# Plan de Nettoyage Anti-Vibecoding -- Phase 0 a 6
+# Phase 2 -- Corrections de Typage
 
-Ce plan est structure en phases sequentielles. Chaque phase sera validee (compilation + verification) avant de passer a la suivante.
-
----
-
-## PHASE 0 -- INVENTAIRE (resultats de l'audit)
-
-### Fichiers morts (jamais importes nulle part)
-
-| Fichier | Raison |
-|---------|--------|
-| `src/components/NewsFeed.tsx` | Importe nulle part (commente dans Index.tsx) |
-| `src/components/ComparisonTable.tsx` | Importe nulle part |
-| `src/components/BrandSwitcher.tsx` | Importe nulle part |
-| `src/components/news/NewsCard.tsx` | Utilise uniquement par NewsGrid.tsx (lui-meme mort) |
-| `src/components/news/NewsGrid.tsx` | Importe nulle part dans les pages |
-| `src/components/news/NewsHero.tsx` | Importe nulle part |
-| `src/components/news/NewsFilters.tsx` | Importe nulle part |
-| `src/components/admin/AdminKPIs.tsx` | Importe nulle part (remplace par EnhancedKPICards) |
-| `src/hooks/useEvaluation.ts` | Importe nulle part |
-| `src/hooks/useNewsFilter.ts` | Importe nulle part |
-| `src/pages/TestPush.tsx` | Page de test, commentaire "a supprimer en production" |
-| `src/components/ui/use-toast.ts` | Re-export inutile (tout le monde importe directement depuis hooks) |
-
-### Route cassee
-
-- `ActualiteDetail` est lazy-loaded dans App.tsx mais **aucune route ne le reference**. Les liens `/actualites/:id` dans `NewsCardLive` et `NewsHeroCarousel` menent vers une 404.
-
-### Anti-patterns detectes
-
-- **Fichier geant** : `src/pages/admin/Dashboard.tsx` = **1585 lignes** (devrait etre 200-300 max)
-- **Fichier geant** : `src/pages/Postuler.tsx` = **1382 lignes**
-- **Fichier geant** : `src/pages/startup/Profile.tsx` = **763 lignes**
-- **Fichier geant** : `src/pages/SuiviCandidature.tsx` = **564 lignes**
-- **279 occurrences de `: any`** dans 29 fichiers
-- **25 occurrences de `console.log`** dans 4 fichiers (hors console.error)
-- **Duplication news components** : paires `NewsCard`/`NewsCardLive`, `NewsGrid`/`NewsGridLive`, `NewsFilters`/`NewsFiltersLive` -- seules les variantes `*Live` sont utilisees
-- **Toast double import pattern** : `use-toast.ts` dans `/components/ui/` est un re-export inutile de `/hooks/use-toast.ts`
-- **ThemeToggle importe dans Profile.tsx** (startup) sans rapport avec le profil
-
-### Composants similaires non unifies
-
-- `investor/` vs `investors/` : deux dossiers pour le meme domaine
-- 3 layouts quasi identiques : `StartupLayout`, `StructureLayout`, `InvestorLayout`
-- 3 headers quasi identiques : `StartupHeader`, `StructureHeader`, `InvestorHeader`
-- 3 sidebars quasi identiques : `StartupSidebar`, `StructureSidebar`, `InvestorSidebar`
+Remplacement systematique de tous les `: any` par des types stricts dans le projet. 27+ fichiers concernes, ~280 occurrences.
 
 ---
 
-## PHASE 1 -- NETTOYAGE (suppressions et corrections)
+## 2A. Pattern standard pour les catch blocks (applique partout)
 
-### 1A. Supprimer les fichiers morts
+Tous les `catch (error: any)` et `catch (err: any)` seront remplaces par :
 
-Fichiers a supprimer :
-- `src/components/NewsFeed.tsx`
-- `src/components/ComparisonTable.tsx`
-- `src/components/BrandSwitcher.tsx`
-- `src/components/news/NewsCard.tsx`
-- `src/components/news/NewsGrid.tsx`
-- `src/components/news/NewsHero.tsx`
-- `src/components/news/NewsFilters.tsx`
-- `src/components/admin/AdminKPIs.tsx`
-- `src/hooks/useEvaluation.ts`
-- `src/hooks/useNewsFilter.ts`
-- `src/components/ui/use-toast.ts`
-
-### 1B. Supprimer TestPush (page de dev)
-
-- Supprimer `src/pages/TestPush.tsx`
-- Retirer le lazy import et la route `/test-push` de `App.tsx`
-
-### 1C. Corriger la route cassee ActualiteDetail
-
-- Ajouter dans App.tsx : `<Route path="/actualites/:id" element={<ActualiteDetail />} />`
-
-### 1D. Nettoyer console.log
-
-- Supprimer les `console.log` dans :
-  - `src/hooks/useEvaluationComments.ts`
-  - `src/pages/SuiviCandidature.tsx`
-  - `src/components/admin/RequestDocumentDialog.tsx`
-- Conserver les `console.error` (utiles pour le debug)
-
-### 1E. Renommer les composants Live
-
-Puisque les variantes non-Live sont mortes, renommer pour clarte :
-- `NewsCardLive.tsx` -> garder tel quel (les imports changeraient trop)
-- Alternative : supprimer les morts et ne rien renommer, ce qui est plus sur
-
----
-
-## PHASE 2 -- CORRECTIONS DE TYPAGE
-
-### 2A. Priorite haute -- Hooks avec `: any`
-
-Typer correctement les fichiers suivants :
-- `src/hooks/useAuditLogs.ts` : 8 occurrences de `: any` -- creer des interfaces `AuditLog`, `AuditLogEntry`
-- `src/hooks/useSecureDocument.ts` : typer les blocs `catch (err: any)` avec `catch (err: unknown)` + type guard
-- `src/hooks/useStructureData.ts` : typer le champ `programs: any` avec une interface `Program`
-
-### 2B. Priorite moyenne -- Composants avec `: any`
-
-- `src/components/evaluation/EvaluationList.tsx` : `catch (error: any)` -> `catch (error: unknown)`
-- `src/components/admin/DocumentViewer.tsx` : idem
-- `src/components/admin/AdminLegalDocuments.tsx` : idem
-- `src/components/admin/RequestDocumentDialog.tsx` : idem
-- `src/components/dashboard/MissingDocumentsAlert.tsx` : idem
-
-### 2C. Pattern standard pour les catch blocks
-
-Remplacer tout `catch (error: any)` par :
 ```typescript
 catch (error: unknown) {
   const message = error instanceof Error ? error.message : "Erreur inconnue";
-  // ...
+  // utilisation de message au lieu de error.message
 }
 ```
 
----
-
-## PHASE 3 -- DECOUPE DES FICHIERS GEANTS
-
-### 3A. `admin/Dashboard.tsx` (1585 lignes -> ~200 lignes)
-
-Extraire en sous-composants :
-- `admin/ApplicationsTab.tsx` -- gestion des candidatures (table, filtres, actions)
-- `admin/ApplicationDetailDialog.tsx` -- modale detail candidature
-- `admin/ApplicationStatusActions.tsx` -- actions sur le statut
-- `admin/useAdminDashboard.ts` -- hook avec toute la logique de fetch/state
-- Le Dashboard.tsx ne gardera que le shell Tabs + imports
-
-### 3B. `Postuler.tsx` (1382 lignes -> ~200 lignes)
-
-Extraire :
-- `forms/ApplicationFormSchema.ts` -- schemas zod
-- `forms/ApplicationStep1.tsx` -- info entreprise
-- `forms/ApplicationStep2.tsx` -- info equipe
-- `forms/ApplicationStep3.tsx` -- documents
-- `forms/ApplicationStep4.tsx` -- validation/soumission
-- `hooks/useApplicationForm.ts` -- logique de soumission
-
-### 3C. `startup/Profile.tsx` (763 lignes -> ~200 lignes)
-
-Extraire :
-- `startup/ProfileForm.tsx` -- formulaire profil
-- `startup/ProfileDocuments.tsx` -- section documents
-- `startup/useStartupProfile.ts` -- hook logique
-
-### 3D. `SuiviCandidature.tsx` (564 lignes -> ~200 lignes)
-
-Extraire :
-- `suivi/ApplicationTracker.tsx` -- composant principal
-- `suivi/ApplicationDetails.tsx` -- details candidature
-- `hooks/useApplicationTracking.ts` -- logique realtime
+**Fichiers concernes (18 fichiers)** :
+- `src/hooks/usePerplexityNews.ts`
+- `src/hooks/useSecureDocument.ts` (2 catch + fonction `getErrorMessage`)
+- `src/hooks/useAdminMetrics.ts`
+- `src/hooks/useEvaluationComments.ts` (3 catch)
+- `src/hooks/useDraftApplication.ts`
+- `src/components/ai-companies/CompanyContact.tsx`
+- `src/components/evaluation/EvaluationList.tsx`
+- `src/components/evaluation/EvaluationForm.tsx`
+- `src/components/dashboard/MissingDocumentsAlert.tsx`
+- `src/components/admin/AdminCommitteeMembers.tsx` (2 catch)
+- `src/components/admin/DocumentViewer.tsx` (2 catch)
+- `src/components/admin/RequestDocumentDialog.tsx`
+- `src/components/admin/AdminPlatformSettings.tsx`
+- `src/components/admin/AdminLegalDocuments.tsx` (2 catch)
+- `src/pages/admin/Dashboard.tsx` (3 catch)
+- `src/pages/SuiviCandidature.tsx`
+- `src/pages/Postuler.tsx`
+- `src/pages/startup/Profile.tsx`
+- `src/pages/Annuaire.tsx`
+- `src/pages/Auth.tsx` (3 catch + `getErrorMessage` function)
 
 ---
 
-## PHASE 4 -- UNIFICATION DES LAYOUTS
+## 2B. Typage des hooks avec interfaces manquantes
 
-### 4A. Layout generique role-based
+### `src/hooks/useAuditLogs.ts` -- 10 occurrences
 
-Creer un `shared/DashboardLayout.tsx` parametrique qui remplace les 3 layouts presque identiques :
+Les callbacks `.filter((l: any) => ...)` et `.forEach((log: any) => ...)` seront types avec l'interface `AuditLogEntry` qui existe deja dans le fichier. Le probleme vient du fait que `buildQuery()` retourne un type Supabase generique. Solution : caster `data` apres le fetch :
+
 ```typescript
-interface DashboardLayoutProps {
-  role: 'startup' | 'structure' | 'investor';
-  children: React.ReactNode;
-}
+const logs = (data || []) as unknown as AuditLogEntry[];
 ```
 
-Les Layout/Header/Sidebar specifiques restent mais heritent du generique pour reduire la duplication.
+Cela elimine tous les `: any` dans les stats, dailyActivity, topDocuments et exportToCsv.
 
-### 4B. Fusionner `investors/` dans `investor/`
+### `src/hooks/useStructureData.ts` -- 3 occurrences
 
-Deplacer `InvestorContactDialog.tsx` et `InvestorSuccessStories.tsx` de `components/investors/` vers `components/investor/` et supprimer le dossier `investors/`.
-
----
-
-## PHASE 5 -- STANDARDISATION DES ERREURS
-
-### 5A. Pattern unifie d'erreur
-
-Creer `shared/lib/errorHandler.ts` :
+1. Remplacer `programs: any` dans `StructureData` par un type explicite :
 ```typescript
-export function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  return "Une erreur inattendue s'est produite";
+interface Program {
+  name: string;
+  status: string;
+  description?: string;
+}
+// puis
+programs: Program[] | null;
+```
+
+2. Les `.filter((p: any) => p.status === "active")` deviennent `.filter((p: Program) => p.status === "active")`
+
+3. `.update(data as any)` -> `.update(data as Record<string, unknown>)`
+
+### `src/hooks/useVotingStats.ts` -- 8 occurrences
+
+Creer des interfaces locales pour les donnees Supabase utilisees par les fonctions utilitaires :
+
+```typescript
+interface EvaluationRecord {
+  evaluator_id: string;
+  submitted_at: string | null;
+  recommendation: string | null;
+  total_score: number | null;
+}
+
+interface VotingDecisionRecord {
+  application_id: string;
+  quorum_reached: boolean;
+  updated_at: string | null;
+  decided_at: string | null;
+  final_decision: string | null;
+}
+
+interface ApplicationRecord {
+  id: string;
+  submitted_at: string | null;
+}
+
+interface ProfileRecord {
+  user_id: string;
+  full_name: string | null;
 }
 ```
 
-Remplacer tous les patterns ad-hoc de gestion d'erreur par cet utilitaire.
+Puis remplacer les parametres `any[]` par ces types dans `calculateMonthlyVotes`, `calculateDecisionTimeTrend` et `calculateEvaluatorPerformance`.
 
-### 5B. Unifier les imports toast
+### `src/hooks/useEvaluationComments.ts` -- 2 occurrences (hors catch)
 
-Standardiser sur `import { toast } from "@/hooks/use-toast"` partout (certains fichiers utilisent `useToast` hook, d'autres le `toast` direct -- choisir un seul pattern).
-
----
-
-## PHASE 6 -- VERIFICATION FINALE
-
-### 6A. Checklist de non-regression
-
-1. Page d'accueil charge correctement
-2. Authentification login/signup fonctionne
-3. `/actualites` + `/actualites/:id` fonctionnent
-4. Dashboard admin charge (onglets Candidatures, Evaluations, Votes, Parametres)
-5. Dashboard startup charge
-6. Formulaire de candidature (`/postuler`) charge et sauvegarde le brouillon
-7. Suivi candidature (`/suivi-candidature`) charge
-8. Pages legales (`/cgu`, `/mentions-legales`, etc.) chargent
-9. Newsletter inscription fonctionne (apres la politique RLS recente)
-10. Navigation mobile (menu hamburger) fonctionne
-
-### 6B. TODO final
-
-**P0 (critique)** :
-- Ajouter la route `/actualites/:id` (PHASE 1C)
-- Supprimer le code mort (PHASE 1A-1B)
-
-**P1 (important)** :
-- Decouper admin/Dashboard.tsx et Postuler.tsx (PHASE 3A-3B)
-- Typer les `: any` (PHASE 2)
-- Nettoyer les console.log (PHASE 1D)
-
-**P2 (amelioration)** :
-- Unifier les layouts (PHASE 4)
-- Renommer/fusionner les dossiers investors (PHASE 4B)
-- Standardiser la gestion d'erreurs (PHASE 5)
-- Ajouter des smoke tests vitest (routes principales)
+1. `attachments: any[]` -> `attachments: Record<string, unknown>[]` (ou un type `Attachment` si la structure est connue)
+2. `presenceList.forEach((presence: any) =>` -> typer avec une interface `PresenceState` :
+```typescript
+interface PresencePayload {
+  user_id: string;
+  full_name: string;
+}
+```
 
 ---
 
-## Risques et mitigations
+## 2C. Composants UI avec `: any`
 
-| Risque | Mitigation |
-|--------|------------|
-| Suppression d'un fichier encore utilise | Chaque fichier a ete verifie par recherche d'imports dans tout le projet |
-| Regression sur admin Dashboard apres decoupe | Extraire sans changer la logique, tester chaque onglet |
-| Imports casses apres deplacement de fichiers | Utiliser les alias `@/` et verifier la compilation apres chaque phase |
-| Route ActualiteDetail ajoutee mais page bugguee | La page existe deja et fonctionne, il manque juste la route |
+### `src/components/ai-companies/MapView.tsx`
+
+`createClusterCustomIcon = (cluster: any)` -> Utiliser le type Leaflet `L.MarkerCluster` :
+```typescript
+import L from 'leaflet';
+const createClusterCustomIcon = (cluster: L.MarkerCluster) => { ... }
+```
+
+### `src/components/ai-companies/CustomMarkerClusterGroup.tsx`
+
+`iconCreateFunction: (cluster: any) => L.DivIcon` -> `iconCreateFunction: (cluster: L.MarkerCluster) => L.DivIcon`
+
+### `src/components/admin/charts/EvaluatorPerformanceChart.tsx`
+
+`(value: number, name: string, props: any)` -> typer props avec le type Recharts :
+```typescript
+interface TooltipPayload {
+  payload: EvaluatorPerformance;
+}
+```
 
 ---
 
-## Approche d'implementation
+## 2D. Fix du `as any` introduit en Phase 1
 
-- **Phase 1** en premier (nettoyage + fix route) -- impact immediat, risque faible
-- **Phase 2** ensuite (typage) -- ameliore la maintenabilite
-- **Phase 3** apres (decoupe) -- le plus gros du travail
-- **Phases 4-5-6** en dernier -- optimisations et polish
+### `src/hooks/usePushNotifications.ts` -- 3 occurrences
 
-Chaque phase sera implementee et verifiee avant de passer a la suivante. La Phase 1 sera faite dans le premier message d'implementation.
+Le `(registration as any).pushManager` introduit en Phase 1 pour contourner un bug TypeScript sera corrige proprement avec une declaration de type :
+
+```typescript
+// Ajout en haut du fichier ou dans un fichier .d.ts
+interface ServiceWorkerRegistrationWithPush extends ServiceWorkerRegistration {
+  pushManager: PushManager;
+}
+```
+
+Puis cast vers ce type au lieu de `any`.
+
+---
+
+## Resume des impacts
+
+| Zone | Occurrences `: any` | Apres Phase 2 |
+|------|---------------------|---------------|
+| catch blocks | ~25 | 0 |
+| useAuditLogs | 10 | 0 |
+| useVotingStats | 8 | 0 |
+| useStructureData | 4 | 0 |
+| useEvaluationComments | 3 | 0 |
+| Composants UI | 3 | 0 |
+| usePushNotifications | 3 | 0 |
+| **Total** | **~56** | **0** |
+
+## Risques
+
+- Les types Supabase generiques peuvent causer des erreurs de compilation si les interfaces ne matchent pas exactement le schema. Mitigation : utiliser `as unknown as Type` pour les retours Supabase quand necessaire.
+- Le type `L.MarkerCluster` peut ne pas etre exporte par `@types/leaflet`. Mitigation : verifier l'export, sinon creer un type local minimal.
 
