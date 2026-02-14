@@ -83,8 +83,6 @@ const InvestorMessages = lazy(() => import("./pages/investor/Messages"));
 const InvestorProfile = lazy(() => import("./pages/investor/Profile"));
 const InvestorSettings = lazy(() => import("./pages/investor/Settings"));
 
-// Page de test - à supprimer en production
-const TestPush = lazy(() => import("./pages/TestPush"));
 
 const queryClient = new QueryClient();
 
@@ -197,7 +195,7 @@ const AppContent = () => {
             <Route path="/entreprises-ia/:id" element={<EntrepriseIADetail />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/actualites" element={<Actualites />} />
-            <Route path="/test-push" element={<TestPush />} />
+            <Route path="/actualites/:id" element={<ActualiteDetail />} />
             
             {/* Legal pages */}
             <Route path="/mentions-legales" element={<MentionsLegales />} />

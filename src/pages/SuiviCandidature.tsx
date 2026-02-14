@@ -226,7 +226,7 @@ const SuiviCandidature = () => {
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
-          console.log("Application update received:", payload);
+          
           fetchApplications();
           
           if (payload.eventType === "UPDATE") {
@@ -247,7 +247,7 @@ const SuiviCandidature = () => {
           table: "application_comments",
         },
         (payload) => {
-          console.log("New comment received:", payload);
+          
           fetchApplications();
           toast({
             title: "Nouveau commentaire",

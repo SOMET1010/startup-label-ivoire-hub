@@ -70,7 +70,7 @@ export function usePushNotifications(): UsePushNotificationsResult {
         if ("serviceWorker" in navigator) {
           try {
             const registration = await navigator.serviceWorker.ready;
-            const subscription = await registration.pushManager.getSubscription();
+            const subscription = await (registration as any).pushManager.getSubscription();
             setIsSubscribed(!!subscription);
           } catch (err) {
             console.error("Error checking subscription:", err);
@@ -128,7 +128,7 @@ export function usePushNotifications(): UsePushNotificationsResult {
 
       // Subscribe to push
       const applicationServerKey = urlBase64ToUint8Array(vapidKey);
-      const subscription = await registration.pushManager.subscribe({
+      const subscription = await (registration as any).pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: applicationServerKey.buffer as ArrayBuffer,
       });
@@ -169,7 +169,7 @@ export function usePushNotifications(): UsePushNotificationsResult {
 
     try {
       const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.getSubscription();
+      const subscription = await (registration as any).pushManager.getSubscription();
 
       if (subscription) {
         await subscription.unsubscribe();
