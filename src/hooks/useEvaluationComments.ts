@@ -156,7 +156,7 @@ export function useEvaluationComments(applicationId: string): UseEvaluationComme
         filter: `application_id=eq.${applicationId}`,
       },
       (payload) => {
-        console.log("Comment change:", payload);
+        
         // Refetch to get proper author info
         fetchComments();
       }

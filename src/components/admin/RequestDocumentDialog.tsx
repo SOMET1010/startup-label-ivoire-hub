@@ -128,7 +128,7 @@ export default function RequestDocumentDialog({
           if (emailError) {
             console.error("Error sending email notification:", emailError);
           } else {
-            console.log("Email notification sent successfully");
+            
           }
         } catch (emailError) {
           // Log error but don't block the flow
