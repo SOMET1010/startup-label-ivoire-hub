@@ -6,53 +6,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useApplicationTracking } from "@/hooks/useApplicationTracking";
 import ApplicationsList from "@/components/suivi/ApplicationsList";
 import ApplicationDetailPanel from "@/components/suivi/ApplicationDetailPanel";
-import { Loader2, Building, AlertCircle, RefreshCw } from "lucide-react";
+import { Loader2, Building, RefreshCw } from "lucide-react";
 
 const SuiviCandidature = () => {
   const {
-    user,
-    authLoading,
     applications,
     loading,
     selectedApp,
     setSelectedApp,
     fetchApplications,
   } = useApplicationTracking();
-
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow py-12 bg-muted/30 flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow py-12 bg-muted/30">
-          <div className="container mx-auto px-4">
-            <div className="max-w-md mx-auto text-center bg-card rounded-xl shadow-sm p-8">
-              <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h1 className="text-2xl font-bold mb-4">Connexion requise</h1>
-              <p className="text-muted-foreground mb-6">
-                Connectez-vous pour suivre vos candidatures au Label Startup Numérique.
-              </p>
-              <Button asChild>
-                <Link to="/auth">Se connecter</Link>
-              </Button>
-            </div>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen flex flex-col">
