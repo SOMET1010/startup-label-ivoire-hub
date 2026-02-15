@@ -15,9 +15,6 @@ import LabelCoach from "./components/LabelCoach";
 import PageLoader from "./components/PageLoader";
 import { SkipLink } from "./components/shared/SkipLink";
 import ErrorBoundary from "./components/ErrorBoundary";
-import { StartupLayout } from "./components/startup/StartupLayout";
-import { StructureLayout } from "./components/structure/StructureLayout";
-import { InvestorLayout } from "./components/investor/InvestorLayout";
 import { useLanguageSync } from "./hooks/useLanguageSync";
 // Pages critiques - import statique pour chargement instantané
 import Index from "./pages/Index";
@@ -54,120 +51,14 @@ const Comite = lazy(() => import("./pages/Comite"));
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
 const AuditLogs = lazy(() => import("./pages/admin/AuditLogs"));
 
-// Pages startup - lazy loading
-const StartupDashboard = lazy(() => import("./pages/startup/Dashboard"));
-const StartupDossier = lazy(() => import("./pages/startup/Dossier"));
-const StartupMessages = lazy(() => import("./pages/startup/Messages"));
-const StartupSupport = lazy(() => import("./pages/startup/Support"));
-const LabelSpace = lazy(() => import("./pages/startup/LabelSpace"));
-const Resources = lazy(() => import("./pages/startup/Resources"));
-const Opportunities = lazy(() => import("./pages/startup/Opportunities"));
-const Events = lazy(() => import("./pages/startup/Events"));
-const Network = lazy(() => import("./pages/startup/Network"));
-const Renewal = lazy(() => import("./pages/startup/Renewal"));
-const StartupProfile = lazy(() => import("./pages/startup/Profile"));
-const StartupSettings = lazy(() => import("./pages/startup/Settings"));
-
-// Pages structure - lazy loading
-const StructureDashboard = lazy(() => import("./pages/structure/Dashboard"));
-const StructureStartups = lazy(() => import("./pages/structure/Startups"));
-const StructurePrograms = lazy(() => import("./pages/structure/Programs"));
-const StructureProfile = lazy(() => import("./pages/structure/Profile"));
-const StructureSettings = lazy(() => import("./pages/structure/Settings"));
-
-// Pages investor - lazy loading
-const InvestorDashboard = lazy(() => import("./pages/investor/Dashboard"));
-const InvestorStartups = lazy(() => import("./pages/investor/Startups"));
-const InvestorInterests = lazy(() => import("./pages/investor/Interests"));
-const InvestorMessages = lazy(() => import("./pages/investor/Messages"));
-const InvestorProfile = lazy(() => import("./pages/investor/Profile"));
-const InvestorSettings = lazy(() => import("./pages/investor/Settings"));
+// Role-specific route modules - lazy loading
+const StartupRoutes = lazy(() => import("./routes/StartupRoutes"));
+const StructureRoutes = lazy(() => import("./routes/StructureRoutes"));
+const InvestorRoutes = lazy(() => import("./routes/InvestorRoutes"));
 
 
 const queryClient = new QueryClient();
 
-// Startup routes wrapper component
-const StartupRoutes = () => (
-  <ProtectedRoute>
-    <RoleGate allowedRoles={['startup']}>
-      <StartupLayout>
-        <Routes>
-          <Route index element={<StartupDashboard />} />
-          <Route path="dossier" element={<StartupDossier />} />
-          <Route path="messages" element={<StartupMessages />} />
-          <Route path="opportunites" element={
-            <LabelGate>
-              <Opportunities />
-            </LabelGate>
-          } />
-          <Route path="reseau" element={
-            <LabelGate>
-              <Network />
-            </LabelGate>
-          } />
-          <Route path="ressources" element={
-            <LabelGate>
-              <Resources />
-            </LabelGate>
-          } />
-          <Route path="support" element={<StartupSupport />} />
-          <Route path="profile" element={<StartupProfile />} />
-          <Route path="label-space" element={
-            <LabelGate>
-              <LabelSpace />
-            </LabelGate>
-          } />
-          <Route path="events" element={
-            <LabelGate>
-              <Events />
-            </LabelGate>
-          } />
-          <Route path="renewal" element={
-            <LabelGate>
-              <Renewal />
-            </LabelGate>
-          } />
-          <Route path="settings" element={<StartupSettings />} />
-        </Routes>
-      </StartupLayout>
-    </RoleGate>
-  </ProtectedRoute>
-);
-
-// Structure routes wrapper component
-const StructureRoutes = () => (
-  <ProtectedRoute>
-    <RoleGate allowedRoles={['structure']}>
-      <StructureLayout>
-        <Routes>
-          <Route index element={<StructureDashboard />} />
-          <Route path="startups" element={<StructureStartups />} />
-          <Route path="programmes" element={<StructurePrograms />} />
-          <Route path="profil" element={<StructureProfile />} />
-          <Route path="settings" element={<StructureSettings />} />
-        </Routes>
-      </StructureLayout>
-    </RoleGate>
-  </ProtectedRoute>
-);
-
-// Investor routes wrapper component
-const InvestorRoutes = () => (
-  <ProtectedRoute>
-    <RoleGate allowedRoles={['investor']}>
-      <InvestorLayout>
-        <Routes>
-          <Route index element={<InvestorDashboard />} />
-          <Route path="startups" element={<InvestorStartups />} />
-          <Route path="interests" element={<InvestorInterests />} />
-          <Route path="messages" element={<InvestorMessages />} />
-          <Route path="profil" element={<InvestorProfile />} />
-          <Route path="settings" element={<InvestorSettings />} />
-        </Routes>
-      </InvestorLayout>
-    </RoleGate>
-  </ProtectedRoute>
-);
 
 // Inner component that can use hooks requiring AuthProvider
 const AppContent = () => {
