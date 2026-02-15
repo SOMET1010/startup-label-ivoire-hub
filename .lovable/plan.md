@@ -1,89 +1,90 @@
 
 
-# Role-Based Access Control Hardening
+# Lazy-Load Role-Specific Dashboard Modules
 
-## Current State
+## Problem
 
-The project already has a solid RBAC foundation:
-- `ProtectedRoute` redirects unauthenticated users to `/connexion`
-- `RoleGate` checks user roles on all dashboard routes (`/startup/*`, `/structure/*`, `/investor/*`, `/admin/*`)
-- `LabelGate` restricts premium features to labeled startups
-- Post-login redirect in `Auth.tsx` sends users to their role-specific dashboard
-- Database-level RLS policies enforce data isolation
+While individual dashboard pages use `React.lazy()`, the three layout shells and their route wrapper components are **statically imported** in `App.tsx`:
 
-## Gaps to Address
-
-### 1. RoleGate shows a dead-end 403 page
-When a startup user manually navigates to `/admin` or `/investor`, they see a static 403 page with no navigation or way out. This should redirect them to their own dashboard instead.
-
-### 2. No role-aware redirect hook
-There's no reusable utility to compute the correct dashboard path from a role. The logic is duplicated in `Auth.tsx` and `Navbar.tsx`.
-
-### 3. `/suivi-candidature` has no role restriction
-Any authenticated user (investor, structure, admin) can access this page, which is only relevant to startup users. It should be restricted to the `startup` role (and `admin` for oversight).
-
----
-
-## Implementation Plan
-
-### Step 1: Create a shared redirect utility
-
-Create `src/lib/utils/roleRedirect.ts` (~10 lines):
-- Export a `getDashboardPath(role)` function returning the correct dashboard path for any role
-- Replace the duplicated `redirectMap` in `Auth.tsx` and `getDashboardLink()` in `Navbar.tsx`
-
-### Step 2: Improve RoleGate with smart redirect
-
-Update `src/components/auth/RoleGate.tsx`:
-- Instead of showing a static 403 page, add a `redirectTo` optional prop (defaults to auto-redirect based on role)
-- When the user has a role but it's not in `allowedRoles`, redirect them to their correct dashboard using `getDashboardPath(userRole)`
-- Add a "back to dashboard" link as fallback if redirect is not desired
-- Keep the 403 display only for users with no role at all (`public`)
-
-### Step 3: Protect `/suivi-candidature` route
-
-Update `src/App.tsx`:
-- Wrap the `/suivi-candidature` route with `ProtectedRoute` and `RoleGate allowedRoles={['startup', 'admin']}`
-- Remove the manual auth check from `SuiviCandidature.tsx` since it will be handled by the wrappers
-
-### Step 4: Update Auth.tsx and Navbar.tsx
-
-- Replace inline redirect maps with the shared `getDashboardPath()` utility
-- No behavior change, just deduplication
-
----
-
-## Technical Details
-
-### RoleGate updated behavior
-
-```text
-User visits /admin with role "startup":
-  Before: Static 403 page (dead end)
-  After:  Redirect to /startup (their dashboard)
-
-User visits /investor with role "startup":
-  Before: Static 403 page (dead end)
-  After:  Redirect to /startup (their dashboard)
-
-User visits /startup with no role (public):
-  Before: Static 403 page
-  After:  Same (403 page with link to home)
+```
+import { StartupLayout } from "./components/startup/StartupLayout";
+import { StructureLayout } from "./components/structure/StructureLayout";
+import { InvestorLayout } from "./components/investor/InvestorLayout";
 ```
 
-### Files to create
-| File | Purpose |
+This pulls in all sidebar configs, header configs, hooks (`useLabelStatus`, `useNotifications`, `useSidebar`), and their dependencies (framer-motion animations, i18n keys, etc.) into the **main bundle** -- even for anonymous users visiting the public homepage.
+
+## Solution
+
+Lazy-load the entire route wrapper components (`StartupRoutes`, `StructureRoutes`, `InvestorRoutes`) so each role's dashboard module is only fetched when a user actually navigates to that path.
+
+## Changes
+
+### `src/App.tsx`
+
+1. **Remove** the 3 static layout imports (lines 18-20)
+2. **Remove** the 3 inline route wrapper component definitions (`StartupRoutes`, `StructureRoutes`, `InvestorRoutes` -- lines 89-170)
+3. **Extract** each route wrapper into its own file and lazy-load it:
+
+```typescript
+const StartupRoutes = lazy(() => import("./routes/StartupRoutes"));
+const StructureRoutes = lazy(() => import("./routes/StructureRoutes"));
+const InvestorRoutes = lazy(() => import("./routes/InvestorRoutes"));
+```
+
+4. The route declarations stay identical -- only the import mechanism changes
+
+### New files
+
+| File | Content |
 |------|---------|
-| `src/lib/utils/roleRedirect.ts` | Shared role-to-path mapping |
+| `src/routes/StartupRoutes.tsx` | Moves the existing `StartupRoutes` component (lines 90-135) into a dedicated file with its own imports |
+| `src/routes/StructureRoutes.tsx` | Moves the existing `StructureRoutes` component (lines 138-152) |
+| `src/routes/InvestorRoutes.tsx` | Moves the existing `InvestorRoutes` component (lines 155-170) |
 
-### Files to modify
-| File | Change |
-|------|--------|
-| `src/components/auth/RoleGate.tsx` | Smart redirect instead of 403 |
-| `src/App.tsx` | Protect `/suivi-candidature` |
-| `src/pages/SuiviCandidature.tsx` | Remove manual auth check |
-| `src/pages/Auth.tsx` | Use shared utility |
-| `src/components/Navbar.tsx` | Use shared utility |
+Each file is a default export containing exactly the same JSX currently defined inline in App.tsx, plus the necessary imports (`ProtectedRoute`, `RoleGate`, `LabelGate`, layout, and lazy page components for that role only).
 
-### No database or RLS changes needed
-The existing RLS policies already enforce proper data isolation at the database level. These changes are purely frontend UX improvements to prevent users from seeing dead-end pages.
+### Example: `src/routes/StartupRoutes.tsx`
+
+```typescript
+import { lazy } from "react";
+import { Routes, Route } from "react-router-dom";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { RoleGate } from "@/components/auth/RoleGate";
+import { LabelGate } from "@/components/auth/LabelGate";
+import { StartupLayout } from "@/components/startup/StartupLayout";
+
+const StartupDashboard = lazy(() => import("@/pages/startup/Dashboard"));
+// ... other lazy page imports
+
+export default function StartupRoutes() {
+  return (
+    <ProtectedRoute>
+      <RoleGate allowedRoles={['startup']}>
+        <StartupLayout>
+          <Routes>
+            {/* same routes as before */}
+          </Routes>
+        </StartupLayout>
+      </RoleGate>
+    </ProtectedRoute>
+  );
+}
+```
+
+## Impact
+
+- **Public visitors**: No dashboard code loaded at all (sidebars, headers, role hooks are excluded from main bundle)
+- **Startup users**: Only startup module fetched; investor and structure modules never loaded
+- **Zero behavior change**: Routing, auth guards, and layouts work identically
+- **3 new files created, 1 file simplified** (App.tsx shrinks by ~80 lines)
+
+## Files Summary
+
+| Action | File |
+|--------|------|
+| Create | `src/routes/StartupRoutes.tsx` |
+| Create | `src/routes/StructureRoutes.tsx` |
+| Create | `src/routes/InvestorRoutes.tsx` |
+| Modify | `src/App.tsx` (remove static imports + inline definitions, add 3 lazy imports) |
+
