@@ -220,7 +220,13 @@ const AppContent = () => {
             {/* Investor routes with dedicated layout */}
             <Route path="/investor/*" element={<InvestorRoutes />} />
             
-            <Route path="/suivi-candidature" element={<SuiviCandidature />} />
+            <Route path="/suivi-candidature" element={
+              <ProtectedRoute>
+                <RoleGate allowedRoles={['startup', 'admin']}>
+                  <SuiviCandidature />
+                </RoleGate>
+              </ProtectedRoute>
+            } />
             
             {/* Admin routes (protected) */}
             <Route 

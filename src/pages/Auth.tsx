@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
+import { getDashboardPath } from "@/lib/utils/roleRedirect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -59,14 +60,7 @@ export default function Auth() {
   // Redirect if already logged in based on role
   useEffect(() => {
     if (user && userRole) {
-      const redirectMap: Record<string, string> = {
-        admin: "/admin",
-        startup: "/startup",
-        structure: "/structure",
-        investor: "/investor",
-        evaluator: "/admin",
-      };
-      navigate(redirectMap[userRole] || "/", { replace: true });
+      navigate(getDashboardPath(userRole), { replace: true });
     }
   }, [user, userRole, navigate]);
 

@@ -4,6 +4,7 @@ import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, Moon, Sun, Monitor
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { getDashboardPath } from "@/lib/utils/roleRedirect";
 import { useBrand } from "@/hooks/useBrand";
 import { useAppTheme } from "@/hooks/useAppTheme";
 import {
@@ -51,18 +52,7 @@ const Navbar = () => {
     return "U";
   };
 
-  const getDashboardLink = () => {
-    if (userRole === "admin" || userRole === "evaluator") {
-      return "/admin";
-    }
-    if (userRole === "investor") {
-      return "/investor";
-    }
-    if (userRole === "structure") {
-      return "/structure";
-    }
-    return "/startup";
-  };
+  const getDashboardLink = () => getDashboardPath(userRole);
 
   return (
     <>
