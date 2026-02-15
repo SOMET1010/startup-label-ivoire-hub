@@ -2,6 +2,14 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
+interface StructureProgram {
+  id: string;
+  name: string;
+  description?: string;
+  duration?: string;
+  status: string;
+}
+
 interface StructureData {
   id: string;
   name: string;
@@ -11,7 +19,7 @@ interface StructureData {
   location: string | null;
   website: string | null;
   logo_url: string | null;
-  programs: any;
+  programs: StructureProgram[] | null;
   status: string | null;
 }
 
@@ -66,7 +74,7 @@ export function useStructureData() {
           return;
         }
 
-        setStructure(structureData as StructureData);
+        setStructure(structureData as unknown as StructureData);
 
         // Fetch accompanied startups
         const { data: linkedStartups, error: linkedError } = await supabase
@@ -112,9 +120,9 @@ export function useStructureData() {
           const labeled = enriched.filter(
             (s) => s.application_status === "approved"
           ).length;
-          const programs = structureData.programs;
+          const programs = structureData.programs as unknown as StructureProgram[] | null;
           const activePrograms = Array.isArray(programs)
-            ? programs.filter((p: any) => p.status === "active").length
+            ? programs.filter((p) => p.status === "active").length
             : 0;
 
           setStats({
@@ -128,9 +136,9 @@ export function useStructureData() {
           });
         } else {
           // Count active programs even if no startups
-          const programs = structureData.programs;
+          const programs = structureData.programs as unknown as StructureProgram[] | null;
           const activePrograms = Array.isArray(programs)
-            ? programs.filter((p: any) => p.status === "active").length
+            ? programs.filter((p) => p.status === "active").length
             : 0;
           setStats({
             totalStartups: 0,
@@ -153,7 +161,7 @@ export function useStructureData() {
     if (!structure || !supabase) return;
     const { error } = await supabase
       .from("structures")
-      .update(data as any)
+      .update(data as Record<string, unknown>)
       .eq("id", structure.id);
     if (!error) {
       setStructure((prev) => (prev ? { ...prev, ...data } : null));

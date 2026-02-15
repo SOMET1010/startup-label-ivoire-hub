@@ -116,17 +116,17 @@ export function useAuditLogs(filters: AuditLogFilters = {}) {
 
       if (error) throw error;
 
-      const logs = data || [];
+      const logs = (data || []) as unknown as AuditLogEntry[];
 
       const stats: AuditLogStats = {
         totalAccess: logs.length,
-        successCount: logs.filter((l: any) => l.access_result === 'success').length,
-        errorCount: logs.filter((l: any) => l.access_result === 'error').length,
-        deniedCount: logs.filter((l: any) => l.access_result === 'denied').length,
-        previewCount: logs.filter((l: any) => l.access_type === 'preview').length,
-        downloadCount: logs.filter((l: any) => l.access_type === 'download').length,
-        uniqueUsers: new Set(logs.map((l: any) => l.user_id)).size,
-        uniqueDocuments: new Set(logs.map((l: any) => l.document_path)).size,
+        successCount: logs.filter((l) => l.access_result === 'success').length,
+        errorCount: logs.filter((l) => l.access_result === 'error').length,
+        deniedCount: logs.filter((l) => l.access_result === 'denied').length,
+        previewCount: logs.filter((l) => l.access_type === 'preview').length,
+        downloadCount: logs.filter((l) => l.access_type === 'download').length,
+        uniqueUsers: new Set(logs.map((l) => l.user_id)).size,
+        uniqueDocuments: new Set(logs.map((l) => l.document_path)).size,
       };
 
       return stats;
@@ -145,7 +145,9 @@ export function useAuditLogs(filters: AuditLogFilters = {}) {
       // Group by date
       const byDate: Record<string, { success: number; error: number; denied: number }> = {};
       
-      (data || []).forEach((log: any) => {
+      const logs = (data || []) as unknown as AuditLogEntry[];
+      
+      logs.forEach((log) => {
         const date = new Date(log.created_at).toISOString().split('T')[0];
         if (!byDate[date]) {
           byDate[date] = { success: 0, error: 0, denied: 0 };
@@ -171,7 +173,9 @@ export function useAuditLogs(filters: AuditLogFilters = {}) {
       // Count by document type
       const byType: Record<string, number> = {};
       
-      (data || []).forEach((log: any) => {
+      const logs = (data || []) as unknown as AuditLogEntry[];
+      
+      logs.forEach((log) => {
         const type = log.document_type || 'Inconnu';
         byType[type] = (byType[type] || 0) + 1;
       });
@@ -205,7 +209,8 @@ export function useAuditLogs(filters: AuditLogFilters = {}) {
       'Message d\'erreur',
     ];
 
-    const rows = logs.map((log: any) => [
+    const typedLogs = logs as unknown as AuditLogEntry[];
+    const rows = typedLogs.map((log) => [
       new Date(log.created_at).toLocaleString('fr-FR'),
       log.profile?.full_name || log.profile?.email || log.user_id,
       log.user_role || '',

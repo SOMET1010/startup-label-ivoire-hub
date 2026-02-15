@@ -302,9 +302,34 @@ export function useVotingStats(period: TimePeriod = '90d') {
   return { ...stats, refetch: fetchStats };
 }
 
+interface EvaluationRecord {
+  evaluator_id: string;
+  submitted_at: string | null;
+  recommendation: string | null;
+  total_score: number | null;
+}
+
+interface VotingDecisionRecord {
+  application_id: string;
+  quorum_reached: boolean | null;
+  updated_at: string | null;
+  decided_at: string | null;
+  final_decision: string | null;
+}
+
+interface ApplicationRecord {
+  id: string;
+  submitted_at: string | null;
+}
+
+interface ProfileRecord {
+  user_id: string;
+  full_name: string | null;
+}
+
 function calculateMonthlyVotes(
-  evaluations: any[], 
-  votingDecisions: any[],
+  evaluations: EvaluationRecord[], 
+  votingDecisions: VotingDecisionRecord[],
   monthsToShow: number
 ): MonthlyVoteData[] {
   const months: Record<string, MonthlyVoteData> = {};
@@ -352,8 +377,8 @@ function calculateMonthlyVotes(
 }
 
 function calculateDecisionTimeTrend(
-  votingDecisions: any[],
-  applications: any[],
+  votingDecisions: VotingDecisionRecord[],
+  applications: ApplicationRecord[],
   monthsToShow: number
 ): DecisionTimeTrend[] {
   const months: Record<string, { total: number; count: number }> = {};
@@ -394,8 +419,8 @@ function calculateDecisionTimeTrend(
 }
 
 function calculateEvaluatorPerformance(
-  evaluations: any[],
-  profiles: any[]
+  evaluations: EvaluationRecord[],
+  profiles: ProfileRecord[]
 ): EvaluatorPerformance[] {
   const performanceMap: Record<string, {
     count: number;

@@ -224,12 +224,12 @@ export default function StartupProfile() {
 
       setIsEditing(false);
       fetchStartup();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating startup:', error);
       toast({
         variant: 'destructive',
         title: 'Erreur',
-        description: error.message || 'Impossible de mettre à jour le profil.',
+        description: error instanceof Error ? error.message : 'Impossible de mettre à jour le profil.',
       });
     } finally {
       setSaving(false);

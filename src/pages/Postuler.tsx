@@ -461,12 +461,12 @@ const Postuler = () => {
         title: "Candidature soumise avec succès",
         description: "Votre dossier a été transmis au Comité de Labellisation pour examen.",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Submission error:", error);
       toast({
         variant: "destructive",
         title: "Erreur de soumission",
-        description: error.message || "Une erreur est survenue lors de la soumission.",
+        description: error instanceof Error ? error.message : "Une erreur est survenue lors de la soumission.",
       });
     } finally {
       setIsLoading(false);

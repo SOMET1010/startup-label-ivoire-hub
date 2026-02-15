@@ -192,7 +192,7 @@ const SuiviCandidature = () => {
       if (!selectedApp && applicationsWithDetails.length > 0) {
         setSelectedApp(applicationsWithDetails[0]);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching applications:", error);
       toast({
         variant: "destructive",

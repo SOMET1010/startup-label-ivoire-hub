@@ -216,9 +216,9 @@ export function useAdminMetrics() {
         statusCounts,
         sectorBreakdown,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching metrics:', err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : "Erreur inconnue");
     } finally {
       setLoading(false);
     }

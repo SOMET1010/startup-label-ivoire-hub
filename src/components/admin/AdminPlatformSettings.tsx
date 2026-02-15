@@ -62,7 +62,7 @@ export default function AdminPlatformSettings() {
         title: "Paramètres enregistrés",
         description: "Les modifications ont été sauvegardées avec succès.",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving settings:", error);
       toast({
         variant: "destructive",

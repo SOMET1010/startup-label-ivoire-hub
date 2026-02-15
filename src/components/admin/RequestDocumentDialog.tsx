@@ -146,7 +146,7 @@ export default function RequestDocumentDialog({
       setMessage("");
       setUpdateStatus(true);
       onSuccess();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error requesting document:", error);
       toast({
         variant: "destructive",

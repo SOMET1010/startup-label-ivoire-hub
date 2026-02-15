@@ -101,7 +101,7 @@ export default function Auth() {
     try {
       await signIn(data.email, data.password);
       // Redirect handled by useEffect watching userRole
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errorMessage = getErrorMessage(err);
       setError(errorMessage);
     } finally {
@@ -124,7 +124,7 @@ export default function Auth() {
       setSuccess(t('signup.successMessage'));
       setShowSignup(false);
       signupForm.reset();
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errorMessage = getErrorMessage(err);
       setError(errorMessage);
     } finally {
@@ -132,8 +132,8 @@ export default function Auth() {
     }
   };
 
-  const getErrorMessage = (err: any): string => {
-    const message = err?.message?.toLowerCase() || "";
+  const getErrorMessage = (err: unknown): string => {
+    const message = (err instanceof Error ? err.message : "").toLowerCase();
     
     if (message.includes("invalid login credentials")) {
       return t('errors.invalidCredentials');
@@ -151,7 +151,7 @@ export default function Auth() {
       return t('errors.networkError');
     }
     
-    return err?.message || t('errors.generic');
+    return (err instanceof Error ? err.message : null) || t('errors.generic');
   };
 
   return (
@@ -521,7 +521,7 @@ export default function Auth() {
                     setIsLoading(true);
                     try {
                       await signIn(email, password);
-                    } catch (err: any) {
+                    } catch (err: unknown) {
                       setError(getErrorMessage(err));
                     } finally {
                       setIsLoading(false);

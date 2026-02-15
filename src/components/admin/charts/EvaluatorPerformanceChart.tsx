@@ -44,7 +44,7 @@ export default function EvaluatorPerformanceChart({ data }: EvaluatorPerformance
             width={75}
           />
           <Tooltip
-            formatter={(value: number, name: string, props: any) => {
+            formatter={(value: number, name: string, props: { payload: typeof chartData[number] }) => {
               const entry = props.payload;
               if (name === "Évaluations") {
                 return [

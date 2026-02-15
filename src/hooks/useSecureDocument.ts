@@ -144,13 +144,14 @@ export function useSecureDocument(): UseSecureDocumentReturn {
       logDocumentAccess(path, mode, 'success', context);
 
       return data.signedUrl;
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errorMessage = getErrorMessage(err);
       setError(errorMessage);
       console.error('Erreur génération URL signée:', err);
       
       // Log l'erreur d'accès
-      const result = err?.message?.includes('permission') ? 'denied' : 'error';
+      const errMsg = err instanceof Error ? err.message : '';
+      const result = errMsg.includes('permission') ? 'denied' : 'error';
       logDocumentAccess(path, mode, result, context, errorMessage);
       
       return null;
@@ -207,14 +208,15 @@ export function useSecureDocument(): UseSecureDocumentReturn {
       logDocumentAccess(path, 'download', 'success', context);
       
       toast.success(`Document "${resolvedFileName}" téléchargé`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       const errorMessage = getErrorMessage(err);
       setError(errorMessage);
       toast.error(errorMessage);
       console.error('Erreur téléchargement document:', err);
       
       // Log l'erreur de téléchargement
-      const result = err?.message?.includes('permission') ? 'denied' : 'error';
+      const errMsg = err instanceof Error ? err.message : '';
+      const result = errMsg.includes('permission') ? 'denied' : 'error';
       logDocumentAccess(path, 'download', result, context, errorMessage);
     } finally {
       setIsLoading(false);
@@ -247,17 +249,18 @@ function extractFileName(path: string): string {
   return parts[parts.length - 1] || 'document';
 }
 
-function getErrorMessage(error: any): string {
-  if (error?.message?.includes('Object not found')) {
+function getErrorMessage(error: unknown): string {
+  const message = error instanceof Error ? error.message : '';
+  if (message.includes('Object not found')) {
     return 'Document non trouvé';
   }
-  if (error?.message?.includes('permission')) {
+  if (message.includes('permission')) {
     return 'Accès non autorisé à ce document';
   }
-  if (error?.message?.includes('expired')) {
+  if (message.includes('expired')) {
     return 'Le lien a expiré, veuillez réessayer';
   }
-  return error?.message || 'Erreur lors de l\'accès au document';
+  return message || 'Erreur lors de l\'accès au document';
 }
 
 /**

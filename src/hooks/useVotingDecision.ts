@@ -228,12 +228,12 @@ export function useVotingDecision(applicationId: string, config: Partial<VotingC
         ...votingResult,
         loading: false,
       }));
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching voting data:", error);
       setResult((prev) => ({
         ...prev,
         loading: false,
-        error: error.message || "Erreur lors du chargement des données de vote",
+        error: error instanceof Error ? error.message : "Erreur lors du chargement des données de vote",
       }));
     }
   }, [applicationId, calculateVotingResult]);
@@ -330,7 +330,7 @@ export function useVotingDecision(applicationId: string, config: Partial<VotingC
       await fetchVotingData();
 
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error applying decision:", error);
       toast({
         variant: "destructive",

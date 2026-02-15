@@ -152,7 +152,7 @@ export default function EvaluationList({ currentUserId, currentUserName }: Evalu
       });
 
       setApplications(applicationsWithEvaluations);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching data:", error);
       toast({
         variant: "destructive",

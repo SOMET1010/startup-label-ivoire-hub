@@ -68,7 +68,7 @@ const createCustomIcon = (isLabeled: boolean) => {
 };
 
 // Custom cluster icon creator
-const createClusterCustomIcon = (cluster: any) => {
+const createClusterCustomIcon = (cluster: { getChildCount: () => number }) => {
   const count = cluster.getChildCount();
   let size = 'small';
   let diameter = 40;
