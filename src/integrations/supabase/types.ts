@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      accompaniment_requests: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          message: string
+          startup_name: string
+          status: string | null
+          structure_name: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          message: string
+          startup_name: string
+          status?: string | null
+          structure_name: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          message?: string
+          startup_name?: string
+          status?: string | null
+          structure_name?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       application_comments: {
         Row: {
           application_id: string
@@ -1151,6 +1184,54 @@ export type Database = {
           updated_at?: string
           user_id?: string
           website?: string | null
+        }
+        Relationships: []
+      }
+      success_stories: {
+        Row: {
+          created_at: string | null
+          description: string
+          founder_name: string
+          founder_quote: string
+          founder_role: string
+          id: string
+          is_published: boolean | null
+          program_name: string
+          result: string
+          sector: string
+          sort_order: number | null
+          startup_name: string
+          structure_name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          founder_name: string
+          founder_quote: string
+          founder_role: string
+          id?: string
+          is_published?: boolean | null
+          program_name: string
+          result: string
+          sector: string
+          sort_order?: number | null
+          startup_name: string
+          structure_name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          founder_name?: string
+          founder_quote?: string
+          founder_role?: string
+          id?: string
+          is_published?: boolean | null
+          program_name?: string
+          result?: string
+          sector?: string
+          sort_order?: number | null
+          startup_name?: string
+          structure_name?: string
         }
         Relationships: []
       }

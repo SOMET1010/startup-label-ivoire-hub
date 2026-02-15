@@ -12,6 +12,7 @@ import { Search } from "lucide-react";
 import { useState } from "react";
 import { AccompagnementSuccessStories } from "@/components/accompagnement/AccompagnementSuccessStories";
 import { AccompagnementFAQ } from "@/components/accompagnement/AccompagnementFAQ";
+import { AccompagnementContactForm } from "@/components/accompagnement/AccompagnementContactForm";
 
 // Mock data for incubators and accelerators
 const structures = [
@@ -258,6 +259,13 @@ const Accompagnement = () => {
 
         {/* Success Stories */}
         <AccompagnementSuccessStories />
+
+        {/* Contact Form */}
+        <section className="py-16 bg-background">
+          <div className="container mx-auto px-4 max-w-lg">
+            <AccompagnementContactForm />
+          </div>
+        </section>
 
         {/* FAQ */}
         <AccompagnementFAQ />
