@@ -174,7 +174,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("notify-document-request: Sending email to", profile.email);
 
     const emailResponse = await resend.emails.send({
-      from: "Label Startup <onboarding@resend.dev>",
+      from: "Label Startup Numérique <no-reply@notifications.ansut.ci>",
       to: [profile.email],
       subject: `📄 Document requis pour ${startupName} - Label Startup Numérique`,
       html: emailHtml,

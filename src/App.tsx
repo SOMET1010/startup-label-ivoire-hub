@@ -16,6 +16,7 @@ import PageLoader from "./components/PageLoader";
 import { SkipLink } from "./components/shared/SkipLink";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { useLanguageSync } from "./hooks/useLanguageSync";
+import { GoogleAnalytics } from "./components/analytics/GoogleAnalytics";
 // Pages critiques - import statique pour chargement instantané
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -70,6 +71,7 @@ const AppContent = () => {
       <SkipLink />
       <CloudStatusBanner />
       <LabelCoach />
+      <GoogleAnalytics />
       <ErrorBoundary>
         <Suspense fallback={<PageLoader />}>
           <Routes>

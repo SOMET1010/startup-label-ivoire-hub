@@ -82,7 +82,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Email 1: Confirmation au visiteur
     const confirmationEmail = await resend.emails.send({
-      from: "Label Startup Numérique <onboarding@resend.dev>",
+      from: "Label Startup Numérique <no-reply@notifications.ansut.ci>",
       to: [email],
       subject: `Votre message a bien été envoyé à ${safeCompanyName}`,
       html: `
@@ -139,7 +139,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Email 2: Notification à l'entreprise
     const notificationEmail = await resend.emails.send({
-      from: "Label Startup Numérique <onboarding@resend.dev>",
+      from: "Label Startup Numérique <no-reply@notifications.ansut.ci>",
       to: [companyEmail],
       replyTo: email,
       subject: `Nouvelle demande de contact - Label Startup Numérique`,

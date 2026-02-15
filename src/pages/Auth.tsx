@@ -40,6 +40,9 @@ const signupSchema = z.object({
     .regex(/[a-z]/, "Le mot de passe doit contenir au moins une minuscule")
     .regex(/[0-9]/, "Le mot de passe doit contenir au moins un chiffre"),
   confirmPassword: z.string(),
+  acceptTerms: z.boolean().refine((val) => val === true, {
+    message: "Vous devez accepter les conditions d'utilisation",
+  }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Les mots de passe ne correspondent pas",
   path: ["confirmPassword"],
@@ -83,6 +86,7 @@ export default function Auth() {
       organizationName: "",
       password: "",
       confirmPassword: "",
+      acceptTerms: false,
     },
   });
 
@@ -455,6 +459,36 @@ export default function Auth() {
                               />
                             </FormControl>
                             <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Terms acceptance checkbox */}
+                      <FormField
+                        control={signupForm.control}
+                        name="acceptTerms"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                                disabled={isLoading}
+                              />
+                            </FormControl>
+                            <div className="space-y-1 leading-none">
+                              <label className="text-sm text-muted-foreground cursor-pointer">
+                                {t('signup.terms')}{' '}
+                                <Link to="/cgu" className="text-primary hover:underline" target="_blank">
+                                  {t('signup.termsLink')}
+                                </Link>{' '}
+                                {t('signup.and')}{' '}
+                                <Link to="/confidentialite" className="text-primary hover:underline" target="_blank">
+                                  {t('signup.privacyLink')}
+                                </Link>
+                              </label>
+                              <FormMessage />
+                            </div>
                           </FormItem>
                         )}
                       />

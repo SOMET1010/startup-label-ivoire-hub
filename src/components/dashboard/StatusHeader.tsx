@@ -51,7 +51,12 @@ export function StatusHeader({ status, className }: StatusHeaderProps) {
           {config.label}
         </Badge>
       </div>
-      <p className="text-sm text-muted-foreground">{config.description}</p>
+      <p className="text-sm text-muted-foreground">
+        {config.description}
+        {normalizedStatus === "approved" && (
+          <span className="ml-2 font-medium text-primary">· Validité : 3 ans</span>
+        )}
+      </p>
     </motion.div>
   );
 }

@@ -66,7 +66,7 @@ export function LabelStatusCard() {
         {daysUntilExpiration !== null && (
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Validité du label</span>
+              <span className="text-muted-foreground">Validité du label (3 ans)</span>
               <span className={`font-medium ${isExpiringSoon ? 'text-amber-600' : ''}`}>
                 {isExpired ? 'Expiré' : `${daysRemaining} jours restants`}
               </span>

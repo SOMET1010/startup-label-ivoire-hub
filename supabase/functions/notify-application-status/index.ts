@@ -145,7 +145,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email
     const emailResponse = await resend.emails.send({
-      from: "Label Startup Numérique <onboarding@resend.dev>",
+      from: "Label Startup Numérique <no-reply@notifications.ansut.ci>",
       to: [profile.email],
       subject: subject,
       html: `
