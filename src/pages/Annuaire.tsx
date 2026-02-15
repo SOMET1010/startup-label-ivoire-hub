@@ -102,9 +102,9 @@ const Annuaire = () => {
         if (fetchError) throw fetchError;
 
         setStartups(data || []);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Error fetching startups:", err);
-        setError(err.message);
+        setError(err instanceof Error ? err.message : "Erreur inconnue");
       } finally {
         setIsLoading(false);
       }

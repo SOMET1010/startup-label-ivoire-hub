@@ -146,7 +146,7 @@ export default function AdminCommitteeMembers() {
         title: editingMember ? "Membre modifié" : "Membre ajouté",
         description: `${form.full_name} a été ${editingMember ? "mis à jour" : "ajouté"} avec succès.`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving committee member:", error);
       toast({
         variant: "destructive",
@@ -186,7 +186,7 @@ export default function AdminCommitteeMembers() {
         title: "Membre supprimé",
         description: `${memberToDelete.full_name} a été retiré du comité.`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting committee member:", error);
       toast({
         variant: "destructive",

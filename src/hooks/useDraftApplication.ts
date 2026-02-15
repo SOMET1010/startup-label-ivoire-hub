@@ -193,18 +193,19 @@ export function useDraftApplication(options: UseDraftApplicationOptions = {}) {
 
       onSaveSuccess?.();
       return startupId;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving draft:", error);
+      const message = error instanceof Error ? error.message : "Impossible de sauvegarder le brouillon.";
       
       if (!silent) {
         toast({
           variant: "destructive",
           title: "Erreur de sauvegarde",
-          description: error.message || "Impossible de sauvegarder le brouillon.",
+          description: message,
         });
       }
 
-      onSaveError?.(error);
+      onSaveError?.(error instanceof Error ? error : new Error(message));
       return null;
     } finally {
       setIsSaving(false);
@@ -246,7 +247,7 @@ export function useDraftApplication(options: UseDraftApplicationOptions = {}) {
         title: "Brouillon supprimé",
         description: "Votre brouillon a été supprimé.",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting draft:", error);
       toast({
         variant: "destructive",

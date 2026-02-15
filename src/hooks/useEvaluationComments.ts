@@ -20,7 +20,7 @@ export interface Comment {
   mentions: string[];
   created_at: string;
   edited_at: string | null;
-  attachments: any[];
+  attachments: Record<string, unknown>[];
   author?: CommentAuthor;
   replies?: Comment[];
 }
@@ -125,9 +125,9 @@ export function useEvaluationComments(applicationId: string): UseEvaluationComme
 
       setComments(rootComments);
       setParticipants(Object.values(profilesMap));
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error fetching comments:", err);
-      setError(err.message || "Erreur lors du chargement des commentaires");
+      setError(err instanceof Error ? err.message : "Erreur lors du chargement des commentaires");
     } finally {
       setLoading(false);
     }
@@ -167,14 +167,14 @@ export function useEvaluationComments(applicationId: string): UseEvaluationComme
       const state = channel.presenceState();
       const users: OnlineUser[] = [];
       Object.values(state).forEach((presenceList) => {
-        presenceList.forEach((presence: any) => {
+        presenceList.forEach((presence: Record<string, unknown>) => {
           if (presence.user_id) {
             users.push({
-              user_id: presence.user_id,
-              full_name: presence.full_name || "Anonyme",
-              avatar_url: presence.avatar_url || null,
-              role: presence.role || "evaluator",
-              online_at: presence.online_at || new Date().toISOString(),
+              user_id: String(presence.user_id),
+              full_name: String(presence.full_name || "Anonyme"),
+              avatar_url: presence.avatar_url ? String(presence.avatar_url) : null,
+              role: String(presence.role || "evaluator"),
+              online_at: String(presence.online_at || new Date().toISOString()),
             });
           }
         });
@@ -266,9 +266,9 @@ export function useEvaluationComments(applicationId: string): UseEvaluationComme
 
       if (insertError) throw insertError;
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error sending comment:", err);
-      setError(err.message || "Erreur lors de l'envoi du commentaire");
+      setError(err instanceof Error ? err.message : "Erreur lors de l'envoi du commentaire");
       return false;
     }
   }, [applicationId, user]);
@@ -291,9 +291,9 @@ export function useEvaluationComments(applicationId: string): UseEvaluationComme
 
       if (updateError) throw updateError;
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error editing comment:", err);
-      setError(err.message || "Erreur lors de la modification du commentaire");
+      setError(err instanceof Error ? err.message : "Erreur lors de la modification du commentaire");
       return false;
     }
   }, []);

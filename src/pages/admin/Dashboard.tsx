@@ -415,7 +415,7 @@ export default function AdminDashboard() {
         rejected,
         users: usersWithRoles.length,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching data:", error);
       toast({
         variant: "destructive",
@@ -581,7 +581,7 @@ export default function AdminDashboard() {
       setActionType(null);
       setActionNotes("");
       fetchData();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error updating status:", error);
       toast({
         variant: "destructive",
@@ -636,7 +636,7 @@ export default function AdminDashboard() {
       setSelectedUser(null);
       setNewRole("");
       fetchData();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error updating role:", error);
       toast({
         variant: "destructive",

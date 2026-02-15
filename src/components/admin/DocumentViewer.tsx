@@ -139,7 +139,7 @@ const DocumentViewer = ({ documents, startupName }: DocumentViewerProps) => {
         documentKey: docKey,
         documentType: docType,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error getting signed URL:", error);
       toast.error("Erreur lors du chargement de l'aperçu");
     } finally {
@@ -156,7 +156,7 @@ const DocumentViewer = ({ documents, startupName }: DocumentViewerProps) => {
       if (signedUrl) {
         window.open(signedUrl, "_blank");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error getting signed URL:", error);
       toast.error("Erreur lors de l'ouverture du document");
     } finally {

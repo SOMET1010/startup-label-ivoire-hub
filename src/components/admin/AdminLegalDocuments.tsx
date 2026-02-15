@@ -174,7 +174,7 @@ export default function AdminLegalDocuments() {
         title: editingDoc ? "Document modifié" : "Document ajouté",
         description: `"${form.title}" a été ${editingDoc ? "mis à jour" : "créé"} avec succès.`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving legal document:", error);
       toast({
         variant: "destructive",
@@ -214,7 +214,7 @@ export default function AdminLegalDocuments() {
         title: "Document supprimé",
         description: `"${docToDelete.title}" a été supprimé.`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting legal document:", error);
       toast({
         variant: "destructive",

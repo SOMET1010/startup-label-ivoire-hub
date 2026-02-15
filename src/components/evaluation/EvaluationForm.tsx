@@ -137,7 +137,7 @@ export default function EvaluationForm({
       });
 
       onSaved?.();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving evaluation:", error);
       toast({
         variant: "destructive",

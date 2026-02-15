@@ -116,13 +116,13 @@ const CompanyContact = ({ company }: CompanyContactProps) => {
         setIsSuccess(false);
       }, 2000);
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erreur lors de l\'envoi:', error);
       
       toast({
         variant: "destructive",
         title: "Erreur d'envoi",
-        description: error.message || "Une erreur est survenue. Veuillez réessayer.",
+        description: error instanceof Error ? error.message : "Une erreur est survenue. Veuillez réessayer.",
         duration: 5000,
       });
     } finally {

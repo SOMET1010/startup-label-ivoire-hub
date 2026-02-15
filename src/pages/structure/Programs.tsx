@@ -21,8 +21,8 @@ import { useToast } from "@/hooks/use-toast";
 interface Program {
   id: string;
   name: string;
-  description: string;
-  duration: string;
+  description?: string;
+  duration?: string;
   status: string;
 }
 

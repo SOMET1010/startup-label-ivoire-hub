@@ -107,12 +107,12 @@ export function MissingDocumentsAlert({
 
       fetchRequests();
       onDocumentUploaded?.();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Upload error:', error);
       toast({
         variant: 'destructive',
         title: 'Erreur',
-        description: error.message || 'Impossible de téléverser le document.',
+        description: error instanceof Error ? error.message : 'Impossible de téléverser le document.',
       });
     } finally {
       setUploading(null);

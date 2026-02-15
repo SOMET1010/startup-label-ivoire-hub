@@ -21,7 +21,7 @@ interface Company {
 
 interface CustomMarkerClusterGroupProps {
   companies: Company[];
-  iconCreateFunction: (cluster: any) => L.DivIcon;
+  iconCreateFunction: (cluster: { getChildCount: () => number }) => L.DivIcon;
   maxClusterRadius?: number;
   createMarkerIcon: (isLabeled: boolean) => L.DivIcon;
   renderPopupContent: (company: Company) => string;

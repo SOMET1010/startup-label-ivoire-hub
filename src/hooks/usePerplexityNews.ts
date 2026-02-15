@@ -93,10 +93,11 @@ export const usePerplexityNews = ({
         timestamp: Date.now()
       });
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error fetching Perplexity news:", err);
+      const message = err instanceof Error ? err.message : "Erreur lors de la récupération des actualités";
       
-      if (err?.message?.includes("429") || err?.status === 429) {
+      if (message.includes("429") || (err instanceof Object && 'status' in err && (err as { status: number }).status === 429)) {
         toast({
           title: "Limite atteinte",
           description: "Trop de requêtes. Affichage des archives.",
@@ -104,7 +105,7 @@ export const usePerplexityNews = ({
         });
       }
       
-      setError(err?.message || "Erreur lors de la récupération des actualités");
+      setError(message);
       setIsLive(false);
     } finally {
       setIsLoading(false);
