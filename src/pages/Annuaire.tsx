@@ -12,6 +12,7 @@ import { Search, Building2, MapPin, Globe, Users, ExternalLink, Award } from "lu
 import { supabase } from "@/integrations/supabase/client";
 import { SEOHead } from "@/components/shared/SEOHead";
 import { PageBreadcrumb } from "@/components/shared/PageBreadcrumb";
+import { SECTORS, STAGES, LOCATIONS } from "@/lib/constants/startup";
 
 interface Startup {
   id: string;
@@ -27,44 +28,11 @@ interface Startup {
   label_granted_at: string | null;
 }
 
-// Constantes pour les filtres
-const SECTORS = [
-  { value: "fintech", label: "FinTech" },
-  { value: "edtech", label: "EdTech" },
-  { value: "healthtech", label: "HealthTech" },
-  { value: "agritech", label: "AgriTech" },
-  { value: "ecommerce", label: "E-commerce" },
-  { value: "mobility", label: "Mobilité" },
-  { value: "cleantech", label: "CleanTech" },
-  { value: "proptech", label: "PropTech" },
-  { value: "other", label: "Autre" },
-];
-
-const STAGES = [
-  { value: "idea", label: "Idéation" },
-  { value: "mvp", label: "MVP" },
-  { value: "early", label: "Early Stage" },
-  { value: "growth", label: "Growth" },
-  { value: "scale", label: "Scale-up" },
-];
-
-const LOCATIONS = [
-  "Abidjan",
-  "Yamoussoukro",
-  "Bouaké",
-  "San-Pédro",
-  "Korhogo",
-  "Man",
-  "Daloa",
-  "Grand-Bassam",
-];
-
 const Annuaire = () => {
   const [startups, setStartups] = useState<Startup[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Filtres
   const [searchTerm, setSearchTerm] = useState("");
   const [sectorFilter, setSectorFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
@@ -79,7 +47,6 @@ const Annuaire = () => {
       }
 
       try {
-        // Récupérer les startups labellisées et visibles dans l'annuaire
         const { data, error: fetchError } = await supabase
           .from("startups")
           .select(`
@@ -113,7 +80,6 @@ const Annuaire = () => {
     fetchStartups();
   }, []);
 
-  // Filtrer les startups
   const filteredStartups = useMemo(() => {
     return startups.filter((startup) => {
       const matchesSearch =
@@ -135,12 +101,10 @@ const Annuaire = () => {
     });
   }, [startups, searchTerm, sectorFilter, locationFilter, stageFilter]);
 
-  // Extraire les localisations uniques des startups
   const availableLocations = useMemo(() => {
     const locs = new Set<string>();
     startups.forEach((s) => {
       if (s.address) {
-        // Extraire la ville de l'adresse
         LOCATIONS.forEach((loc) => {
           if (s.address?.toLowerCase().includes(loc.toLowerCase())) {
             locs.add(loc);
@@ -203,7 +167,6 @@ const Annuaire = () => {
           <Card className="mb-8">
             <CardContent className="p-6">
               <div className="flex flex-col lg:flex-row gap-4">
-                {/* Recherche */}
                 <div className="relative flex-grow">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -214,7 +177,6 @@ const Annuaire = () => {
                   />
                 </div>
 
-                {/* Filtres */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:w-2/3">
                   <Select value={sectorFilter} onValueChange={setSectorFilter}>
                     <SelectTrigger>
@@ -260,7 +222,6 @@ const Annuaire = () => {
                 </div>
               </div>
 
-              {/* Résultats et reset */}
               <div className="flex justify-between items-center mt-4 pt-4 border-t border-border">
                 <p className="text-sm text-muted-foreground">
                   <span className="font-semibold text-foreground">{filteredStartups.length}</span>
@@ -313,7 +274,6 @@ const Annuaire = () => {
                     <Card key={startup.id} className="overflow-hidden card-hover group">
                       <CardContent className="p-0">
                         <div className="p-6">
-                          {/* Header avec logo et nom */}
                           <div className="flex items-start gap-4 mb-4">
                             <div className="w-16 h-16 rounded-xl overflow-hidden bg-muted flex items-center justify-center border border-border">
                               {startup.logo_url ? (
@@ -340,12 +300,10 @@ const Annuaire = () => {
                             </div>
                           </div>
 
-                          {/* Description */}
                           <p className="text-muted-foreground text-sm line-clamp-3 mb-4">
                             {startup.description || "Aucune description disponible"}
                           </p>
 
-                          {/* Métadonnées */}
                           <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
                             {startup.address && (
                               <div className="flex items-center gap-1">
@@ -366,7 +324,6 @@ const Annuaire = () => {
                             )}
                           </div>
 
-                          {/* Stade */}
                           {getStageLabel(startup.stage) && (
                             <div className="mt-3">
                               <Badge variant="outline" className="text-xs">
@@ -376,7 +333,6 @@ const Annuaire = () => {
                           )}
                         </div>
 
-                        {/* Footer avec actions */}
                         <div className="px-6 py-4 bg-muted/30 border-t border-border flex items-center justify-between">
                           {startup.website ? (
                             <a
@@ -421,7 +377,6 @@ const Annuaire = () => {
             </>
           )}
 
-          {/* Stats en bas */}
           {!isLoading && startups.length > 0 && (
             <div className="mt-12 text-center">
               <p className="text-muted-foreground">
