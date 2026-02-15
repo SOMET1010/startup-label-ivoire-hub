@@ -7,8 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import CTA from "@/components/CTA";
-import { InvestorContactDialog } from "@/components/investors/InvestorContactDialog";
-import { InvestorSuccessStories } from "@/components/investors/InvestorSuccessStories";
+import { InvestorContactDialog } from "@/components/investor/InvestorContactDialog";
+import { InvestorSuccessStories } from "@/components/investor/InvestorSuccessStories";
 
 // Mock data for investors with Ivorian context
 const investors = [
