@@ -18,6 +18,7 @@ import ApplicationsTab from "@/components/admin/ApplicationsTab";
 import UsersTab from "@/components/admin/UsersTab";
 import ApplicationDetailDialog from "@/components/admin/ApplicationDetailDialog";
 import AdminDialogs from "@/components/admin/AdminDialogs";
+import SecurityHealthCard from "@/components/admin/SecurityHealthCard";
 
 export default function AdminDashboard() {
   const { user, profile, isAdmin } = useAuth();
@@ -50,12 +51,17 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* Overview Charts */}
-          {realtimeMetrics && (
-            <div className="my-8">
-              <DashboardOverview monthlyStats={realtimeMetrics.monthlyStats} statusCounts={realtimeMetrics.statusCounts} sectorBreakdown={realtimeMetrics.sectorBreakdown} animationKey={animationKey} />
+          {/* Security Health + Overview Charts */}
+          <div className="my-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              {realtimeMetrics && (
+                <DashboardOverview monthlyStats={realtimeMetrics.monthlyStats} statusCounts={realtimeMetrics.statusCounts} sectorBreakdown={realtimeMetrics.sectorBreakdown} animationKey={animationKey} />
+              )}
             </div>
-          )}
+            <div>
+              <SecurityHealthCard />
+            </div>
+          </div>
 
           {/* Tabs */}
           <Tabs defaultValue="applications" className="space-y-4">
