@@ -19,6 +19,7 @@ import UsersTab from "@/components/admin/UsersTab";
 import ApplicationDetailDialog from "@/components/admin/ApplicationDetailDialog";
 import AdminDialogs from "@/components/admin/AdminDialogs";
 import SecurityHealthCard from "@/components/admin/SecurityHealthCard";
+import SecurityReviewBanner from "@/components/admin/SecurityReviewBanner";
 
 export default function AdminDashboard() {
   const { user, profile, isAdmin } = useAuth();
@@ -39,6 +40,8 @@ export default function AdminDashboard() {
               <RefreshCw className={`h-4 w-4 mr-2 ${admin.loading ? "animate-spin" : ""}`} />Actualiser
             </Button>
           </div>
+
+          <SecurityReviewBanner />
 
           {/* KPI Cards */}
           {realtimeMetrics ? (
