@@ -47,6 +47,7 @@ const Confidentialite = lazy(() => import("./pages/Confidentialite"));
 const CGU = lazy(() => import("./pages/CGU"));
 const CadreJuridique = lazy(() => import("./pages/CadreJuridique"));
 const Comite = lazy(() => import("./pages/Comite"));
+const Presentation = lazy(() => import("./pages/Presentation"));
 
 // Pages admin - lazy loading
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
@@ -96,6 +97,7 @@ const AppContent = () => {
             <Route path="/cgu" element={<CGU />} />
             <Route path="/cadre-juridique" element={<CadreJuridique />} />
             <Route path="/comite" element={<Comite />} />
+            <Route path="/presentation" element={<Presentation />} />
             
             {/* Auth routes */}
             <Route path="/auth" element={<Auth />} />
