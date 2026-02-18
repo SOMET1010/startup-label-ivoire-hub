@@ -1,33 +1,49 @@
 
 
-# Enable Password HIBP Check and Document for Team
+# Presentation interactive de la plateforme Ivoire Hub
 
-## Context
+## Objectif
+Creer une page `/presentation` avec un diaporama interactif en plein ecran presentant la plateforme Label Startup Cote d'Ivoire. La presentation sera navigable avec les fleches du clavier et les boutons a l'ecran.
 
-The `SUPA_auth_leaked_password_protection` security warning requires enabling a platform-level toggle. The documentation file `public/documents/enable-leaked-password-protection.md` already exists.
+## Contenu des slides (12 slides)
 
-## What will be done
+1. **Page de titre** -- Logo, nom du projet, MTNI/ANSUT, version 2.0
+2. **Contexte et cadre legal** -- Loi n 2023-901, acteurs institutionnels (MTNI, ANSUT, Comite, SAE)
+3. **Vision et objectifs strategiques** -- Guichet unique, KPIs Annee 1 (200+ candidatures, 50+ labellisees, <30j decision)
+4. **Portail public** -- 10 fonctionnalites (accueil, criteres, quiz, annuaire, actualites, FAQ, cartographie IA...)
+5. **Espace Startup** -- 11 fonctionnalites (candidature multi-etapes, suivi, coach IA, notifications push, renouvellement...)
+6. **Espace Evaluateur** -- 7 fonctionnalites (grille de notation /20, vote avec quorum, commentaires, synthese)
+7. **Espace Administrateur** -- 10 fonctionnalites (KPIs temps reel, audit logs, gestion comite, securite)
+8. **Espaces SAE et Investisseur** -- Structures d'accompagnement (4 fonctionnalites) + Investisseurs (5 fonctionnalites)
+9. **Architecture technique** -- Stack (React/Vite, Tailwind, Lovable Cloud), schema BDD, Edge Functions
+10. **Securite et conformite** -- RLS, JWT, HIBP, URLs signees, RGPD, WCAG 2.1 AA
+11. **Planning et jalons** -- Timeline Jan-Juin 2026, sprints, recette, mise en production
+12. **Merci / Contact** -- Coordonnees support, MTNI, ANSUT
 
-### 1. Enable HIBP Check (Manual platform action)
+## Implementation technique
 
-This setting is a platform-level authentication configuration that cannot be toggled via code or migrations. A team member must perform the following one-time action:
+### Fichiers a creer
+- `src/pages/Presentation.tsx` -- Page principale avec le moteur de slides
+- `src/components/presentation/SlideRenderer.tsx` -- Composant qui scale les slides a 1920x1080
+- `src/components/presentation/slides/` -- Un composant par slide (TitleSlide, ContextSlide, etc.)
+- `src/components/presentation/PresentationControls.tsx` -- Barre de navigation (precedent/suivant, numero, plein ecran)
 
-1. Open the **Cloud** tab in the left sidebar
-2. Navigate to **Users** > **Auth settings** > **Email**
-3. Enable the **Password HIBP Check** toggle
-4. Click **Save**
+### Fonctionnalites
+- Navigation clavier (fleches gauche/droite, Espace, Echap)
+- Boutons precedent/suivant avec indicateur de progression
+- Mode plein ecran via l'API Fullscreen du navigateur
+- Animations de transition entre slides avec Framer Motion
+- Design institutionnel coherent avec les couleurs de la plateforme (vert/orange)
+- Responsive : fonctionne sur desktop et tablette
 
-### 2. Update security finding
+### Integration
+- Ajout de la route `/presentation` dans `App.tsx` (publique, lazy-loaded)
+- Lien accessible depuis le footer ou la documentation
 
-Once the toggle is enabled, update the `SUPA_auth_leaked_password_protection` security finding to mark it as resolved (delete the finding).
-
-### 3. Verify
-
-Re-run the security scan to confirm the warning no longer appears.
-
-## Important note
-
-The documentation file already exists at `public/documents/enable-leaked-password-protection.md` with complete instructions, verification steps, and a sign-off section. No new files need to be created.
-
-The only code-level action is deleting/updating the security finding after the platform toggle is confirmed enabled.
+### Design des slides
+- Fond avec gradient institutionnel
+- Icones Lucide pour illustrer chaque section
+- Tableaux et listes stylises pour les fonctionnalites
+- Badges de statut "Livre" pour montrer l'avancement
+- Armoiries / branding officiel CI
 
