@@ -1,33 +1,36 @@
 import SlideLayout from "../SlideLayout";
-import { Heart, Mail, Phone, Globe } from "lucide-react";
+import { Sparkles, Globe, Mail, QrCode } from "lucide-react";
 
 const MerciSlide = () => (
   <SlideLayout>
     <div className="flex flex-col items-center justify-center h-full text-white text-center px-20">
-      <Heart className="w-16 h-16 text-amber-300 mb-6" />
-      <h2 className="text-[64px] font-bold mb-4">Merci</h2>
-      <p className="text-[28px] text-white/80 mb-12 max-w-[900px]">
-        Pour toute question sur la plateforme Label Startup Côte d'Ivoire
+      <Sparkles className="w-20 h-20 text-amber-300 mb-8" />
+      <h2 className="text-[72px] font-bold mb-4">Rejoignez le mouvement</h2>
+      <p className="text-[28px] text-white/80 mb-14 max-w-[1000px]">
+        Ensemble, construisons l'écosystème d'innovation de demain en Côte d'Ivoire et en Afrique
       </p>
 
-      <div className="grid grid-cols-3 gap-8 w-full max-w-[1200px]">
+      <div className="grid grid-cols-3 gap-8 w-full max-w-[1200px] mb-14">
         {[
-          { icon: Globe, title: "MTNI", desc: "Ministère de la Transition Numérique et de l'Innovation", link: "www.numerique.gouv.ci" },
-          { icon: Mail, title: "Support", desc: "Équipe technique de la plateforme", link: "support@label-startup.ci" },
-          { icon: Phone, title: "ANSUT", desc: "Agence Nationale du Service Universel des Télécoms", link: "www.ansut.ci" },
+          { icon: Globe, title: "Visitez la plateforme", desc: "label-startup.ci", sub: "Candidatez ou explorez l'annuaire" },
+          { icon: Mail, title: "Contactez-nous", desc: "contact@label-startup.ci", sub: "Partenariats & investissements" },
+          { icon: QrCode, title: "Scannez", desc: "Accès direct", sub: "Depuis votre mobile" },
         ].map((c) => (
           <div key={c.title} className="bg-white/10 backdrop-blur rounded-2xl p-8 flex flex-col items-center">
-            <c.icon className="w-10 h-10 text-amber-300 mb-4" />
-            <h3 className="text-[26px] font-bold mb-2">{c.title}</h3>
-            <p className="text-[18px] text-white/60 mb-3">{c.desc}</p>
-            <span className="text-[18px] text-amber-300">{c.link}</span>
+            <c.icon className="w-12 h-12 text-amber-300 mb-4" />
+            <h3 className="text-[24px] font-bold mb-2">{c.title}</h3>
+            <span className="text-[20px] text-amber-300 mb-1">{c.desc}</span>
+            <span className="text-[17px] text-white/50">{c.sub}</span>
           </div>
         ))}
       </div>
 
-      <div className="mt-12 flex items-center gap-4">
-        <img src="/images/armoiries-ci.svg" alt="Armoiries CI" className="h-12 w-auto opacity-60" />
-        <span className="text-[18px] text-white/40">République de Côte d'Ivoire — 2026</span>
+      <div className="flex items-center gap-4">
+        <img src="/images/armoiries-ci.svg" alt="Armoiries CI" className="h-14 w-auto opacity-60" />
+        <div className="text-left">
+          <p className="text-[18px] text-white/60">République de Côte d'Ivoire</p>
+          <p className="text-[16px] text-white/40">Ministère de la Transition Numérique • ANSUT</p>
+        </div>
       </div>
     </div>
   </SlideLayout>

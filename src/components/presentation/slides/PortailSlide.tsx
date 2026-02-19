@@ -1,34 +1,34 @@
 import SlideLayout from "../SlideLayout";
-import { Globe, CheckCircle } from "lucide-react";
+import { Layers, ArrowRight } from "lucide-react";
 
-const features = [
-  "Page d'accueil institutionnelle",
-  "Critères d'éligibilité détaillés",
-  "Quiz d'auto-évaluation interactif",
-  "Formulaire de candidature multi-étapes",
-  "Annuaire des startups labellisées",
-  "Actualités & événements",
-  "FAQ dynamique",
-  "Cartographie IA de l'écosystème",
-  "Page investisseurs",
-  "Accompagnement & structures",
+const steps = [
+  { num: "01", title: "Découvrir", desc: "Comprendre les critères et vérifier son éligibilité en quelques minutes" },
+  { num: "02", title: "Postuler", desc: "Déposer son dossier en ligne avec un formulaire guidé étape par étape" },
+  { num: "03", title: "Évaluer", desc: "Un comité d'experts analyse chaque dossier selon 4 critères clés" },
+  { num: "04", title: "Labelliser", desc: "Obtenir le Label officiel et accéder à tout l'écosystème de soutien" },
 ];
 
 const PortailSlide = () => (
   <SlideLayout>
     <div className="flex flex-col h-full text-white px-24 py-20">
       <div className="flex items-center gap-4 mb-2">
-        <Globe className="w-10 h-10 text-amber-300" />
-        <span className="text-[20px] text-amber-300 font-semibold uppercase tracking-widest">Slide 4</span>
+        <Layers className="w-10 h-10 text-amber-300" />
+        <span className="text-[20px] text-amber-300 font-semibold uppercase tracking-widest">Comment ça marche</span>
       </div>
-      <h2 className="text-[52px] font-bold mb-4">Portail Public</h2>
-      <div className="h-1 w-24 bg-amber-400 rounded-full mb-10" />
+      <h2 className="text-[52px] font-bold mb-4">Un parcours simple en 4 étapes</h2>
+      <div className="h-1 w-24 bg-amber-400 rounded-full mb-12" />
 
-      <div className="grid grid-cols-2 gap-4 flex-1">
-        {features.map((f, i) => (
-          <div key={i} className="flex items-center gap-4 bg-white/10 backdrop-blur rounded-xl px-6 py-5">
-            <CheckCircle className="w-7 h-7 text-emerald-300 flex-shrink-0" />
-            <span className="text-[22px]">{f}</span>
+      <div className="flex gap-6 flex-1 items-stretch">
+        {steps.map((s, i) => (
+          <div key={s.num} className="flex-1 flex items-center gap-4">
+            <div className="flex-1 bg-white/10 backdrop-blur rounded-2xl p-8 flex flex-col h-full justify-center">
+              <span className="text-[64px] font-bold text-amber-300/40 mb-2">{s.num}</span>
+              <h3 className="text-[32px] font-bold mb-3">{s.title}</h3>
+              <p className="text-[20px] text-white/70 leading-relaxed">{s.desc}</p>
+            </div>
+            {i < steps.length - 1 && (
+              <ArrowRight className="w-10 h-10 text-amber-300/50 flex-shrink-0" />
+            )}
           </div>
         ))}
       </div>
