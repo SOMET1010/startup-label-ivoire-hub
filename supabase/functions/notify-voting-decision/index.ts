@@ -202,48 +202,58 @@ const handler = async (req: Request): Promise<Response> => {
                 <head>
                   <meta charset="utf-8">
                   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                  <style>
-                    body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f5f5f5; }
-                    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                    .header { background: linear-gradient(135deg, #F97316 0%, #22C55E 100%); color: white; padding: 40px 30px; text-align: center; border-radius: 12px 12px 0 0; }
-                    .header h1 { margin: 0; font-size: 28px; font-weight: 700; }
-                    .content { background: #ffffff; padding: 40px 30px; border-left: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; }
-                    .status-badge { display: inline-block; background: ${isApproved ? '#10B981' : '#EF4444'}; color: white; padding: 8px 20px; border-radius: 20px; font-weight: 600; }
-                    .button { display: inline-block; background: linear-gradient(135deg, #F97316 0%, #22C55E 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; }
-                    .footer { background: #f9f9f9; padding: 30px; text-align: center; border-radius: 0 0 12px 12px; font-size: 14px; color: #666; border: 1px solid #e0e0e0; border-top: none; }
-                  </style>
                 </head>
-                <body>
-                  <div class="container">
-                    <div class="header">
-                      <h1>Label Startup Numérique</h1>
-                      <p>Côte d'Ivoire</p>
-                    </div>
-                    <div class="content">
-                      <p>Bonjour <strong>${profile.full_name || 'Cher(e) candidat(e)'}</strong>,</p>
-                      
-                      ${isApproved ? `
-                        <p>Nous avons le plaisir de vous informer que votre candidature au <strong>Label Startup Numérique</strong> a été <span class="status-badge">Approuvée</span></p>
-                        <p>Votre startup <strong>${startup.name}</strong> fait désormais partie de l'écosystème des startups labellisées de Côte d'Ivoire !</p>
-                      ` : `
-                        <p>Nous vous remercions pour votre candidature au <strong>Label Startup Numérique</strong>.</p>
-                        <p>Après examen de votre dossier pour <strong>${startup.name}</strong>, le comité a décidé de ne pas retenir votre candidature à ce stade.</p>
-                        <p>Cette décision ne remet pas en cause la valeur de votre projet. Nous vous encourageons à continuer et à soumettre une nouvelle candidature.</p>
-                      `}
-                      
-                      ${notes ? `<p style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;"><strong>Note du comité :</strong> ${notes}</p>` : ''}
-                      
-                      <center style="margin: 30px 0;">
-                        <a href="https://startup-label-ivoire-hub.lovable.app/suivi-candidature" class="button">
-                          Voir le détail
-                        </a>
-                      </center>
-                    </div>
-                    <div class="footer">
-                      <p><strong>Label Startup Numérique Côte d'Ivoire</strong></p>
-                      <p>© ${new Date().getFullYear()} - Tous droits réservés</p>
-                    </div>
-                  </div>
+                <body style="font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f5f5f5;">
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px;">
+                    <tr>
+                      <td align="center">
+                        <table width="600" cellpadding="0" cellspacing="0" style="max-width: 600px;">
+                          <tr>
+                            <td style="background: linear-gradient(135deg, #F97316 0%, #16a34a 100%); color: white; padding: 40px 30px; text-align: center; border-radius: 12px 12px 0 0;">
+                              <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: white;">Label Startup Numérique</h1>
+                              <p style="margin: 8px 0 0; color: rgba(255,255,255,0.9);">Côte d'Ivoire</p>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="background: #ffffff; padding: 40px 30px; border-left: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0;">
+                              <p style="margin: 0 0 16px;">Bonjour <strong>${profile.full_name || 'Cher(e) candidat(e)'}</strong>,</p>
+                              
+                              ${isApproved ? `
+                                <p>Nous avons le plaisir de vous informer que votre candidature au <strong>Label Startup Numérique</strong> a été 
+                                  <span style="display: inline-block; background: #10B981; color: white; padding: 8px 20px; border-radius: 20px; font-weight: 600;">Approuvée</span>
+                                </p>
+                                <p>Votre startup <strong>${startup.name}</strong> fait désormais partie de l'écosystème des startups labellisées de Côte d'Ivoire !</p>
+                              ` : `
+                                <p>Nous vous remercions pour votre candidature au <strong>Label Startup Numérique</strong>.</p>
+                                <p>Après examen de votre dossier pour <strong>${startup.name}</strong>, le comité a décidé de ne pas retenir votre candidature à ce stade.</p>
+                                <p style="margin-top: 12px;">Cette décision ne remet pas en cause la valeur de votre projet. Nous vous encourageons à continuer et à soumettre une nouvelle candidature.</p>
+                              `}
+                              
+                              ${notes ? `<p style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;"><strong>Note du comité :</strong> ${notes}</p>` : ''}
+                              
+                              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
+                                <tr>
+                                  <td align="center">
+                                    <a href="https://startup-label-ivoire-hub.lovable.app/suivi-candidature"
+                                       style="display: inline-block; background: linear-gradient(135deg, #F97316 0%, #16a34a 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600;">
+                                      Voir le détail
+                                    </a>
+                                  </td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="background: #f9f9f9; padding: 30px; text-align: center; border-radius: 0 0 12px 12px; border: 1px solid #e0e0e0; border-top: none;">
+                              <p style="margin: 0; font-size: 14px; color: #666;"><strong>Label Startup Numérique Côte d'Ivoire</strong></p>
+                              <p style="margin: 8px 0 0; font-size: 12px; color: #999;">Ministère de la Transition Numérique et de la Digitalisation</p>
+                              <p style="margin: 8px 0 0; font-size: 12px; color: #999;">© ${new Date().getFullYear()} - Tous droits réservés</p>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
                 </body>
               </html>
             `,

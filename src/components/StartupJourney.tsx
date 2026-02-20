@@ -67,7 +67,7 @@ const itemVariants = {
 
 const StartupJourney = () => {
   return (
-    <section className="py-20 bg-gradient-to-b from-background to-muted/30">
+    <section className="py-20 bg-gradient-to-b from-background to-muted/30" aria-labelledby="journey-title">
       <div className="container mx-auto px-4">
         {/* Header */}
         <motion.div 
@@ -78,7 +78,7 @@ const StartupJourney = () => {
           transition={{ duration: 0.6 }}
         >
           <span className="badge-gold mb-4">Processus simplifié</span>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+          <h2 id="journey-title" className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Votre parcours vers le label
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -91,6 +91,7 @@ const StartupJourney = () => {
           {/* Progress line */}
           <motion.div 
             className="absolute top-16 left-0 right-0 h-1 bg-border overflow-hidden"
+            aria-hidden="true"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -132,7 +133,7 @@ const StartupJourney = () => {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.3 + index * 0.1, type: "spring", stiffness: 200 }}
                 >
-                  <step.icon className={cn("w-6 h-6", step.color)} />
+                  <step.icon className={cn("w-6 h-6", step.color)} aria-hidden="true" />
                 </motion.div>
                 
                 {/* Step number */}
@@ -154,7 +155,7 @@ const StartupJourney = () => {
 
                 {/* Arrow between steps */}
                 {index < steps.length - 1 && (
-                  <ChevronRight className="absolute top-16 right-0 transform translate-x-1/2 -translate-y-1/2 w-5 h-5 text-primary/50 hidden xl:block" />
+                  <ChevronRight className="absolute top-16 right-0 transform translate-x-1/2 -translate-y-1/2 w-5 h-5 text-primary/50 hidden xl:block" aria-hidden="true" />
                 )}
               </motion.div>
             ))}
@@ -185,7 +186,7 @@ const StartupJourney = () => {
                   )}
                   whileHover={{ scale: 1.1, rotate: 5 }}
                 >
-                  <step.icon className={cn("w-5 h-5", step.color)} />
+                  <step.icon className={cn("w-5 h-5", step.color)} aria-hidden="true" />
                 </motion.div>
                 {index < steps.length - 1 && (
                   <motion.div 

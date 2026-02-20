@@ -130,14 +130,17 @@ const generateEmailHTML = (
           
           <!-- Footer -->
           <tr>
-            <td style="background-color: #f8f9fa; padding: 20px 30px; border-radius: 0 0 12px 12px; text-align: center;">
-              <p style="margin: 0; font-size: 12px; color: #999;">
-                Cet email a été envoyé automatiquement par le Programme Label Startup Numérique de Côte d'Ivoire.
-              </p>
-              <p style="margin: 10px 0 0; font-size: 12px; color: #999;">
-                © ${new Date().getFullYear()} Label Startup Numérique - Tous droits réservés
-              </p>
-            </td>
+             <td style="background-color: #f8f9fa; padding: 20px 30px; border-radius: 0 0 12px 12px; text-align: center;">
+               <p style="margin: 0; font-size: 12px; color: #999;">
+                 Cet email a été envoyé automatiquement par le Programme Label Startup Numérique de Côte d'Ivoire.
+               </p>
+               <p style="margin: 8px 0 0; font-size: 12px; color: #999;">
+                 Ministère de la Transition Numérique et de la Digitalisation
+               </p>
+               <p style="margin: 8px 0 0; font-size: 12px; color: #999;">
+                 © ${new Date().getFullYear()} Label Startup Numérique - Tous droits réservés
+               </p>
+             </td>
           </tr>
         </table>
       </td>
