@@ -128,9 +128,9 @@ const Stats = () => {
   const { stats, loading } = usePlatformStats();
 
   return (
-    <section className="py-20 bg-gradient-to-br from-primary via-primary/95 to-primary/90 text-primary-foreground relative overflow-hidden">
+    <section className="py-20 bg-gradient-to-br from-primary via-primary/95 to-primary/90 text-primary-foreground relative overflow-hidden" aria-labelledby="stats-title">
       {/* Background decorations */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
         <motion.div 
           className="absolute top-0 right-0 w-96 h-96 bg-secondary/20 rounded-full blur-3xl"
           initial={{ opacity: 0, scale: 0.8 }}
@@ -168,7 +168,7 @@ const Stats = () => {
             <TrendingUp className="w-4 h-4" />
             Impact National
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <h2 id="stats-title" className="text-3xl md:text-4xl font-bold mb-4">
             Construisons l'écosystème numérique ivoirien
           </h2>
           <p className="text-xl text-primary-foreground/80 max-w-3xl mx-auto">

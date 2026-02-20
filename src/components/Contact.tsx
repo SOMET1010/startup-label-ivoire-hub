@@ -32,10 +32,10 @@ const Contact = () => {
   };
 
   return (
-    <section className="py-16 bg-muted/50" id="contact">
+    <section className="py-16 bg-muted/50" id="contact" aria-labelledby="contact-title">
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Nous contacter</h2>
+          <h2 id="contact-title" className="text-3xl md:text-4xl font-bold mb-4">Nous contacter</h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Vous avez des questions ou besoin d'assistance concernant le Label Startup ? 
             Notre équipe est à votre disposition.
@@ -194,6 +194,7 @@ const Contact = () => {
           <div className="aspect-video max-w-4xl mx-auto rounded-lg overflow-hidden shadow-lg">
             <iframe 
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31893.08418741484!2d-4.035666072617334!3d5.354925721910213!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfc1ea23de4c4afb%3A0x78a3978b571c0779!2sDeux%20Plateaux%2C%20Abidjan%2C%20C%C3%B4te%20d&#39;Ivoire!5e0!3m2!1sfr!2sus!4v1713496260584!5m2!1sfr!2sus" 
+              title="Localisation Ivoire Hub - Deux Plateaux, Abidjan"
               width="100%" 
               height="100%" 
               style={{ border: 0 }} 

@@ -91,21 +91,22 @@ const handler = async (req: Request): Promise<Response> => {
           <head>
             <meta charset="utf-8">
             <style>
-              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f5; }
               .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
-              .content { background: #ffffff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; }
-              .summary { background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0; }
-              .footer { background: #f9f9f9; padding: 20px; text-align: center; border-radius: 0 0 8px 8px; font-size: 14px; color: #666; }
-              .button { display: inline-block; background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 10px 0; }
-              h1 { margin: 0; font-size: 24px; }
-              h2 { color: #667eea; font-size: 18px; }
+              .header { background: linear-gradient(135deg, #f97316 0%, #16a34a 100%); color: white; padding: 30px; text-align: center; border-radius: 12px 12px 0 0; }
+              .content { background: #ffffff; padding: 32px; border-radius: 0 0 12px 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+              .summary { background: #fff7ed; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f97316; }
+              .footer { text-align: center; padding: 24px; font-size: 12px; color: #71717a; }
+              .button { display: inline-block; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 10px 0; box-shadow: 0 4px 12px rgba(249,115,22,0.3); }
+              h1 { margin: 0; font-size: 24px; font-weight: 700; }
+              h2 { color: #c2410c; font-size: 18px; }
             </style>
           </head>
           <body>
             <div class="container">
               <div class="header">
                 <h1>✓ Message envoyé avec succès</h1>
+                <p style="margin: 8px 0 0; opacity: 0.9; font-size: 14px;">Label Startup Numérique · Côte d'Ivoire</p>
               </div>
               <div class="content">
                 <p>Bonjour <strong>${safeName}</strong>,</p>
@@ -126,8 +127,8 @@ const handler = async (req: Request): Promise<Response> => {
                 </ul>
               </div>
               <div class="footer">
-                <p>Cet email a été envoyé automatiquement depuis la plateforme Label Startup Numérique Côte d'Ivoire.</p>
-                <p>© ${new Date().getFullYear()} Label Startup Numérique CI - Tous droits réservés</p>
+                <p style="margin: 0 0 8px;">Label Startup Numérique - Ministère de la Transition Numérique</p>
+                <p style="margin: 0;">© ${new Date().getFullYear()} Côte d'Ivoire. Tous droits réservés.</p>
               </div>
             </div>
           </body>
@@ -149,22 +150,23 @@ const handler = async (req: Request): Promise<Response> => {
           <head>
             <meta charset="utf-8">
             <style>
-              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f5; }
               .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-              .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
-              .content { background: #ffffff; padding: 30px; border: 1px solid #e0e0e0; border-top: none; }
-              .contact-details { background: #f0f4ff; padding: 20px; border-left: 4px solid #667eea; margin: 20px 0; }
-              .message-box { background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; }
-              .footer { background: #f9f9f9; padding: 20px; text-align: center; border-radius: 0 0 8px 8px; font-size: 14px; color: #666; }
-              .button { display: inline-block; background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 10px 0; }
-              h1 { margin: 0; font-size: 24px; }
-              h2 { color: #667eea; font-size: 18px; margin-top: 0; }
+              .header { background: linear-gradient(135deg, #f97316 0%, #16a34a 100%); color: white; padding: 30px; text-align: center; border-radius: 12px 12px 0 0; }
+              .content { background: #ffffff; padding: 32px; border-radius: 0 0 12px 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+              .contact-details { background: #fff7ed; padding: 20px; border-left: 4px solid #f97316; margin: 20px 0; border-radius: 0 8px 8px 0; }
+              .message-box { background: #f4f4f5; padding: 20px; border-radius: 8px; margin: 20px 0; }
+              .footer { text-align: center; padding: 24px; font-size: 12px; color: #71717a; }
+              .button { display: inline-block; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 10px 0; box-shadow: 0 4px 12px rgba(249,115,22,0.3); }
+              h1 { margin: 0; font-size: 24px; font-weight: 700; }
+              h2 { color: #c2410c; font-size: 18px; margin-top: 0; }
             </style>
           </head>
           <body>
             <div class="container">
               <div class="header">
                 <h1>📩 Nouvelle demande de contact</h1>
+                <p style="margin: 8px 0 0; opacity: 0.9; font-size: 14px;">Label Startup Numérique · Côte d'Ivoire</p>
               </div>
               <div class="content">
                 <p>Bonjour,</p>
@@ -178,7 +180,7 @@ const handler = async (req: Request): Promise<Response> => {
                 </div>
                 
                 <p><strong>Sujet de la demande :</strong></p>
-                <p style="font-size: 16px; color: #667eea;"><strong>${safeSubject}</strong></p>
+                <p style="font-size: 16px; color: #c2410c;"><strong>${safeSubject}</strong></p>
                 
                 <div class="message-box">
                   <h2>Message complet</h2>
@@ -198,8 +200,8 @@ const handler = async (req: Request): Promise<Response> => {
                 </center>
               </div>
               <div class="footer">
-                <p>Cet email a été envoyé automatiquement depuis la plateforme Label Startup Numérique Côte d'Ivoire.</p>
-                <p>© ${new Date().getFullYear()} Label Startup Numérique CI - Tous droits réservés</p>
+                <p style="margin: 0 0 8px;">Label Startup Numérique - Ministère de la Transition Numérique</p>
+                <p style="margin: 0;">© ${new Date().getFullYear()} Côte d'Ivoire. Tous droits réservés.</p>
               </div>
             </div>
           </body>
