@@ -62,7 +62,7 @@ const itemVariants = {
 
 const Testimonials = () => {
   return (
-    <section className="py-20 bg-background">
+    <section className="py-20 bg-background" aria-labelledby="testimonials-title">
       <div className="container mx-auto px-4">
         {/* Header */}
         <motion.div 
@@ -73,7 +73,7 @@ const Testimonials = () => {
           transition={{ duration: 0.6 }}
         >
           <span className="badge-gold mb-4">Témoignages</span>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+          <h2 id="testimonials-title" className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             L'impact concret du label
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -115,7 +115,7 @@ const Testimonials = () => {
 
               {/* Quote icon */}
               <div className="mb-6">
-                <Quote className="w-10 h-10 text-primary/20" />
+                <Quote className="w-10 h-10 text-primary/20" aria-hidden="true" />
               </div>
 
               {/* Quote text */}
