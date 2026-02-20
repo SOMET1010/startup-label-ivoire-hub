@@ -13,12 +13,13 @@ import SAEInvestorSlide from "@/components/presentation/slides/SAEInvestorSlide"
 import ArchitectureSlide from "@/components/presentation/slides/ArchitectureSlide";
 import SecuritySlide from "@/components/presentation/slides/SecuritySlide";
 import PlanningSlide from "@/components/presentation/slides/PlanningSlide";
+import BilanSlide from "@/components/presentation/slides/BilanSlide";
 import MerciSlide from "@/components/presentation/slides/MerciSlide";
 
 const slides = [
   TitleSlide, ContextSlide, VisionSlide, PortailSlide,
   StartupSlide, EvaluateurSlide, AdminSlide, SAEInvestorSlide,
-  ArchitectureSlide, SecuritySlide, PlanningSlide, MerciSlide,
+  ArchitectureSlide, SecuritySlide, PlanningSlide, BilanSlide, MerciSlide,
 ];
 
 const Presentation = () => {
